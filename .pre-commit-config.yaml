@@ -12,5 +12,4 @@ repos:
       rev: v4.9.1
       hooks:
           - id: commitizen
-          - id: commitizen-branch
             stages: [pre-push]
