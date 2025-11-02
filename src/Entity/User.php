@@ -2,14 +2,19 @@
 
 namespace App\Entity;
 
-use App\Repository\UserRepository;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use App\Repository\UserRepository;
+use App\Validator\Constraints\Password\StrongPassword;
+use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_UUID', fields: ['uuid'])]
+#[UniqueEntity(fields: ['email'], message: 'Cette adresse email est déjà utilisée.')]
+#[UniqueEntity(fields: ['uuid'], message: 'Cet UUID est déjà utilisé.')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -18,36 +23,91 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
+    #[Assert\NotBlank(message: 'L\'UUID ne peut pas être vide.')]
+    #[Assert\Uuid(message: 'L\'UUID doit être valide.')]
     private ?string $uuid = null;
 
     /**
      * @var list<string> The user roles
      */
     #[ORM\Column]
+    #[Assert\Type(type: 'array', message: 'Les rôles doivent être un tableau.')]
+    #[Assert\All([
+        new Assert\Type(type: 'string', message: 'Chaque rôle doit être une chaîne de caractères.'),
+        new Assert\Regex(pattern: '/^ROLE_[A-Z_]+$/', message: 'Le format du rôle est invalide.')
+    ])]
     private array $roles = [];
 
     /**
      * @var string The hashed password
      */
     #[ORM\Column]
+    #[Assert\NotBlank(message: 'Le mot de passe ne peut pas être vide.')]
+    #[StrongPassword(
+        minLength: 12,
+        minUppercase: 1,
+        minLowercase: 1,
+        minNumbers: 1,
+        minSpecialChars: 1,
+        checkCommonPasswords: true,
+        checkPersonalInfo: true
+    )]
     private ?string $password = null;
 
     #[ORM\Column(length: 150, unique: true)]
+    #[Assert\NotBlank(message: 'L\'email ne peut pas être vide.')]
+    #[Assert\Email(message: 'L\'adresse email {{ value }} n\'est pas valide.')]
+    #[Assert\Length(
+        max: 150,
+        maxMessage: 'L\'email ne peut pas dépasser {{ limit }} caractères.'
+    )]
     private ?string $email = null;
 
     #[ORM\Column(length: 50)]
+    #[Assert\NotBlank(message: 'Le prénom ne peut pas être vide.')]
+    #[Assert\Length(
+        min: 2,
+        max: 50,
+        minMessage: 'Le prénom doit contenir au moins {{ limit }} caractères.',
+        maxMessage: 'Le prénom ne peut pas dépasser {{ limit }} caractères.'
+    )]
+    #[Assert\Regex(
+        pattern: '/^[a-zA-ZÀ-ÿ\-\s]+$/',
+        message: 'Le prénom ne peut contenir que des lettres, espaces et tirets.'
+    )]
     private ?string $firstname = null;
 
     #[ORM\Column(length: 50)]
+    #[Assert\NotBlank(message: 'Le nom de famille ne peut pas être vide.')]
+    #[Assert\Length(
+        min: 2,
+        max: 50,
+        minMessage: 'Le nom de famille doit contenir au moins {{ limit }} caractères.',
+        maxMessage: 'Le nom de famille ne peut pas dépasser {{ limit }} caractères.'
+    )]
+    #[Assert\Regex(
+        pattern: '/^[a-zA-ZÀ-ÿ\-\s]+$/',
+        message: 'Le nom de famille ne peut contenir que des lettres, espaces et tirets.'
+    )]
     private ?string $lastname = null;
 
     #[ORM\Column]
+    #[Assert\NotNull(message: 'La date de naissance ne peut pas être vide.')]
+    #[Assert\Type(type: '\DateTimeImmutable', message: 'La date de naissance doit être une date valide.')]
+    #[Assert\LessThan(
+        value: '-18 years',
+        message: 'Vous devez être majeur pour vous inscrire.'
+    )]
     private ?\DateTimeImmutable $birthDate = null;
 
     #[ORM\Column]
+    #[Assert\NotNull(message: 'La date de création ne peut pas être vide.')]
+    #[Assert\Type(type: '\DateTimeImmutable', message: 'La date de création doit être une date valide.')]
     private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\Column]
+    #[Assert\NotNull(message: 'La date de mise à jour ne peut pas être vide.')]
+    #[Assert\Type(type: '\DateTimeImmutable', message: 'La date de mise à jour doit être une date valide.')]
     private ?\DateTimeImmutable $updatedAt = null;
 
     public function getId(): ?int
