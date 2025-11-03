@@ -9,34 +9,6 @@ use Symfony\Component\Validator\Exception\UnexpectedValueException;
 
 class StrongPasswordValidator extends ConstraintValidator
 {
-    private array $commonPasswords = [
-        'password',
-        'password123',
-        '123456',
-        '123456789',
-        'qwerty',
-        'abc123',
-        'password1',
-        'admin',
-        'letmein',
-        'welcome',
-        'monkey',
-        '1234567890',
-        'dragon',
-        'passw0rd',
-        'master',
-        'hello',
-        'freedom',
-        'whatever',
-        'qazwsx',
-        'trustno1',
-        'azerty',
-        'motdepasse',
-        'secret',
-        'bonjour',
-        'français'
-    ];
-
     public function validate(mixed $value, Constraint $constraint): void
     {
         if (!$constraint instanceof StrongPassword) {
@@ -58,7 +30,6 @@ class StrongPasswordValidator extends ConstraintValidator
             $this->context->buildViolation($constraint->tooShortMessage)
                 ->setParameter('{{ minLength }}', (string) $constraint->minLength)
                 ->addViolation();
-            return;
         }
 
         // Vérifier les majuscules
@@ -94,42 +65,11 @@ class StrongPasswordValidator extends ConstraintValidator
                 ->addViolation();
         }
 
-        // Vérifier les mots de passe communs
-        if ($constraint->checkCommonPasswords && $this->isCommonPassword($password)) {
-            $this->context->buildViolation($constraint->commonPasswordMessage)
-                ->addViolation();
-        }
-
         // Vérifier les informations personnelles (si l'objet User est disponible)
         if ($constraint->checkPersonalInfo && $this->containsPersonalInfo($password)) {
             $this->context->buildViolation($constraint->containsPersonalInfoMessage)
                 ->addViolation();
         }
-    }
-
-    private function isCommonPassword(string $password): bool
-    {
-        $lowerPassword = strtolower($password);
-
-        foreach ($this->commonPasswords as $commonPassword) {
-            if (
-                $lowerPassword === strtolower($commonPassword) ||
-                str_contains($lowerPassword, strtolower($commonPassword))
-            ) {
-                return true;
-            }
-        }
-
-        // Vérifier les patterns simples
-        if (
-            preg_match('/^(.)\1+$/', $password) || // Caractères répétés
-            preg_match('/^(012|123|234|345|456|567|678|789|890)+/', $password) || // Séquences numériques
-            preg_match('/^(abc|bcd|cde|def|efg|fgh|ghi|hij|ijk|jkl|klm|lmn|mno|nop|opq|pqr|qrs|rst|stu|tuv|uvw|vwx|wxy|xyz)+/i', $password)
-        ) { // Séquences alphabétiques
-            return true;
-        }
-
-        return false;
     }
 
     private function containsPersonalInfo(string $password): bool

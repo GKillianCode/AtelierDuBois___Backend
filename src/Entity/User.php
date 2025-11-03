@@ -43,15 +43,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     #[ORM\Column]
     #[Assert\NotBlank(message: 'Le mot de passe ne peut pas être vide.')]
-    #[StrongPassword(
-        minLength: 12,
-        minUppercase: 1,
-        minLowercase: 1,
-        minNumbers: 1,
-        minSpecialChars: 1,
-        checkCommonPasswords: true,
-        checkPersonalInfo: true
-    )]
+    #[StrongPassword]
     private ?string $password = null;
 
     #[ORM\Column(length: 150, unique: true)]
