@@ -23,18 +23,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
-    #[Assert\NotBlank(message: 'L\'UUID ne peut pas être vide.')]
-    #[Assert\Uuid(message: 'L\'UUID doit être valide.')]
+    #[Assert\NotBlank(message: 'L\'UUID ne peut pas être vide.', groups: ['registration'])]
+    #[Assert\Uuid(message: 'L\'UUID doit être valide.', groups: ['registration'])]
     private ?string $uuid = null;
 
     /**
      * @var list<string> The user roles
      */
     #[ORM\Column]
-    #[Assert\Type(type: 'array', message: 'Les rôles doivent être un tableau.')]
+    #[Assert\Type(type: 'array', message: 'Les rôles doivent être un tableau.', groups: ['registration'])]
     #[Assert\All([
-        new Assert\Type(type: 'string', message: 'Chaque rôle doit être une chaîne de caractères.'),
-        new Assert\Regex(pattern: '/^ROLE_[A-Z_]+$/', message: 'Le format du rôle est invalide.')
+        new Assert\Type(type: 'string', message: 'Chaque rôle doit être une chaîne de caractères.', groups: ['registration']),
+        new Assert\Regex(pattern: '/^ROLE_[A-Z_]+$/', message: 'Le format du rôle est invalide.', groups: ['registration'])
     ])]
     private array $roles = [];
 
@@ -42,13 +42,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @var string The hashed password
      */
     #[ORM\Column]
-    #[Assert\NotBlank(message: 'Le mot de passe ne peut pas être vide.')]
-    #[StrongPassword]
+    #[Assert\NotBlank(message: 'Le mot de passe ne peut pas être vide.', groups: ['password_change'])]
     private ?string $password = null;
 
+    #[StrongPassword(groups: ['registration'])]
+    private ?string $plainPassword = null;
+
     #[ORM\Column(length: 150, unique: true)]
-    #[Assert\NotBlank(message: 'L\'email ne peut pas être vide.')]
-    #[Assert\Email(message: 'L\'adresse email {{ value }} n\'est pas valide.')]
+    #[Assert\NotBlank(message: 'L\'email ne peut pas être vide.', groups: ['registration'])]
+    #[Assert\Email(message: 'L\'adresse email {{ value }} n\'est pas valide.', groups: ['registration'])]
     #[Assert\Length(
         max: 150,
         maxMessage: 'L\'email ne peut pas dépasser {{ limit }} caractères.'
@@ -56,51 +58,61 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $email = null;
 
     #[ORM\Column(length: 50)]
-    #[Assert\NotBlank(message: 'Le prénom ne peut pas être vide.')]
+    #[Assert\NotBlank(message: 'Le prénom ne peut pas être vide.', groups: ['registration'])]
     #[Assert\Length(
         min: 2,
         max: 50,
         minMessage: 'Le prénom doit contenir au moins {{ limit }} caractères.',
-        maxMessage: 'Le prénom ne peut pas dépasser {{ limit }} caractères.'
+        maxMessage: 'Le prénom ne peut pas dépasser {{ limit }} caractères.',
+        groups: ['registration']
     )]
     #[Assert\Regex(
         pattern: '/^[a-zA-ZÀ-ÿ\-\s]+$/',
-        message: 'Le prénom ne peut contenir que des lettres, espaces et tirets.'
+        message: 'Le prénom ne peut contenir que des lettres, espaces et tirets.',
+        groups: ['registration']
     )]
     private ?string $firstname = null;
 
     #[ORM\Column(length: 50)]
-    #[Assert\NotBlank(message: 'Le nom de famille ne peut pas être vide.')]
+    #[Assert\NotBlank(message: 'Le nom de famille ne peut pas être vide.', groups: ['registration'])]
     #[Assert\Length(
         min: 2,
         max: 50,
         minMessage: 'Le nom de famille doit contenir au moins {{ limit }} caractères.',
-        maxMessage: 'Le nom de famille ne peut pas dépasser {{ limit }} caractères.'
+        maxMessage: 'Le nom de famille ne peut pas dépasser {{ limit }} caractères.',
+        groups: ['registration']
     )]
     #[Assert\Regex(
         pattern: '/^[a-zA-ZÀ-ÿ\-\s]+$/',
-        message: 'Le nom de famille ne peut contenir que des lettres, espaces et tirets.'
+        message: 'Le nom de famille ne peut contenir que des lettres, espaces et tirets.',
+        groups: ['registration']
     )]
     private ?string $lastname = null;
 
     #[ORM\Column]
-    #[Assert\NotNull(message: 'La date de naissance ne peut pas être vide.')]
-    #[Assert\Type(type: '\DateTimeImmutable', message: 'La date de naissance doit être une date valide.')]
+    #[Assert\NotNull(message: 'La date de naissance ne peut pas être vide.', groups: ['registration'])]
+    #[Assert\Type(type: '\DateTimeImmutable', message: 'La date de naissance doit être une date valide.', groups: ['registration'])]
     #[Assert\LessThan(
         value: '-18 years',
-        message: 'Vous devez être majeur pour vous inscrire.'
+        message: 'Vous devez être majeur pour vous inscrire.',
+        groups: ['registration']
     )]
     private ?\DateTimeImmutable $birthDate = null;
 
     #[ORM\Column]
-    #[Assert\NotNull(message: 'La date de création ne peut pas être vide.')]
-    #[Assert\Type(type: '\DateTimeImmutable', message: 'La date de création doit être une date valide.')]
+    #[Assert\NotNull(message: 'La date de création ne peut pas être vide.', groups: ['registration'])]
+    #[Assert\Type(type: '\DateTimeImmutable', message: 'La date de création doit être une date valide.', groups: ['registration'])]
     private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\Column]
-    #[Assert\NotNull(message: 'La date de mise à jour ne peut pas être vide.')]
-    #[Assert\Type(type: '\DateTimeImmutable', message: 'La date de mise à jour doit être une date valide.')]
+    #[Assert\NotNull(message: 'La date de mise à jour ne peut pas être vide.', groups: ['registration'])]
+    #[Assert\Type(type: '\DateTimeImmutable', message: 'La date de mise à jour doit être une date valide.', groups: ['registration'])]
     private ?\DateTimeImmutable $updatedAt = null;
+
+    public function __construct()
+    {
+        $this->roles = ['ROLE_USER'];
+    }
 
     public function getId(): ?int
     {
@@ -164,6 +176,24 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->password = $password;
 
         return $this;
+    }
+
+    public function getPlainPassword(): ?string
+    {
+        return $this->plainPassword;
+    }
+
+    public function setPlainPassword(?string $plainPassword): static
+    {
+        $this->plainPassword = $plainPassword;
+
+        return $this;
+    }
+
+    // Méthode pour effacer le plainPassword après encodage
+    public function erasePlainPassword(): void
+    {
+        $this->plainPassword = null;
     }
 
     /**
