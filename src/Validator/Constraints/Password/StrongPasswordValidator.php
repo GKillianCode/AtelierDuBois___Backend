@@ -15,7 +15,7 @@ class StrongPasswordValidator extends ConstraintValidator
             throw new UnexpectedTypeException($constraint, StrongPassword::class);
         }
 
-        if (null === $value || '' === $value) {
+        if (null === $value) {
             return;
         }
 
