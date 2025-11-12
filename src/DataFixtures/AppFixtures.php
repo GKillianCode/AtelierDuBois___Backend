@@ -6,17 +6,14 @@ use App\Entity\User;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class AppFixtures extends Fixture
 {
     private ValidatorInterface $validator;
-    private UserPasswordHasherInterface $encoder;
 
-    public function __construct(ValidatorInterface $validator, UserPasswordHasherInterface $encoder)
+    public function __construct(ValidatorInterface $validator)
     {
         $this->validator = $validator;
-        $this->encoder = $encoder;
     }
 
     public function load(ObjectManager $manager): void
@@ -28,7 +25,6 @@ class AppFixtures extends Fixture
         $user->setPlainPassword('Abricot2024!');
         $user->setFirstname('John');
         $user->setLastname('Doe');
-        $user->setBirthDate(new \DateTimeImmutable('1990-01-01'));
         $user->setRoles(['ROLE_USER']);
         $user->setCreatedAt(new \DateTimeImmutable());
         $user->setUpdatedAt(new \DateTimeImmutable());

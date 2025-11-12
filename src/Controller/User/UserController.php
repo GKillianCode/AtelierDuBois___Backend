@@ -99,35 +99,9 @@ final class UserController extends AbstractController
                 ], Response::HTTP_BAD_REQUEST);
             }
 
-            if (isset($data['birthDate']) && is_string($data['birthDate'])) {
-                try {
-                } catch (\Exception $e) {
-                    return $this->json([
-                        'violations' => [
-                            [
-                                'birthDate' => ['La date de naissance doit être au format YYYY-MM-DD']
-                            ]
-                        ]
-                    ], Response::HTTP_BAD_REQUEST);
-                }
-            }
-
-            try {
-                $data['birthDate'] = new \DateTimeImmutable($data['birthDate']);
-            } catch (\Exception $e) {
-                return $this->json([
-                    'violations' => [
-                        [
-                            'birthDate' => ['La date de naissance est invalide (ex: 2025-02-31)']
-                        ]
-                    ]
-                ], Response::HTTP_BAD_REQUEST);
-            }
-
             $registerUserDto = new RegisterUserDto(
                 firstname: $data['firstname'] ?? null,
                 lastname: $data['lastname'] ?? null,
-                birthDate: $data['birthDate'] ?? null,
                 email: $data['email'] ?? null,
                 password: $data['password'] ?? null
             );

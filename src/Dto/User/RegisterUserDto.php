@@ -40,16 +40,6 @@ class RegisterUserDto
         )]
         public readonly string $lastname,
 
-        #[Assert\NotNull(message: 'La date de naissance ne peut pas être vide.', groups: ['registration'])]
-        #[Assert\Type(type: '\DateTimeImmutable', message: 'La date de naissance doit être une date valide.', groups: ['registration'])]
-        #[Assert\LessThan(
-            value: '-18 years',
-            message: 'Vous devez être majeur pour vous inscrire.',
-            groups: ['registration']
-        )]
-        #[Context([DateTimeNormalizer::FORMAT_KEY => 'YYYY-MM-DD'])]
-        public readonly ?\DateTimeImmutable $birthDate = null,
-
         #[Assert\NotBlank(message: 'L\'email ne peut pas être vide.', groups: ['registration'])]
         #[Assert\Email(message: 'L\'adresse email {{ value }} n\'est pas valide.', groups: ['registration'])]
         #[Assert\Length(
