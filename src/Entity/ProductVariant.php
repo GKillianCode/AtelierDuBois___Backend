@@ -33,6 +33,10 @@ class ProductVariant
     #[ORM\JoinColumn(nullable: false)]
     private ?Product $productId = null;
 
+    #[ORM\ManyToOne(inversedBy: 'productVariants')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Wood $woodId = null;
+
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
@@ -112,6 +116,18 @@ class ProductVariant
     public function setProductId(?Product $productId): static
     {
         $this->productId = $productId;
+
+        return $this;
+    }
+
+    public function getWoodId(): ?Wood
+    {
+        return $this->woodId;
+    }
+
+    public function setWoodId(?Wood $woodId): static
+    {
+        $this->woodId = $woodId;
 
         return $this;
     }
