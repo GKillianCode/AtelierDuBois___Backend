@@ -1,31 +1,27 @@
 <?php
 
-namespace App\Entity;
+namespace App\Entity\Product;
 
-use App\Repository\ProductRepository;
+use App\Repository\Product\WoodRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: ProductRepository::class)]
-class Product
+#[ORM\Entity(repositoryClass: WoodRepository::class)]
+class Wood
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 150)]
+    #[ORM\Column(length: 100)]
     private ?string $name = null;
-
-    #[ORM\Column(type: Types::TEXT)]
-    private ?string $description = null;
 
     /**
      * @var Collection<int, ProductVariant>
      */
-    #[ORM\OneToMany(targetEntity: ProductVariant::class, mappedBy: 'productId')]
+    #[ORM\OneToMany(targetEntity: ProductVariant::class, mappedBy: 'woodId')]
     private Collection $productVariants;
 
     #[ORM\Column]
@@ -56,18 +52,6 @@ class Product
         return $this;
     }
 
-    public function getDescription(): ?string
-    {
-        return $this->description;
-    }
-
-    public function setDescription(string $description): static
-    {
-        $this->description = $description;
-
-        return $this;
-    }
-
     /**
      * @return Collection<int, ProductVariant>
      */
@@ -80,7 +64,7 @@ class Product
     {
         if (!$this->productVariants->contains($productVariant)) {
             $this->productVariants->add($productVariant);
-            $productVariant->setProductId($this);
+            $productVariant->setWoodId($this);
         }
 
         return $this;
@@ -90,8 +74,8 @@ class Product
     {
         if ($this->productVariants->removeElement($productVariant)) {
             // set the owning side to null (unless already changed)
-            if ($productVariant->getProductId() === $this) {
-                $productVariant->setProductId(null);
+            if ($productVariant->getWoodId() === $this) {
+                $productVariant->setWoodId(null);
             }
         }
 
