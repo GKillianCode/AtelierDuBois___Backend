@@ -2,12 +2,11 @@
 
 namespace App\Service\User;
 
-use Dom\Entity;
-use App\Entity\User;
-use App\Dto\User\RegisterUserDto;
-use App\Repository\UserRepository;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Entity\User\User;
 use Symfony\Component\Uid\Uuid;
+use App\Dto\User\RegisterUserDto;
+use App\Repository\User\UserRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class UserService
@@ -36,7 +35,6 @@ class UserService
         $user->setUuid(Uuid::v4()->toRfc4122());
         $user->setFirstname($registerUserDto->firstname);
         $user->setLastname($registerUserDto->lastname);
-        $user->setBirthDate($registerUserDto->birthDate);
         $user->setEmail($registerUserDto->email);
         $user->setPlainPassword($registerUserDto->password);
 

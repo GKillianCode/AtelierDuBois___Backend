@@ -1,9 +1,12 @@
 <?php
 
-namespace App\Entity;
+namespace App\Entity\User;
 
+use App\Entity\Order;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use App\Repository\UserRepository;
+use App\Repository\User\UserRepository;
 use App\Validator\Constraints\Password\StrongPassword;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -90,16 +93,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $lastname = null;
 
     #[ORM\Column]
-    #[Assert\NotNull(message: 'La date de naissance ne peut pas être vide.', groups: ['registration'])]
-    #[Assert\Type(type: '\DateTimeImmutable', message: 'La date de naissance doit être une date valide.', groups: ['registration'])]
-    #[Assert\LessThan(
-        value: '-18 years',
-        message: 'Vous devez être majeur pour vous inscrire.',
-        groups: ['registration']
-    )]
-    private ?\DateTimeImmutable $birthDate = null;
-
-    #[ORM\Column]
     #[Assert\NotNull(message: 'La date de création ne peut pas être vide.', groups: ['registration'])]
     #[Assert\Type(type: '\DateTimeImmutable', message: 'La date de création doit être une date valide.', groups: ['registration'])]
     private ?\DateTimeImmutable $createdAt = null;
@@ -109,11 +102,25 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Assert\Type(type: '\DateTimeImmutable', message: 'La date de mise à jour doit être une date valide.', groups: ['registration'])]
     private ?\DateTimeImmutable $updatedAt = null;
 
+    /**
+     * @var Collection<int, Address>
+     */
+    #[ORM\OneToMany(targetEntity: Address::class, mappedBy: 'userId')]
+    private Collection $addresses;
+
+    /**
+     * @var Collection<int, Order>
+     */
+    #[ORM\OneToMany(targetEntity: Order::class, mappedBy: 'userId')]
+    private Collection $orders;
+
     public function __construct()
     {
         $this->roles = ['ROLE_USER'];
         $this->createdAt = new \DateTimeImmutable();
         $this->updatedAt = new \DateTimeImmutable();
+        $this->addresses = new ArrayCollection();
+        $this->orders = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -251,18 +258,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function getBirthDate(): ?\DateTimeImmutable
-    {
-        return $this->birthDate;
-    }
-
-    public function setBirthDate(\DateTimeImmutable $birthDate): static
-    {
-        $this->birthDate = $birthDate;
-
-        return $this;
-    }
-
     public function getCreatedAt(): ?\DateTimeImmutable
     {
         return $this->createdAt;
@@ -283,6 +278,66 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setUpdatedAt(\DateTimeImmutable $updatedAt): static
     {
         $this->updatedAt = $updatedAt;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Address>
+     */
+    public function getAddresses(): Collection
+    {
+        return $this->addresses;
+    }
+
+    public function addAddress(Address $address): static
+    {
+        if (!$this->addresses->contains($address)) {
+            $this->addresses->add($address);
+            $address->setUserId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAddress(Address $address): static
+    {
+        if ($this->addresses->removeElement($address)) {
+            // set the owning side to null (unless already changed)
+            if ($address->getUserId() === $this) {
+                $address->setUserId(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Order>
+     */
+    public function getOrders(): Collection
+    {
+        return $this->orders;
+    }
+
+    public function addOrder(Order $order): static
+    {
+        if (!$this->orders->contains($order)) {
+            $this->orders->add($order);
+            $order->setUserId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOrder(Order $order): static
+    {
+        if ($this->orders->removeElement($order)) {
+            // set the owning side to null (unless already changed)
+            if ($order->getUserId() === $this) {
+                $order->setUserId(null);
+            }
+        }
 
         return $this;
     }
