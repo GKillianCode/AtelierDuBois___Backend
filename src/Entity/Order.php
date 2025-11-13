@@ -31,6 +31,10 @@ class Order
     #[ORM\JoinColumn(nullable: false)]
     private ?Address $billingAddressId = null;
 
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?OrderStatus $statusId = null;
+
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
@@ -86,6 +90,18 @@ class Order
     public function setBillingAddressId(?Address $billingAddressId): static
     {
         $this->billingAddressId = $billingAddressId;
+
+        return $this;
+    }
+
+    public function getStatusId(): ?OrderStatus
+    {
+        return $this->statusId;
+    }
+
+    public function setStatusId(?OrderStatus $statusId): static
+    {
+        $this->statusId = $statusId;
 
         return $this;
     }
