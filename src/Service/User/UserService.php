@@ -2,10 +2,9 @@
 
 namespace App\Service\User;
 
-use Dom\Entity;
-use App\Entity\User;
+use App\Entity\User\User;
 use App\Dto\User\RegisterUserDto;
-use App\Repository\UserRepository;
+use App\Repository\User\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Uid\Uuid;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
