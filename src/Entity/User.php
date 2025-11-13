@@ -2,6 +2,8 @@
 
 namespace App\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\UserRepository;
 use App\Validator\Constraints\Password\StrongPassword;
@@ -109,11 +111,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Assert\Type(type: '\DateTimeImmutable', message: 'La date de mise à jour doit être une date valide.', groups: ['registration'])]
     private ?\DateTimeImmutable $updatedAt = null;
 
+    /**
+     * @var Collection<int, Address>
+     */
+    #[ORM\OneToMany(targetEntity: Address::class, mappedBy: 'userId')]
+    private Collection $addresses;
+
     public function __construct()
     {
         $this->roles = ['ROLE_USER'];
         $this->createdAt = new \DateTimeImmutable();
         $this->updatedAt = new \DateTimeImmutable();
+        $this->addresses = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -283,6 +292,36 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setUpdatedAt(\DateTimeImmutable $updatedAt): static
     {
         $this->updatedAt = $updatedAt;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Address>
+     */
+    public function getAddresses(): Collection
+    {
+        return $this->addresses;
+    }
+
+    public function addAddress(Address $address): static
+    {
+        if (!$this->addresses->contains($address)) {
+            $this->addresses->add($address);
+            $address->setUserId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAddress(Address $address): static
+    {
+        if ($this->addresses->removeElement($address)) {
+            // set the owning side to null (unless already changed)
+            if ($address->getUserId() === $this) {
+                $address->setUserId(null);
+            }
+        }
 
         return $this;
     }
