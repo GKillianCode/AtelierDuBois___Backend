@@ -38,7 +38,6 @@ final class UserController extends AbstractController
             example: [
                 'firstname' => 'John',
                 'lastname' => 'Doe',
-                'birthDate' => '1990-01-01',
                 'email' => 'john.doe@example.com',
                 'password' => 'MonMotDePasse123!'
             ]

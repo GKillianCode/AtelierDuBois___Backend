@@ -93,16 +93,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $lastname = null;
 
     #[ORM\Column]
-    #[Assert\NotNull(message: 'La date de naissance ne peut pas être vide.', groups: ['registration'])]
-    #[Assert\Type(type: '\DateTimeImmutable', message: 'La date de naissance doit être une date valide.', groups: ['registration'])]
-    #[Assert\LessThan(
-        value: '-18 years',
-        message: 'Vous devez être majeur pour vous inscrire.',
-        groups: ['registration']
-    )]
-    private ?\DateTimeImmutable $birthDate = null;
-
-    #[ORM\Column]
     #[Assert\NotNull(message: 'La date de création ne peut pas être vide.', groups: ['registration'])]
     #[Assert\Type(type: '\DateTimeImmutable', message: 'La date de création doit être une date valide.', groups: ['registration'])]
     private ?\DateTimeImmutable $createdAt = null;
@@ -264,18 +254,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setLastname(string $lastname): static
     {
         $this->lastname = $lastname;
-
-        return $this;
-    }
-
-    public function getBirthDate(): ?\DateTimeImmutable
-    {
-        return $this->birthDate;
-    }
-
-    public function setBirthDate(\DateTimeImmutable $birthDate): static
-    {
-        $this->birthDate = $birthDate;
 
         return $this;
     }
