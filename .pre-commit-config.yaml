@@ -8,8 +8,3 @@ repos:
           - id: check-added-large-files
           - id: detect-private-key
           - id: double-quote-string-fixer
-    - repo: https://github.com/commitizen-tools/commitizen
-      rev: v4.9.1
-      hooks:
-          - id: commitizen
-            stages: [pre-push]
