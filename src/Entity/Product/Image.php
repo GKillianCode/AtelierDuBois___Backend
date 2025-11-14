@@ -19,6 +19,9 @@ class Image
     #[ORM\Column(length: 10)]
     private ?string $imageName = null;
 
+    #[ORM\Column(length: 15)]
+    private ?string $format = null;
+
     #[ORM\ManyToOne(inversedBy: 'images')]
     #[ORM\JoinColumn(nullable: false)]
     private ?ProductVariant $productVariantId = null;
@@ -66,6 +69,18 @@ class Image
     public function setProductVariantId(?ProductVariant $productVariantId): static
     {
         $this->productVariantId = $productVariantId;
+
+        return $this;
+    }
+
+    public function getFormat(): ?string
+    {
+        return $this->format;
+    }
+
+    public function setFormat(string $format): static
+    {
+        $this->format = $format;
 
         return $this;
     }
