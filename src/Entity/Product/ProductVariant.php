@@ -20,7 +20,7 @@ class ProductVariant
     private ?Uuid $uuid = null;
 
     #[ORM\Column(length: 100)]
-    private ?string $publicUrl = null;
+    private ?string $publicId = null;
 
     #[ORM\Column]
     private ?bool $isDefault = null;
@@ -73,14 +73,14 @@ class ProductVariant
         return $this;
     }
 
-    public function getPublicUrl(): ?string
+    public function getPublicId(): ?string
     {
-        return $this->publicUrl;
+        return $this->publicId;
     }
 
-    public function setPublicUrl(string $publicUrl): static
+    public function setPublicId(string $publicId): static
     {
-        $this->publicUrl = $publicUrl;
+        $this->publicId = $publicId;
 
         return $this;
     }
