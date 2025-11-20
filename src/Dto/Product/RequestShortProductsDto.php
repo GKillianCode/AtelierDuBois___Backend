@@ -13,7 +13,7 @@ class RequestShortProductsDto
         )]
         #[Assert\GreaterThan(
             value: 0,
-            message: 'Le numéro de page doit être supérieur à 0.'
+            message: 'Le numéro de page doit être supérieur à {{ value }}.'
         )]
         public readonly int $page,
 
@@ -22,8 +22,8 @@ class RequestShortProductsDto
             message: 'La valeur {{ value }} n\'est pas valide pour le nombre d\'éléments par page.'
         )]
         #[Assert\GreaterThan(
-            value: 0,
-            message: 'Le nombre d\'éléments par page doit être supérieur à 0.'
+            value: 10,
+            message: 'Le nombre d\'éléments par page doit être supérieur à {{ value }}.'
         )]
         #[Assert\LessThanOrEqual(
             value: 100,
