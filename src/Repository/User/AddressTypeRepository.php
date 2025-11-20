@@ -2,7 +2,7 @@
 
 namespace App\Repository\User;
 
-use App\Entity\AddressType;
+use App\Entity\User\AddressType;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
