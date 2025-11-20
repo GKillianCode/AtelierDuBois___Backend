@@ -4,6 +4,7 @@ namespace App\Entity\Order;
 
 use App\Entity\Product\ProductVariant;
 use App\Repository\Order\OrderProductRepository;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: OrderProductRepository::class)]
@@ -14,6 +15,12 @@ class OrderProduct
     #[ORM\Column]
     private ?int $id = null;
 
+    #[ORM\Column]
+    private ?int $price = null;
+
+    #[ORM\Column(type: Types::SMALLINT)]
+    private ?int $quantity = null;
+
     #[ORM\ManyToOne(inversedBy: 'orderProducts')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Order $orderId = null;
@@ -21,9 +28,6 @@ class OrderProduct
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
     private ?ProductVariant $productVariantId = null;
-
-    #[ORM\Column]
-    private ?int $price = null;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
@@ -34,6 +38,30 @@ class OrderProduct
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function getPrice(): ?int
+    {
+        return $this->price;
+    }
+
+    public function setPrice(int $price): static
+    {
+        $this->price = $price;
+
+        return $this;
+    }
+
+    public function getQuantity(): ?int
+    {
+        return $this->quantity;
+    }
+
+    public function setQuantity(int $quantity): static
+    {
+        $this->quantity = $quantity;
+
+        return $this;
     }
 
     public function getOrderId(): ?Order
@@ -56,18 +84,6 @@ class OrderProduct
     public function setProductVariantId(?ProductVariant $productVariantId): static
     {
         $this->productVariantId = $productVariantId;
-
-        return $this;
-    }
-
-    public function getPrice(): ?int
-    {
-        return $this->price;
-    }
-
-    public function setPrice(int $price): static
-    {
-        $this->price = $price;
 
         return $this;
     }
