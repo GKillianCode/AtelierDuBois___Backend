@@ -44,7 +44,10 @@ class ShortProductsDto
             message: 'La valeur {{ value }} n\'est pas valide pour les produits.'
         )]
         #[Assert\All(
-            new Assert\Valid()
+            new Assert\Type(
+                type: 'object',
+                message: 'Chaque produit doit être un objet valide.'
+            )
         )]
         /** @var ShortProductDto[] */
         public readonly array $products
