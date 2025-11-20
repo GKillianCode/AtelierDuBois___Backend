@@ -43,6 +43,8 @@ class RegisterUserDto
         #[Assert\NotBlank(message: 'L\'email ne peut pas être vide.', groups: ['registration'])]
         #[Assert\Email(message: 'L\'adresse email {{ value }} n\'est pas valide.', groups: ['registration'])]
         #[Assert\Length(
+            min: 8,
+            minMessage: 'L\'email doit contenir au moins {{ limit }} caractères.',
             max: 150,
             maxMessage: 'L\'email ne peut pas dépasser {{ limit }} caractères.',
             groups: ['registration']
