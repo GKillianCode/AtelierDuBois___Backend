@@ -20,22 +20,12 @@ class WoodTypeDto
             minMessage: 'Le nom du bois doit contenir au minimum {{ limit }} caractères.',
             maxMessage: 'Le nom du bois ne doit pas dépasser {{ limit }} caractères.'
         )]
+        #[Assert\Regex(
+            pattern: '/^[A-Z]+$/',
+            message: 'Le nom du bois ne doit contenir que des lettres majuscules'
+        )]
         public readonly string $name,
 
-        #[Assert\Type(
-            type: 'string',
-            message: 'La valeur {{ value }} n\'est pas valide pour l\'URL de l\'image.'
-        )]
-        #[Assert\NotBlank(
-            message: 'L\'URL de l\'image ne doit pas être vide.'
-        )]
-        #[Assert\Url(
-            message: 'L\'URL de l\'image n\'est pas une URL valide.'
-        )]
-        #[Assert\Length(
-            max: 255,
-            maxMessage: 'L\'URL de l\'image ne doit pas dépasser {{ limit }} caractères.'
-        )]
-        public readonly string $mainImageUrl,
+        public readonly ImageDto $mainImageUrl,
     ) {}
 }
