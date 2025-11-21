@@ -2,7 +2,6 @@
 
 namespace App\Controller\User;
 
-use Psr\Log\LoggerInterface;
 use OpenApi\Attributes as OA;
 
 use App\Dto\User\RegisterUserDto;
@@ -10,7 +9,6 @@ use App\Service\User\UserService;
 use Nelmio\ApiDocBundle\Attribute\Model;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -128,7 +126,7 @@ final class UserController extends AbstractController
                 'status' => 'User registered successfully'
             ], Response::HTTP_CREATED);
         } catch (\Exception $e) {
-            return $this->json(['error' => 'An unexpected error occurred'], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return $this->json(['error' => 'An unexpected error occurred : ' . $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 }
