@@ -13,6 +13,9 @@ class Address
     #[ORM\Column]
     private ?int $id = null;
 
+    #[ORM\Column(length: 100)]
+    private ?string $publicId = null;
+
     #[ORM\Column(length: 255)]
     private ?string $street = null;
 
@@ -38,6 +41,18 @@ class Address
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function getPublicId(): ?string
+    {
+        return $this->publicId;
+    }
+
+    public function setPublicId(string $publicId): static
+    {
+        $this->publicId = $publicId;
+
+        return $this;
     }
 
     public function getStreet(): ?string
