@@ -1,0 +1,13 @@
+<?php
+
+namespace App\Enum;
+
+enum ErrorCode: string
+{
+    case ADDRESS_LIMIT_REACHED = 'ADDRESS_LIMIT_REACHED';
+    case ADDRESS_ALREADY_EXISTS = 'ADDRESS_ALREADY_EXISTS';
+
+
+    case INVALID_DATA = 'INVALID_DATA';
+    case HTTP_INTERNAL_SERVER_ERROR = 'HTTP_INTERNAL_SERVER_ERROR';
+}
