@@ -68,6 +68,24 @@ final class AddressController extends AbstractController
         }
     }
 
+    #[Route('/api/v1/user/address/can-add', name: 'address_can_add', methods: ['GET'])]
+    public function canUserAddAddress(): Response
+    {
+        try {
+            $this->logger->debug("AddressController::canUserAddAddress ENTER");
+
+            $areUserCanAddAddress = $this->addressService->canAddAddress($this->getUser());
+
+            $this->logger->debug("AddressController::canUserAddAddress EXIT");
+            return $this->json([
+                'canAddAddress' => $areUserCanAddAddress
+            ], Response::HTTP_OK);
+        } catch (\Exception $e) {
+            $this->logger->error("AddressController::canUserAddAddress ERROR::" . ErrorCode::HTTP_INTERNAL_SERVER_ERROR->value);
+            return new JsonResponse(['error' => 'Error while checking address addition capability'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
     private function createErrorResponse(ErrorCode $code, string $message, string $userMessage, array $details = []): JsonResponse
     {
         $errorResponse = new ErrorResponse($code->value, $message, $details, $userMessage);
