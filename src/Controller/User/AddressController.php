@@ -2,62 +2,76 @@
 
 namespace App\Controller\User;
 
+use App\Enum\ErrorCode;
 use App\Dto\User\AddressDto;
+use App\Response\ErrorResponse;
+use App\Service\ValidatorService;
 use App\Service\User\AddressService;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 final class AddressController extends AbstractController
 {
-    private AddressService $addressService;
-    private SerializerInterface $serializer;
 
-    public function __construct(AddressService $addressService, SerializerInterface $serializer)
-    {
-        $this->addressService = $addressService;
-        $this->serializer = $serializer;
-    }
+    public function __construct(
+        public readonly AddressService $addressService,
+        public readonly ValidatorService $validatorService,
+        public readonly SerializerInterface $serializer,
+        private readonly LoggerInterface $logger
+    ) {}
 
     #[Route('/api/v1/user/address/add', name: 'address_add', methods: ['POST'])]
     public function addAddress(Request $request): Response
     {
-        $addressDto = $this->serializer->deserialize(
-            $request->getContent(),
-            AddressDto::class,
-            'json'
-        );
+        try {
+            $this->logger->debug("AddressController::addAddress ENTER");
 
-        $this->addressService->addAddress($addressDto);
-        return new Response("");
+            $areUserCanAddAddress = $this->addressService->canAddAddress($this->getUser());
+            if ($areUserCanAddAddress) {
+                $addressDto = $this->serializer->deserialize(
+                    $request->getContent(),
+                    AddressDto::class,
+                    'json'
+                );
+
+                $violations = $this->validatorService->getViolationsAsArray($addressDto, null);
+                if (empty($violations)) {
+                    $user = $this->getUser();
+                    $this->addressService->addAddress($addressDto, $user);
+
+                    $this->logger->debug("AddressController::addAddress EXIT");
+                    return $this->json([
+                        'status' => 'Address registered successfully'
+                    ], Response::HTTP_CREATED);
+                }
+
+                return $this->createErrorResponse(
+                    ErrorCode::INVALID_DATA,
+                    'The provided data is invalid.',
+                    "Les données fournies sont invalides. Veuillez vérifier les informations et réessayer.",
+                    $violations
+                );
+            }
+            return $this->createErrorResponse(
+                ErrorCode::ADDRESS_LIMIT_REACHED,
+                'Maximum number of addresses reached.',
+                "Vous avez atteint le nombre maximal d'adresses que vous pouvez ajouter."
+            );
+        } catch (\Exception $e) {
+            $this->logger->error("AddressController::addAddress ERROR::" . ErrorCode::HTTP_INTERNAL_SERVER_ERROR->value);
+            return new JsonResponse(['error' => 'Error while adding address'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
-    /*
-    #[Route('/api/v1/user/address/{id}', name: 'address_get', methods: ['GET'])]
-    public function getAddress(int $id): Response
+    private function createErrorResponse(ErrorCode $code, string $message, string $userMessage, array $details = []): JsonResponse
     {
-        return new Response("");
+        $errorResponse = new ErrorResponse($code->value, $message, $details, $userMessage);
+        $this->logger->debug("AddressController::addAddress ERROR::" . $code->value);
+        return new JsonResponse($errorResponse->toArray(), Response::HTTP_BAD_REQUEST);
     }
-
-    #[Route('/api/v1/user/address/', name: 'address_get_all', methods: ['GET'])]
-    public function getAllAddress(): Response
-    {
-        return new Response("");
-    }
-
-    #[Route('/api/v1/user/{id}/update', name: 'address_update', methods: ['PUT'])]
-    public function updateAddress(int $id): Response
-    {
-
-        return new Response("");
-    }
-
-    #[Route('/api/v1/user/{id}/remove', name: 'address_remove', methods: ['DELETE'])]
-    public function removeAddress(int $id): Response
-    {
-        return new Response("");
-    }
-    */
 }
