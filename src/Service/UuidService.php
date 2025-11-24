@@ -6,7 +6,7 @@ use Ramsey\Uuid\Uuid;
 use Psr\Log\LoggerInterface;
 use Ramsey\Uuid\UuidInterface;
 
-final class UuidService
+class UuidService
 {
     private const BASE62 = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
 
