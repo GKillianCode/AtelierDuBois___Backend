@@ -11,7 +11,6 @@ use App\Dto\Product\PublicIdDto;
 use App\Service\ValidatorService;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\User\AddressRepository;
-use App\Repository\User\AddressTypeRepository;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 class AddressService
@@ -21,12 +20,19 @@ class AddressService
         public readonly LoggerInterface $logger,
         public readonly EntityManagerInterface $entityManager,
         public readonly UuidService $uuidService,
-        public readonly AddressTypeRepository $addressTypeRepository,
         public readonly AddressRepository $addressRepository,
         public readonly ValidatorService $validatorService,
         #[Autowire('%env(int:USER_MAX_ADDRESSES)%')]
         private readonly int $userMaxAddresses = 5
     ) {}
+
+    public function countAddresses(User $user): int
+    {
+        $this->logger->debug("AddressService::countAddresses ENTER");
+        $count = $this->addressRepository->count(['userId' => $user]);
+        $this->logger->debug("AddressService::countAddresses EXIT");
+        return $count;
+    }
 
     /**
      * Check if the user can add a new address based on the maximum allowed addresses.
@@ -36,7 +42,7 @@ class AddressService
     public function canAddAddress(User $user): bool
     {
         $this->logger->debug("AddressService::canAddAddress ENTER");
-        $canAdd = $user->getAddresses()->count() < $this->userMaxAddresses;
+        $canAdd = $this->countAddresses($user) < $this->userMaxAddresses;
         $this->logger->debug("AddressService::canAddAddress EXIT");
         return $canAdd;
     }
@@ -52,10 +58,36 @@ class AddressService
         $this->logger->debug("AddressService::addAddress ENTER");
 
         $address = $this->createAddressFromDto($addressDto, $user);
+        $address = $this->setAddressAsDefault($address, $user);
+
+        if ($addressDto->isDefault)
+            $this->setAddressesAsNonDefault($user);
+
         $this->validateAddress($address);
         $this->persistAddress($address);
 
         $this->logger->debug("AddressService::addAddress EXIT");
+    }
+
+    private function setAddressAsDefault(Address $address, User $user): Address
+    {
+        $this->logger->debug("AddressService::setAddressAsDefault ENTER");
+
+        $countExistingAddresses = $this->countAddresses($user);
+        if ($countExistingAddresses === 0 || $address->isDefault()) {
+            $address->setIsDefault(true);
+        }
+
+        $this->logger->debug("AddressService::setAddressAsDefault EXIT");
+
+        return $address;
+    }
+
+    private function setAddressesAsNonDefault(User $user): void
+    {
+        $this->logger->debug("AddressService::setAddressesAsNonDefault ENTER");
+        $this->addressRepository->unsetAllDefaultAddresses($user);
+        $this->logger->debug("AddressService::setAddressAsNonDefault EXIT");
     }
 
     /**
@@ -77,7 +109,7 @@ class AddressService
             ->setZipcode($addressDto->zipcode)
             ->setCity($addressDto->city)
             ->setIsProfessionnal($addressDto->isProfessionnal)
-            ->setIsDefault(false)
+            ->setIsDefault($addressDto->isDefault)
             ->setCreatedAt(new \DateTimeImmutable())
             ->setUpdatedAt(new \DateTimeImmutable());
 
@@ -136,11 +168,19 @@ class AddressService
         $this->logger->debug("AddressService::persistAddress EXIT");
     }
 
+    public function getAllAddresses(User $user): array
+    {
+        $this->logger->debug("AddressService::getAllAddresses ENTER");
+        $addresses = $user->getAddresses()->toArray();
+        $this->logger->debug("AddressService::getAllAddresses EXIT");
+        return $addresses;
+    }
+
     public function getAllAddressesInDto(User $user): array
     {
         $this->logger->debug("AddressService::getAllAddresses ENTER");
 
-        $addresses = $user->getAddresses();
+        $addresses = $this->getAllAddresses($user);
         $addressesDto = [];
 
         foreach ($addresses as $address) {
