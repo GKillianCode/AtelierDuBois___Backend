@@ -15,8 +15,6 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
-use function Symfony\Component\Translation\t;
-
 final class AddressController extends AbstractController
 {
 
@@ -184,16 +182,27 @@ final class AddressController extends AbstractController
         try {
             $user = $this->getUser();
             $address = $this->addressService->getAddressByPublicId($user, $publicId);
+            $countRegisteredAddresses = $this->addressService->countUserAddresses($user);
 
             if ($address) {
-                $this->addressService->removeAddressByPublicId($address);
+                if ($countRegisteredAddresses > 1) {
+                    $this->addressService->removeAddressByPublicId($address);
 
-                $this->logger->debug("AddressController::removeAddress EXIT");
-                return $this->json([
-                    'status' => 'Address removed successfully'
-                ], Response::HTTP_OK);
+                    $this->logger->debug("AddressController::removeAddress EXIT 1");
+                    return $this->json([
+                        'status' => 'Address removed successfully'
+                    ], Response::HTTP_OK);
+                } else {
+                    $this->logger->debug("AddressController::removeAddress EXIT 2");
+                    return $this->createErrorResponse(
+                        ErrorCode::ADDRESS_CANNOT_DELETE_DEFAULT,
+                        'At least one address must be kept.',
+                        "Au moins une adresse doit être conservée."
+                    );
+                }
             }
 
+            $this->logger->debug("AddressController::removeAddress EXIT 3");
             return $this->createErrorResponse(
                 ErrorCode::ADDRESS_NOT_FOUND,
                 'Address not found.',
