@@ -13,6 +13,15 @@ class Address
     #[ORM\Column]
     private ?int $id = null;
 
+    #[ORM\Column(length: 100)]
+    private ?string $publicId = null;
+
+    #[ORM\Column]
+    private ?bool $isDefault = null;
+
+    #[ORM\Column]
+    private ?bool $isProfessionnal = null;
+
     #[ORM\Column(length: 255)]
     private ?string $street = null;
 
@@ -21,9 +30,6 @@ class Address
 
     #[ORM\Column(length: 100)]
     private ?string $city = null;
-
-    #[ORM\ManyToOne]
-    private ?AddressType $addressTypeId = null;
 
     #[ORM\ManyToOne(inversedBy: 'addresses')]
     #[ORM\JoinColumn(nullable: false)]
@@ -38,6 +44,42 @@ class Address
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function getPublicId(): ?string
+    {
+        return $this->publicId;
+    }
+
+    public function setPublicId(string $publicId): static
+    {
+        $this->publicId = $publicId;
+
+        return $this;
+    }
+
+    public function isDefault(): ?bool
+    {
+        return $this->isDefault;
+    }
+
+    public function setIsDefault(bool $isDefault): static
+    {
+        $this->isDefault = $isDefault;
+
+        return $this;
+    }
+
+    public function isProfessionnal(): ?bool
+    {
+        return $this->isProfessionnal;
+    }
+
+    public function setIsProfessionnal(bool $isProfessionnal): static
+    {
+        $this->isProfessionnal = $isProfessionnal;
+
+        return $this;
     }
 
     public function getStreet(): ?string
@@ -72,18 +114,6 @@ class Address
     public function setCity(string $city): static
     {
         $this->city = $city;
-
-        return $this;
-    }
-
-    public function getAddressTypeId(): ?AddressType
-    {
-        return $this->addressTypeId;
-    }
-
-    public function setAddressTypeId(?AddressType $addressTypeId): static
-    {
-        $this->addressTypeId = $addressTypeId;
 
         return $this;
     }

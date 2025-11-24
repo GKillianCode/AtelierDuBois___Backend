@@ -2,28 +2,25 @@
 
 namespace App\Controller\User;
 
-use Psr\Log\LoggerInterface;
 use OpenApi\Attributes as OA;
 
 use App\Dto\User\RegisterUserDto;
 use App\Service\User\UserService;
+use App\Service\ValidatorService;
 use Nelmio\ApiDocBundle\Attribute\Model;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Request;
 
 #[OA\Tag(name: 'Users')]
 final class UserController extends AbstractController
 {
-
-    private UserService $userService;
-
-    public function __construct(UserService $userService)
-    {
-        $this->userService = $userService;
-    }
+    public function __construct(
+        public readonly UserService $userService,
+        public readonly ValidatorService $validatorService
+    ) {}
 
     #[OA\Post(
         path: '/api/register',
@@ -105,10 +102,9 @@ final class UserController extends AbstractController
                 password: $data['password'] ?? null
             );
 
-            $violations = $this->userService->checkValidation($registerUserDto);
-
+            $violations = $this->validatorService->getViolationsAsArray($registerUserDto, ['registration']);
             if (!empty($violations)) {
-                return $this->json(['violations' => $violations], Response::HTTP_UNPROCESSABLE_ENTITY);
+                return new JsonResponse(['errors' => $violations], Response::HTTP_BAD_REQUEST);
             }
 
             if ($this->userService->isUserExistsByEmail($registerUserDto->email)) {
@@ -128,7 +124,7 @@ final class UserController extends AbstractController
                 'status' => 'User registered successfully'
             ], Response::HTTP_CREATED);
         } catch (\Exception $e) {
-            return $this->json(['error' => 'An unexpected error occurred'], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return $this->json(['error' => 'An unexpected error occurred : ' . $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 }

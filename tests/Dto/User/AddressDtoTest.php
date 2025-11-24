@@ -6,7 +6,7 @@ use App\Dto\User\AddressDto;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
-class AdressDtoTest extends KernelTestCase
+class AddressDtoTest extends KernelTestCase
 {
     private ValidatorInterface $validator;
 
@@ -19,10 +19,12 @@ class AdressDtoTest extends KernelTestCase
     public function testValidAddress(): void
     {
         $dto = new AddressDto(
+            publicId: null,
             street: '123 Rue de la Paix',
             city: 'Paris',
             zipcode: '75001',
-            isProfessionnalAddress: false
+            isProfessionnal: false,
+            isDefault: true
         );
 
         $violations = $this->validator->validate($dto);
@@ -34,10 +36,12 @@ class AdressDtoTest extends KernelTestCase
     public function testBlankStreet(): void
     {
         $dto = new AddressDto(
+            publicId: null,
             street: '',
             city: 'Paris',
             zipcode: '75001',
-            isProfessionnalAddress: false
+            isProfessionnal: false,
+            isDefault: true
         );
 
         $violations = $this->validator->validate($dto);
@@ -47,10 +51,12 @@ class AdressDtoTest extends KernelTestCase
     public function testTooShortStreet(): void
     {
         $dto = new AddressDto(
+            publicId: null,
             street: 'A',
             city: 'Paris',
             zipcode: '75001',
-            isProfessionnalAddress: false
+            isProfessionnal: false,
+            isDefault: true
         );
 
         $violations = $this->validator->validate($dto);
@@ -60,10 +66,12 @@ class AdressDtoTest extends KernelTestCase
     public function testTooLongStreet(): void
     {
         $dto = new AddressDto(
+            publicId: null,
             street: str_repeat('A', 256),
             city: 'Paris',
             zipcode: '75001',
-            isProfessionnalAddress: false
+            isProfessionnal: false,
+            isDefault: true
         );
 
         $violations = $this->validator->validate($dto);
@@ -75,10 +83,12 @@ class AdressDtoTest extends KernelTestCase
     public function testBlankCity(): void
     {
         $dto = new AddressDto(
+            publicId: null,
             street: '123 Rue de la Paix',
             city: '',
             zipcode: '75001',
-            isProfessionnalAddress: false
+            isProfessionnal: false,
+            isDefault: true
         );
 
         $violations = $this->validator->validate($dto);
@@ -88,10 +98,12 @@ class AdressDtoTest extends KernelTestCase
     public function testTooShortCity(): void
     {
         $dto = new AddressDto(
+            publicId: null,
             street: '123 Rue de la Paix',
             city: 'P',
             zipcode: '75001',
-            isProfessionnalAddress: false
+            isProfessionnal: false,
+            isDefault: true
         );
 
         $violations = $this->validator->validate($dto);
@@ -101,10 +113,12 @@ class AdressDtoTest extends KernelTestCase
     public function testTooLongCity(): void
     {
         $dto = new AddressDto(
+            publicId: null,
             street: '123 Rue de la Paix',
             city: str_repeat('A', 256),
             zipcode: '75001',
-            isProfessionnalAddress: false
+            isProfessionnal: false,
+            isDefault: true
         );
 
         $violations = $this->validator->validate($dto);
@@ -116,10 +130,12 @@ class AdressDtoTest extends KernelTestCase
     public function testBlankZipcode(): void
     {
         $dto = new AddressDto(
+            publicId: null,
             street: '123 Rue de la Paix',
             city: 'Paris',
             zipcode: '',
-            isProfessionnalAddress: false
+            isProfessionnal: false,
+            isDefault: true
         );
 
         $violations = $this->validator->validate($dto);
@@ -129,10 +145,12 @@ class AdressDtoTest extends KernelTestCase
     public function testTooLongZipcode(): void
     {
         $dto = new AddressDto(
+            publicId: null,
             street: '123 Rue de la Paix',
             city: 'Paris',
             zipcode: str_repeat('A', 101),
-            isProfessionnalAddress: false
+            isProfessionnal: false,
+            isDefault: true
         );
 
         $violations = $this->validator->validate($dto);
@@ -142,10 +160,12 @@ class AdressDtoTest extends KernelTestCase
     public function testSpecialZipcode(): void
     {
         $dto = new AddressDto(
+            publicId: null,
             street: '123 Rue de la Paix',
             city: 'Paris',
             zipcode: '123@#!',
-            isProfessionnalAddress: false
+            isProfessionnal: false,
+            isDefault: true
         );
 
         $violations = $this->validator->validate($dto);
@@ -155,10 +175,12 @@ class AdressDtoTest extends KernelTestCase
     public function testGoodSpecialZipcode(): void
     {
         $dto = new AddressDto(
+            publicId: null,
             street: '123 Rue de la Paix',
             city: 'Paris',
             zipcode: 'A2',
-            isProfessionnalAddress: false
+            isProfessionnal: false,
+            isDefault: true
         );
 
         $violations = $this->validator->validate($dto);
