@@ -168,6 +168,19 @@ class AddressService
         $this->logger->debug("AddressService::persistAddress EXIT");
     }
 
+    public function getAddressByPublicId(User $user, string $publicId): ?Address
+    {
+        $this->logger->debug("AddressService::getAddressByPublicId ENTER");
+
+        $address = $this->addressRepository->findOneBy([
+            'userId' => $user,
+            'publicId' => $publicId
+        ]);
+
+        $this->logger->debug("AddressService::getAddressByPublicId EXIT");
+        return $address;
+    }
+
     public function getAllAddresses(User $user): array
     {
         $this->logger->debug("AddressService::getAllAddresses ENTER");
@@ -190,5 +203,21 @@ class AddressService
 
         $this->logger->debug("AddressService::getAllAddresses EXIT");
         return $addressesDto;
+    }
+
+    public function getAddressInDtoByPublicId(User $user, string $publicId): ?AddressDto
+    {
+        $this->logger->debug("AddressService::getAddressInDtoByPublicId ENTER");
+
+        $address = $this->getAddressByPublicId($user, $publicId);
+
+        if ($address) {
+            $addressDto = $this->createAddressDtoFromAddress($address);
+            $this->logger->debug("AddressService::getAddressInDtoByPublicId EXIT 1");
+            return $addressDto;
+        }
+
+        $this->logger->debug("AddressService::getAddressInDtoByPublicId EXIT 2");
+        return null;
     }
 }
