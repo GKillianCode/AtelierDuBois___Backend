@@ -2,11 +2,14 @@
 
 namespace App\Dto\User;
 
+use App\Dto\Product\PublicIdDto;
 use Symfony\Component\Validator\Constraints as Assert;
 
 class AddressDto
 {
     public function __construct(
+        public ?PublicIdDto $publicId = null,
+
         #[Assert\NotBlank(message: 'Le nom de la rue ne doit pas être vide.')]
         #[Assert\Length(
             min: 2,
@@ -41,6 +44,13 @@ class AddressDto
             type: 'bool',
             message: 'La valeur {{ value }} n\'est pas valide pour le type d\'adresse.'
         )]
-        public readonly bool $isProfessionnalAddress
+        public readonly bool $isProfessionnal,
+
+        #[Assert\NotNull(message: 'Le statut par défaut doit être spécifié.')]
+        #[Assert\Type(
+            type: 'bool',
+            message: 'La valeur {{ value }} n\'est pas valide pour le statut par défaut.'
+        )]
+        public readonly bool $isDefault
     ) {}
 }
