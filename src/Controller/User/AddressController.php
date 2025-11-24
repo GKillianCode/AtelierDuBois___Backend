@@ -15,6 +15,8 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
+use function Symfony\Component\Translation\t;
+
 final class AddressController extends AbstractController
 {
 
@@ -130,6 +132,79 @@ final class AddressController extends AbstractController
             return new JsonResponse(['error' => 'Error while getting address'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+
+    #[Route('/api/v1/user/address/{publicId}/update', name: 'address_update', methods: ['PUT'])]
+    public function updateAddress(string $publicId, Request $request): Response
+    {
+        try {
+            $this->logger->debug("AddressController::updateAddress ENTER");
+
+            $addressDto = $this->serializer->deserialize(
+                $request->getContent(),
+                AddressDto::class,
+                'json'
+            );
+
+            $violations = $this->validatorService->getViolationsAsArray($addressDto, null);
+            if (empty($violations)) {
+                $user = $this->getUser();
+                $address = $this->addressService->getAddressByPublicId($user, $publicId);
+
+                if ($address) {
+                    $this->addressService->updateAddress($address, $addressDto, $user);
+
+                    $this->logger->debug("AddressController::updateAddress EXIT");
+                    return $this->json([
+                        'status' => 'Address updated successfully'
+                    ], Response::HTTP_OK);
+                }
+
+                return $this->createErrorResponse(
+                    ErrorCode::ADDRESS_NOT_FOUND,
+                    'Address not found.',
+                    "Adresse non trouvée."
+                );
+            }
+
+            return $this->createErrorResponse(
+                ErrorCode::INVALID_DATA,
+                'The provided data is invalid.',
+                "Les données fournies sont invalides. Veuillez vérifier les informations et réessayer.",
+                $violations
+            );
+        } catch (\Exception $e) {
+            $this->logger->error("AddressController::updateAddress ERROR::" . ErrorCode::HTTP_INTERNAL_SERVER_ERROR->value);
+            return new JsonResponse(['error' => 'Error while updating address'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    #[Route('/api/v1/user/address/{publicId}/remove', name: 'address_remove', methods: ['DELETE'])]
+    public function removeAddress(string $publicId): Response
+    {
+        try {
+            $user = $this->getUser();
+            $address = $this->addressService->getAddressByPublicId($user, $publicId);
+
+            if ($address) {
+                $this->addressService->removeAddressByPublicId($address);
+
+                $this->logger->debug("AddressController::removeAddress EXIT");
+                return $this->json([
+                    'status' => 'Address removed successfully'
+                ], Response::HTTP_OK);
+            }
+
+            return $this->createErrorResponse(
+                ErrorCode::ADDRESS_NOT_FOUND,
+                'Address not found.',
+                "Adresse non trouvée."
+            );
+        } catch (\Exception $e) {
+            $this->logger->error("AddressController::removeAddress ERROR::" . ErrorCode::HTTP_INTERNAL_SERVER_ERROR->value);
+            return new JsonResponse(['error' => 'Error while removing address'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
 
     private function createErrorResponse(ErrorCode $code, string $message, string $userMessage, array $details = []): JsonResponse
     {
