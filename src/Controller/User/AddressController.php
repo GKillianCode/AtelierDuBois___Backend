@@ -105,6 +105,32 @@ final class AddressController extends AbstractController
         }
     }
 
+    #[Route('/api/v1/user/address/{publicId}', name: 'address_get', methods: ['GET'])]
+    public function getAddress(string $publicId): Response
+    {
+        try {
+            $this->logger->debug("AddressController::getAddress ENTER");
+
+            $addressDto = $this->addressService->getAddressInDtoByPublicId($this->getUser(), $publicId);
+
+            if ($addressDto) {
+                $this->logger->debug("AddressController::getAddress EXIT");
+                return $this->json([
+                    'address' => $addressDto
+                ], Response::HTTP_OK);
+            }
+
+            return $this->createErrorResponse(
+                ErrorCode::ADDRESS_NOT_FOUND,
+                'Address not found.',
+                "Adresse non trouvée."
+            );
+        } catch (\Exception $e) {
+            $this->logger->error("AddressController::getAddress ERROR::" . ErrorCode::HTTP_INTERNAL_SERVER_ERROR->value);
+            return new JsonResponse(['error' => 'Error while getting address'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
     private function createErrorResponse(ErrorCode $code, string $message, string $userMessage, array $details = []): JsonResponse
     {
         $errorResponse = new ErrorResponse($code->value, $message, $details, $userMessage);
