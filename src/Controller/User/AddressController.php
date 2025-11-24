@@ -33,6 +33,7 @@ final class AddressController extends AbstractController
 
             $areUserCanAddAddress = $this->addressService->canAddAddress($this->getUser());
             if ($areUserCanAddAddress) {
+
                 $addressDto = $this->serializer->deserialize(
                     $request->getContent(),
                     AddressDto::class,
@@ -83,6 +84,24 @@ final class AddressController extends AbstractController
         } catch (\Exception $e) {
             $this->logger->error("AddressController::canUserAddAddress ERROR::" . ErrorCode::HTTP_INTERNAL_SERVER_ERROR->value);
             return new JsonResponse(['error' => 'Error while checking address addition capability'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    #[Route('/api/v1/user/address/all', name: 'address_get_all', methods: ['GET'])]
+    public function getAllAddress(): Response
+    {
+        try {
+            $this->logger->debug("AddressController::getAllAddress ENTER");
+
+            $addresses = $this->addressService->getAllAddressesInDto($this->getUser());
+
+            $this->logger->debug("AddressController::getAllAddress EXIT");
+            return $this->json([
+                'addresses' => $addresses
+            ], Response::HTTP_OK);
+        } catch (\Exception $e) {
+            $this->logger->error("AddressController::getAllAddress ERROR::" . ErrorCode::HTTP_INTERNAL_SERVER_ERROR->value);
+            return new JsonResponse(['error' => 'Error while getting all addresses'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
