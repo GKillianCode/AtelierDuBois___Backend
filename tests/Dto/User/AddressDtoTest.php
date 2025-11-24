@@ -6,7 +6,7 @@ use App\Dto\User\AddressDto;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
-class AdressDtoTest extends KernelTestCase
+class AddressDtoTest extends KernelTestCase
 {
     private ValidatorInterface $validator;
 
