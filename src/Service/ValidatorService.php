@@ -62,7 +62,6 @@ class ValidatorService
             $errors[] = [
                 'property' => $violation->getPropertyPath(),
                 'message' => $violation->getMessage(),
-                'invalidValue' => $violation->getInvalidValue()
             ];
         }
 

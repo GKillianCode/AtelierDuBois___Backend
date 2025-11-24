@@ -2,8 +2,11 @@
 
 namespace App\Controller\User;
 
-use OpenApi\Attributes as OA;
+use App\Enum\ErrorCode;
 
+use Psr\Log\LoggerInterface;
+use OpenApi\Attributes as OA;
+use App\Response\ErrorResponse;
 use App\Dto\User\RegisterUserDto;
 use App\Service\User\UserService;
 use App\Service\ValidatorService;
@@ -13,11 +16,14 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Serializer\SerializerInterface;
 
 #[OA\Tag(name: 'Users')]
 final class UserController extends AbstractController
 {
     public function __construct(
+        public readonly SerializerInterface $serializer,
+        public readonly LoggerInterface $logger,
         public readonly UserService $userService,
         public readonly ValidatorService $validatorService
     ) {}
@@ -85,46 +91,50 @@ final class UserController extends AbstractController
     public function register(Request $request): Response
     {
         try {
-            $data = json_decode($request->getContent(), true);
+            $this->logger->debug("UserController::register ENTER");
 
-            if (!$data) {
-                return $this->json([
-                    'violations' => [
-                        ['propertyPath' => '_root', 'message' => 'Invalid JSON']
-                    ]
-                ], Response::HTTP_BAD_REQUEST);
-            }
-
-            $registerUserDto = new RegisterUserDto(
-                firstname: $data['firstname'] ?? null,
-                lastname: $data['lastname'] ?? null,
-                email: $data['email'] ?? null,
-                password: $data['password'] ?? null
+            $registerUserDto = $this->serializer->deserialize(
+                $request->getContent(),
+                RegisterUserDto::class,
+                'json'
             );
 
             $violations = $this->validatorService->getViolationsAsArray($registerUserDto, ['registration']);
-            if (!empty($violations)) {
-                return new JsonResponse(['errors' => $violations], Response::HTTP_BAD_REQUEST);
-            }
+            if (empty($violations)) {
+                if ($this->userService->isUserExistsByEmail($registerUserDto->email)) {
+                    $this->logger->debug("UserController::register EXIT 1");
+                    return $this->createErrorResponse(
+                        ErrorCode::USER_ALREADY_EXISTS,
+                        'User already exists.',
+                        "Cet utilisateur existe déjà.",
+                    );
+                }
 
-            if ($this->userService->isUserExistsByEmail($registerUserDto->email)) {
+                $this->userService->registerUser($registerUserDto);
+
+                $this->logger->debug("UserController::register EXIT 2");
                 return $this->json([
-                    'violations' => [
-                        [
-                            'propertyPath' => 'email',
-                            'message' => 'Cette adresse email est déjà utilisée.'
-                        ]
-                    ]
-                ], Response::HTTP_BAD_REQUEST);
+                    'status' => 'User registered successfully'
+                ], Response::HTTP_CREATED);
             }
 
-            $this->userService->registerUser($registerUserDto);
-
-            return $this->json([
-                'status' => 'User registered successfully'
-            ], Response::HTTP_CREATED);
+            $this->logger->debug("UserController::register EXIT 3");
+            return $this->createErrorResponse(
+                ErrorCode::INVALID_DATA,
+                'The provided data is invalid.',
+                "Les données fournies sont invalides. Veuillez vérifier les informations et réessayer.",
+                $violations
+            );
         } catch (\Exception $e) {
-            return $this->json(['error' => 'An unexpected error occurred : ' . $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+            $this->logger->error("UserController::register ERROR: " . $e->getMessage());
+            return $this->json(['error' => 'An unexpected error occurred'], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
+    }
+
+    private function createErrorResponse(ErrorCode $code, string $message, string $userMessage, array $details = []): JsonResponse
+    {
+        $errorResponse = new ErrorResponse($code->value, $message, $details, $userMessage);
+        $this->logger->debug("AddressController::addAddress ERROR::" . $code->value);
+        return new JsonResponse($errorResponse->toArray(), Response::HTTP_BAD_REQUEST);
     }
 }
