@@ -2,12 +2,16 @@
 
 namespace App\Service;
 
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Component\Validator\ConstraintViolationListInterface;
 
 class ValidatorService
 {
-    public function __construct(private ValidatorInterface $validator) {}
+    public function __construct(
+        private readonly ValidatorInterface $validator,
+        private readonly LoggerInterface $logger
+    ) {}
 
     /**
      * Validate an object (entity or DTO) with optional groups
@@ -17,7 +21,10 @@ class ValidatorService
      */
     public function validate(object $object, ?array $groups = null): ConstraintViolationListInterface
     {
-        return $this->validator->validate($object, null, $groups);
+        $this->logger->debug("ValidatorService::validate ENTER");
+        $constraintes = $this->validator->validate($object, null, $groups);
+        $this->logger->debug("ValidatorService::validate EXIT");
+        return $constraintes;
     }
 
     /**
@@ -28,7 +35,10 @@ class ValidatorService
      */
     public function hasViolations(object $object, ?array $groups = null): bool
     {
-        return count($this->validate($object, $groups)) > 0;
+        $this->logger->debug("ValidatorService::hasViolations ENTER");
+        $asViolations = !empty($this->validate($object, $groups)) > 0;
+        $this->logger->debug("ValidatorService::hasViolations EXIT");
+        return $asViolations;
     }
 
     /**
@@ -39,9 +49,11 @@ class ValidatorService
      */
     public function getViolationsAsArray(object $object, ?array $groups = null): array
     {
+        $this->logger->debug("ValidatorService::getViolationsAsArray ENTER");
         $violations = $this->validate($object, $groups);
 
         if (count($violations) === 0) {
+            $this->logger->debug("ValidatorService::getViolationsAsArray EXIT 1");
             return [];
         }
 
@@ -54,6 +66,7 @@ class ValidatorService
             ];
         }
 
+        $this->logger->debug("ValidatorService::getViolationsAsArray EXIT 2");
         return $errors;
     }
 }
