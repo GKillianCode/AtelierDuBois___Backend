@@ -16,29 +16,5 @@ class AppFixtures extends Fixture
         $this->validator = $validator;
     }
 
-    public function load(ObjectManager $manager): void
-    {
-
-        $addressTypes = ['PERSONNAL', 'PROFESSIONAL'];
-
-        foreach ($addressTypes as $type) {
-            $addressType = new AddressType();
-            $addressType->setName($type)
-                ->setCreatedAt(new \DateTimeImmutable())
-                ->setUpdatedAt(new \DateTimeImmutable());
-
-            $errors = $this->validator->validate($addressType, null, ['registration']);
-
-            if (count($errors) > 0) {
-                foreach ($errors as $error) {
-                    echo $error->getMessage() . "\n";
-                }
-                return;
-            }
-
-            $manager->persist($addressType);
-        }
-
-        $manager->flush();
-    }
+    public function load(ObjectManager $manager): void {}
 }
