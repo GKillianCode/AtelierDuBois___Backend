@@ -26,11 +26,11 @@ class AddressService
         private readonly int $userMaxAddresses = 5
     ) {}
 
-    public function countAddresses(User $user): int
+    public function countUserAddresses(User $user): int
     {
-        $this->logger->debug("AddressService::countAddresses ENTER");
+        $this->logger->debug("AddressService::countUserAddresses ENTER");
         $count = $this->addressRepository->count(['userId' => $user]);
-        $this->logger->debug("AddressService::countAddresses EXIT");
+        $this->logger->debug("AddressService::countUserAddresses EXIT");
         return $count;
     }
 
@@ -42,7 +42,7 @@ class AddressService
     public function canAddAddress(User $user): bool
     {
         $this->logger->debug("AddressService::canAddAddress ENTER");
-        $canAdd = $this->countAddresses($user) < $this->userMaxAddresses;
+        $canAdd = $this->countUserAddresses($user) < $this->userMaxAddresses;
         $this->logger->debug("AddressService::canAddAddress EXIT");
         return $canAdd;
     }
@@ -73,7 +73,7 @@ class AddressService
     {
         $this->logger->debug("AddressService::setAddressAsDefault ENTER");
 
-        $countExistingAddresses = $this->countAddresses($user);
+        $countExistingAddresses = $this->countUserAddresses($user);
         if ($countExistingAddresses === 0 || $address->isDefault()) {
             $address->setIsDefault(true);
         }
@@ -219,5 +219,34 @@ class AddressService
 
         $this->logger->debug("AddressService::getAddressInDtoByPublicId EXIT 2");
         return null;
+    }
+
+    public function updateAddress(Address $address, AddressDto $addressUpdateDto, User $user): void
+    {
+        $this->logger->debug("AddressService::updateAddress ENTER");
+
+        $address->setStreet($addressUpdateDto->street)
+            ->setZipcode($addressUpdateDto->zipcode)
+            ->setCity($addressUpdateDto->city)
+            ->setIsProfessionnal($addressUpdateDto->isProfessionnal)
+            ->setUpdatedAt(new \DateTimeImmutable());
+
+        $address = $this->setAddressAsDefault($address, $user);
+
+        if ($addressUpdateDto->isDefault)
+            $this->setAddressesAsNonDefault($user);
+
+        $this->validateAddress($address);
+        $this->persistAddress($address);
+
+        $this->logger->debug("AddressService::updateAddress EXIT");
+    }
+
+    public function removeAddressByPublicId(Address $address): void
+    {
+        $this->logger->debug("AddressService::removeAddressByPublicId ENTER");
+        $this->entityManager->remove($address);
+        $this->entityManager->flush();
+        $this->logger->debug("AddressService::removeAddressByPublicId EXIT");
     }
 }
