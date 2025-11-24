@@ -7,9 +7,10 @@ use App\Dto\User\AddressDto;
 use App\Entity\User\Address;
 use App\Service\UuidService;
 use Psr\Log\LoggerInterface;
-use App\Entity\User\AddressType;
+use App\Dto\Product\PublicIdDto;
 use App\Service\ValidatorService;
 use Doctrine\ORM\EntityManagerInterface;
+use App\Repository\User\AddressRepository;
 use App\Repository\User\AddressTypeRepository;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
@@ -21,6 +22,7 @@ class AddressService
         public readonly EntityManagerInterface $entityManager,
         public readonly UuidService $uuidService,
         public readonly AddressTypeRepository $addressTypeRepository,
+        public readonly AddressRepository $addressRepository,
         public readonly ValidatorService $validatorService,
         #[Autowire('%env(int:USER_MAX_ADDRESSES)%')]
         private readonly int $userMaxAddresses = 5
@@ -67,7 +69,6 @@ class AddressService
         $this->logger->debug("AddressService::createAddressFromDto ENTER");
 
         $newUuidBase62 = $this->uuidService->generateUuid62();
-        $addressType = $this->getAddressTypeById($addressDto->isProfessionnalAddress ? 2 : 1);
 
         $address = new Address();
         $address->setUserId($user)
@@ -75,12 +76,30 @@ class AddressService
             ->setStreet($addressDto->street)
             ->setZipcode($addressDto->zipcode)
             ->setCity($addressDto->city)
-            ->setAddressTypeId($addressType)
+            ->setIsProfessionnal($addressDto->isProfessionnal)
+            ->setIsDefault(false)
             ->setCreatedAt(new \DateTimeImmutable())
             ->setUpdatedAt(new \DateTimeImmutable());
 
         $this->logger->debug("AddressService::createAddressFromDto EXIT");
         return $address;
+    }
+
+    public function createAddressDtoFromAddress(Address $address): AddressDto
+    {
+        $this->logger->debug("AddressService::createAddressDtoFromAddress ENTER");
+
+        $addressDto = new AddressDto(
+            publicId: new PublicIdDto($address->getPublicId()),
+            street: $address->getStreet(),
+            city: $address->getCity(),
+            zipcode: $address->getZipcode(),
+            isProfessionnal: $address->isProfessionnal(),
+            isDefault: $address->isDefault()
+        );
+
+        $this->logger->debug("AddressService::createAddressDtoFromAddress EXIT");
+        return $addressDto;
     }
 
     /**
@@ -117,16 +136,19 @@ class AddressService
         $this->logger->debug("AddressService::persistAddress EXIT");
     }
 
-    /**
-     * Retrieve AddressType entity by its ID.
-     * @param int $id
-     * @return AddressType|null
-     */
-    public function getAddressTypeById(int $id): ?AddressType
+    public function getAllAddressesInDto(User $user): array
     {
-        $this->logger->debug("AddressService::getAddressTypeById ENTER");
-        $addressType = $this->addressTypeRepository->findOneBy(['id' => $id]);
-        $this->logger->debug("AddressService::getAddressTypeById EXIT");
-        return $addressType;
+        $this->logger->debug("AddressService::getAllAddresses ENTER");
+
+        $addresses = $user->getAddresses();
+        $addressesDto = [];
+
+        foreach ($addresses as $address) {
+            $addressDto = $this->createAddressDtoFromAddress($address);
+            $addressesDto[] = $addressDto;
+        }
+
+        $this->logger->debug("AddressService::getAllAddresses EXIT");
+        return $addressesDto;
     }
 }
