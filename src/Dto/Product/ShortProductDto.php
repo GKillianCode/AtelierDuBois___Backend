@@ -2,6 +2,7 @@
 
 namespace App\Dto\Product;
 
+use App\Enum\ProductType;
 use Symfony\Component\Validator\Constraints as Assert;
 
 class ShortProductDto
@@ -21,6 +22,8 @@ class ShortProductDto
             maxMessage: 'Le titre ne doit pas dépasser {{ limit }} caractères.'
         )]
         public readonly string $title,
+
+        public readonly ProductType $type,
 
         public readonly ?PriceDto $unitPrice,
 

@@ -2,6 +2,7 @@
 
 namespace App\Service\Product;
 
+use App\Enum\ProductType;
 use Psr\Log\LoggerInterface;
 use App\Dto\Product\PriceDto;
 use App\Dto\Product\PublicIdDto;
@@ -63,8 +64,11 @@ class ProductService
 
             $defaultImage = $defaultVariant->getImages()->first();
 
+            $productType = $defaultVariant->getStock() != null ? ProductType::IN_STOCK : ProductType::CUSTOM_MADE;
+
             $products[] = new ShortProductDto(
                 title: $product->getName(),
+                type: $productType,
                 unitPrice: new PriceDto($defaultVariant->getPrice()),
                 mainImage: $this->imageService->imageToImageDto($defaultImage),
                 publicId: new PublicIdDto($defaultVariant->getPublicId())
