@@ -6,7 +6,6 @@ use App\Repository\Product\ProductVariantRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: ProductVariantRepository::class)]
 class ProductVariant
@@ -15,9 +14,6 @@ class ProductVariant
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
-
-    #[ORM\Column(type: 'uuid')]
-    private ?Uuid $uuid = null;
 
     #[ORM\Column(length: 100)]
     private ?string $publicId = null;
@@ -54,23 +50,13 @@ class ProductVariant
     public function __construct()
     {
         $this->images = new ArrayCollection();
+        $this->createdAt = new \DateTimeImmutable();
+        $this->updatedAt = new \DateTimeImmutable();
     }
 
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getUuid(): ?Uuid
-    {
-        return $this->uuid;
-    }
-
-    public function setUuid(Uuid $uuid): static
-    {
-        $this->uuid = $uuid;
-
-        return $this;
     }
 
     public function getPublicId(): ?string
