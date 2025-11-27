@@ -2,6 +2,7 @@
 
 namespace App\Tests\Dto\Product;
 
+use App\Enum\ProductType;
 use App\Dto\Product\ImageDto;
 use App\Dto\Product\PriceDto;
 use App\Dto\Product\PublicIdDto;
@@ -25,6 +26,7 @@ class ProductDetailDtoTest extends KernelTestCase
         $dto = new ProductDetailDto(
             shortProduct: new ShortProductDto(
                 title: 'Table en chêne massif',
+                type: ProductType::IN_STOCK,
                 unitPrice: new PriceDto(
                     amount: 499,
                 ),

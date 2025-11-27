@@ -2,6 +2,7 @@
 
 namespace App\Tests\Dto\Product;
 
+use App\Enum\ProductType;
 use App\Dto\Product\ImageDto;
 use App\Dto\Product\PriceDto;
 use App\Dto\Product\PublicIdDto;
@@ -23,6 +24,7 @@ class ShortProductDtoTest extends KernelTestCase
     {
         $dto = new ShortProductDto(
             title: 'Table en bois',
+            type: ProductType::IN_STOCK,
             unitPrice: new PriceDto(amount: 19999),
             mainImage: new ImageDto(imageUrl: 'https://example.com/image.webp'),
             publicId: new PublicIdDto(publicId: '1A2bC3dE4fG5hI6jK7lM22')
@@ -36,6 +38,7 @@ class ShortProductDtoTest extends KernelTestCase
     {
         $dto = new ShortProductDto(
             title: 'Tb',
+            type: ProductType::IN_STOCK,
             unitPrice: new PriceDto(amount: 19999),
             mainImage: new ImageDto(imageUrl: 'https://example.com/image.webp'),
             publicId: new PublicIdDto(publicId: '1A2bC3dE4fG5hI6jK7lM22')
@@ -49,6 +52,7 @@ class ShortProductDtoTest extends KernelTestCase
     {
         $dto = new ShortProductDto(
             title: 'T' . str_repeat('a', 300),
+            type: ProductType::IN_STOCK,
             unitPrice: new PriceDto(amount: 19999),
             mainImage: new ImageDto(imageUrl: 'https://example.com/image.webp'),
             publicId: new PublicIdDto(publicId: '1A2bC3dE4fG5hI6jK7lM22')
