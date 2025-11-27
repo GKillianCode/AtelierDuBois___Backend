@@ -76,25 +76,29 @@ class AppFixtures extends Fixture
     private function createProducts(ObjectManager $manager): void
     {
         $products = [
-            [
+            [ // 0
                 'name' => 'Table de salle à manger',
                 'description' => 'Une belle table en bois massif pour vos repas en famille.',
             ],
-            [
+            [ // 1
                 'name' => 'Chaise',
                 'description' => 'Chaise confortable en bois avec un design élégant.',
             ],
-            [
+            [ // 2
                 'name' => 'Armoire',
                 'description' => 'Armoire spacieuse en chêne pour ranger vos vêtements.',
             ],
-            [
+            [ // 3
                 'name' => 'Étagère murale',
                 'description' => 'Étagère décorative en bois pour salon ou bureau.',
             ],
-            [
+            [ // 4
                 'name' => 'Bureau artisanal',
                 'description' => 'Bureau en bois massif avec finitions artisanales.',
+            ],
+            [ // 5
+                'name' => 'Fenêtre en bois',
+                'description' => 'Fenêtre en bois massif sur mesures avec finitions artisanales.',
             ]
         ];
 
@@ -127,7 +131,7 @@ class AppFixtures extends Fixture
         $woodTypes = $this->getWoodTypes($manager);
 
         $productVariants = [
-            [
+            [ // 0
                 'product' => $products[0], // Table
                 'wood' => $woodTypes[0],
                 'publicId' => '537u4s94BWogtNsb8vKCo1',
@@ -135,7 +139,7 @@ class AppFixtures extends Fixture
                 'price' => 49900,
                 'stock' => 10,
             ],
-            [
+            [ // 1
                 'product' => $products[0], // Table
                 'wood' => $woodTypes[1],
                 'publicId' => '537u4s94BWogtNsb8vKCo2',
@@ -143,7 +147,7 @@ class AppFixtures extends Fixture
                 'price' => 45900,
                 'stock' => 5,
             ],
-            [
+            [ // 2
                 'product' => $products[1], // Chaise
                 'wood' => $woodTypes[1],
                 'publicId' => '537u4s94BWogtNsb8vKCo3',
@@ -151,7 +155,7 @@ class AppFixtures extends Fixture
                 'price' => 9900,
                 'stock' => 20,
             ],
-            [
+            [ // 3
                 'product' => $products[1], // Chaise
                 'wood' => $woodTypes[2],
                 'publicId' => '537u4s94BWogtNsb8vKCo4',
@@ -159,7 +163,7 @@ class AppFixtures extends Fixture
                 'price' => 8900,
                 'stock' => 15,
             ],
-            [
+            [ // 4
                 'product' => $products[2], // Armoire
                 'wood' => $woodTypes[3],
                 'publicId' => 'ARMOIRE-CHENE-005',
@@ -167,7 +171,7 @@ class AppFixtures extends Fixture
                 'price' => 89900,
                 'stock' => 3,
             ],
-            [
+            [ // 5
                 'product' => $products[3], // Étagère
                 'wood' => $woodTypes[3],
                 'publicId' => 'ETAGERE-PIN-006',
@@ -175,7 +179,7 @@ class AppFixtures extends Fixture
                 'price' => 15900,
                 'stock' => 12,
             ],
-            [
+            [ // 6
                 'product' => $products[4], // Bureau
                 'wood' => $woodTypes[1],
                 'publicId' => 'BUREAU-TECK-007',
@@ -183,13 +187,37 @@ class AppFixtures extends Fixture
                 'price' => 65900,
                 'stock' => 7,
             ],
-            [
+            [ // 7
                 'product' => $products[4], // Bureau
                 'wood' => $woodTypes[3],
                 'publicId' => 'BUREAU-CHENE-008',
                 'isDefault' => false,
                 'price' => 69900,
                 'stock' => 4,
+            ],
+            [ // 8
+                'product' => $products[5], // Fenêtre
+                'wood' => $woodTypes[1],
+                'publicId' => 'FENETRE-TECK-009',
+                'isDefault' => true,
+                'price' => 0,
+                'stock' => null,
+            ],
+            [ // 9
+                'product' => $products[5],
+                'wood' => $woodTypes[2],
+                'publicId' => 'FENETRE-TECK-009',
+                'isDefault' => false,
+                'price' => 0,
+                'stock' => null,
+            ],
+            [ // 10
+                'product' => $products[5],
+                'wood' => $woodTypes[3],
+                'publicId' => 'FENETRE-TECK-009',
+                'isDefault' => false,
+                'price' => 0,
+                'stock' => null,
             ]
         ];
 
@@ -280,6 +308,28 @@ class AppFixtures extends Fixture
                 'format' => 'webp',
                 'isDefault' => true,
                 'productVariant' => 7,
+            ],
+            // Images pour le variant 8 (Fenêtre - isDefault: false)
+            [
+                'folderName' => '537u4s94BWogtNsb8vKCo3',
+                'imageName' => '537u4s94BWogtNsb8vKCo3',
+                'format' => 'webp',
+                'isDefault' => true,
+                'productVariant' => 8,
+            ],
+            [
+                'folderName' => '537u4s94BWogtNsb8vKCo3',
+                'imageName' => '537u4s94BWogtNsb8vKCo3',
+                'format' => 'webp',
+                'isDefault' => false,
+                'productVariant' => 9,
+            ],
+            [
+                'folderName' => '537u4s94BWogtNsb8vKCo3',
+                'imageName' => '537u4s94BWogtNsb8vKCo3',
+                'format' => 'webp',
+                'isDefault' => false,
+                'productVariant' => 10,
             ],
         ];
 
