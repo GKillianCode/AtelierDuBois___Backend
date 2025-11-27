@@ -24,6 +24,6 @@ class ImageServiceTest extends TestCase
 
         $imageDto = $this->imageService->imageToImageDto($imageMock);
 
-        $this->assertEquals('folder/image.jpg', $imageDto->getPath());
+        $this->assertEquals('folder/image.jpg', $imageDto->imageUrl);
     }
 }
