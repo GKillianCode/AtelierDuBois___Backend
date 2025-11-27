@@ -28,9 +28,4 @@ class ImageDto
         )]
         public readonly string $imageUrl,
     ) {}
-
-    public function getPath(): string
-    {
-        return $this->imageUrl;
-    }
 }
