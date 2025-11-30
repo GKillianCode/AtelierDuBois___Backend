@@ -11,6 +11,7 @@ use App\Dto\Product\ProductDetailDto;
 use App\Dto\Product\ShortProductDto;
 use App\Service\Product\ImageService;
 use App\Entity\Product\ProductVariant;
+use App\Enum\SortFilterCode;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use App\Repository\Product\ProductRepository;
 use App\Repository\Product\ProductVariantRepository;
@@ -24,14 +25,14 @@ class ProductService
         private readonly ImageService $imageService
     ) {}
 
-    public function getAllProducts(int $page, int $limit): array
+    public function getAllProducts(int $page, int $limit, SortFilterCode $filter, SortFilterCode $productType): array
     {
-        $this->logger->debug("ProductService::getAllProducts ENTER");
+        $this->logger->debug("ProductService::getAllProducts ENTER", ['filter' => $filter, 'productType' => $productType]);
 
         $page = max(1, $page);
         $limit = min(80, max(1, $limit));
 
-        $paginator = $this->productRepository->paginateProducts($page, $limit);
+        $paginator = $this->productRepository->paginateProducts($page, $limit, $filter, $productType);
 
         $products = $this->getAllProductsInShortProductDto($paginator);
         $paginationData = $this->getMetaPaginationData($paginator, $limit, $page);
