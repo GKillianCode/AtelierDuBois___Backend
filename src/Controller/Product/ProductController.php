@@ -14,7 +14,7 @@ final class ProductController extends AbstractController
         private readonly ProductService $productService,
     ) {}
 
-    #[Route('/api/v1/product/all', name: 'product_get_all', methods: ['GET'])]
+    #[Route('/api/public/v1/product/all', name: 'product_get_all', methods: ['GET'])]
     public function getAllProducts(Request $request): Response
     {
         try {
@@ -27,6 +27,24 @@ final class ProductController extends AbstractController
         } catch (\Exception $e) {
             return $this->json([
                 'error' => 'An error occurred while fetching products. ' . $e->getMessage()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    #[Route('/api/public/v1/product/{publicId}', name: 'product_get_by_id', methods: ['GET'])]
+    public function getProductById(string $publicId): Response
+    {
+        try {
+            $product = $this->productService->getProductVariantByPublicId($publicId);
+            if (!$product) {
+                return $this->json([
+                    'error' => 'ProductVariant not found.'
+                ], Response::HTTP_NOT_FOUND);
+            }
+            return $this->json($product);
+        } catch (\Exception $e) {
+            return $this->json([
+                'error' => 'An error occurred while fetching the product. ' . $e->getMessage()
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
