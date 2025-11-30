@@ -40,5 +40,8 @@ class ProductDetailDto
         )]
         /** @var ImageDto[] */
         public readonly array $imageUrls,
+
+        /** @var OtherProductVariant[] */
+        public readonly array $otherProductVariants,
     ) {}
 }
