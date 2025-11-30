@@ -11,4 +11,17 @@ class ImageService
     {
         return new ImageDto($image->getFolderName() . '/' . $image->getImageName() . '.' . $image->getFormat());
     }
+
+    /**
+     * @param Image[] $images
+     * @return ImageDto[]
+     */
+    public function imagesToImageDtos(array $images): array
+    {
+        $imageDtos = [];
+        foreach ($images as $image) {
+            $imageDtos[] = $this->imageToImageDto($image);
+        }
+        return $imageDtos;
+    }
 }
