@@ -7,16 +7,20 @@ use Psr\Log\LoggerInterface;
 use App\Dto\Product\PriceDto;
 use App\Dto\Product\PublicIdDto;
 use App\Dto\Product\PaginationData;
+use App\Dto\Product\ProductDetailDto;
 use App\Dto\Product\ShortProductDto;
 use App\Service\Product\ImageService;
+use App\Entity\Product\ProductVariant;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use App\Repository\Product\ProductRepository;
+use App\Repository\Product\ProductVariantRepository;
 
 class ProductService
 {
     public function __construct(
         private readonly LoggerInterface $logger,
         private readonly ProductRepository $productRepository,
+        private readonly ProductVariantRepository $productVariantRepository,
         private readonly ImageService $imageService
     ) {}
 
@@ -38,6 +42,26 @@ class ProductService
             'products' => $products,
             'pagination' => $paginationData
         ];
+    }
+
+    public function getProductVariantByPublicId(string $publicId)
+    {
+        $this->logger->debug("ProductService::getProductVariantByPublicId ENTER", ['publicId' => $publicId]);
+
+        $productVariant = $this->productVariantRepository->getProductVariantByPublicId($publicId);
+        $productId = $productVariant->getProductId()->getId();
+        $productsVariants = $this->productVariantRepository->getAllMinimalProductVariant($productId);
+
+        if ($productVariant && $productsVariants) {
+            $this->logger->debug("ProductService::getProductVariantByPublicId EXIT 1", ['publicId' => $publicId]);
+
+            $otherProductsVariantsDto = $this->ProductsVariantsToOtherProductVariantsDto($productsVariants);
+            $productDetailDto = $this->ProductVariantToProductDetailDto($productVariant, $otherProductsVariantsDto);
+            return $productDetailDto;
+        }
+
+        $this->logger->debug("ProductService::getProductVariantByPublicId EXIT 2", ['publicId' => $publicId]);
+        return null;
     }
 
     private function getAllProductsInShortProductDto(Paginator $paginator): array
@@ -99,5 +123,43 @@ class ProductService
         $this->logger->debug("ProductService::getMetaPaginationData EXIT");
 
         return $paginationData;
+    }
+
+    private function ProductsVariantsToOtherProductVariantsDto($productsVariants): array
+    {
+        $this->logger->debug("ProductService::ProductsVariantsToOtherProductVariantsDto ENTER");
+        $otherProductVariants = [];
+        foreach ($productsVariants as $productVariant) {
+            $imageDto = $this->imageService->imageToImageDto($productVariant->getImages()->first());
+            $otherProductVariants[] = new OtherProductVariant(
+                publicId: $productVariant->getPublicId(),
+                wood: $productVariant->getWoodId()->getName(),
+                unitPrice: $productVariant->getPrice(),
+                imageUrl: $imageDto->imageUrl,
+            );
+        }
+        $this->logger->debug("ProductService::ProductsVariantsToOtherProductVariantsDto EXIT");
+        return $otherProductVariants;
+    }
+
+    private function ProductVariantToProductDetailDto(ProductVariant $mainProductVariant, array $otherProductVariants): ProductDetailDto
+    {
+        $this->logger->debug("ProductService::ProductVariantToProductDetailDto ENTER");
+        $dto = new ProductDetailDto(
+            shortProduct: new ShortProductDto(
+                title: $mainProductVariant->getProductId()->getName(),
+                type: $mainProductVariant->getStock() != null ? ProductType::IN_STOCK : ProductType::CUSTOM_MADE,
+                unitPrice: new PriceDto($mainProductVariant->getPrice()),
+                mainImage: $this->imageService->imageToImageDto($mainProductVariant->getImages()->first()),
+                publicId: new PublicIdDto($mainProductVariant->getPublicId())
+            ),
+            description: $mainProductVariant->getProductId()->getDescription(),
+            stock: $mainProductVariant->getStock(),
+            imageUrls: $this->imageService->imagesToImageDtos($mainProductVariant->getImages()->toArray()),
+            otherProductVariants: $otherProductVariants
+        );
+
+        $this->logger->debug("ProductService::ProductVariantToProductDetailDto EXIT");
+        return $dto;
     }
 }
