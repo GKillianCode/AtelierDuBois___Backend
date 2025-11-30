@@ -4,6 +4,7 @@ namespace App\Repository\Product;
 
 use App\Enum\SortFilterCode;
 use App\Entity\Product\Product;
+use App\Dto\Product\RequestFiltersDto;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -18,7 +19,7 @@ class ProductRepository extends ServiceEntityRepository
         parent::__construct($registry, Product::class);
     }
 
-    public function paginateProducts(int $page, int $limit, SortFilterCode $filter, SortFilterCode $productType): Paginator
+    public function paginateProducts(int $page, int $limit, RequestFiltersDto $requestFiltersDto): Paginator
     {
 
 
@@ -26,9 +27,11 @@ class ProductRepository extends ServiceEntityRepository
             ->select('p', 'pv', 'i')
             ->leftJoin('p.productVariants', 'pv', 'WITH', 'pv.isDefault = :isDefault')
             ->leftJoin('pv.images', 'i', 'WITH', 'i.isDefault = :isDefault')
+            ->where('LOWER(p.name) LIKE LOWER(:search)')
+            ->setParameter('search', '%' . $requestFiltersDto->search . '%')
             ->setParameter('isDefault', true);
 
-        match ($filter) {
+        match ($requestFiltersDto->filter) {
             SortFilterCode::PRICE_ASC => $query->orderBy('pv.price', 'ASC'),
             SortFilterCode::PRICE_DESC => $query->orderBy('pv.price', 'DESC'),
             SortFilterCode::NAME_ASC => $query->orderBy('p.name', 'ASC'),
@@ -38,7 +41,7 @@ class ProductRepository extends ServiceEntityRepository
             default => $query->orderBy('p.createdAt', 'ASC')
         };
 
-        match ($productType) {
+        match ($requestFiltersDto->productType) {
             SortFilterCode::PRODUCTS_WITH_PRICE => $query->andWhere('pv.price IS NOT NULL'),
             SortFilterCode::PRODUCTS_WITHOUT_PRICE => $query->andWhere('pv.price IS NULL'),
             default => null

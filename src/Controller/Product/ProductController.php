@@ -3,6 +3,7 @@
 namespace App\Controller\Product;
 
 use App\Enum\SortFilterCode;
+use App\Dto\Product\RequestFiltersDto;
 use App\Service\Product\ProductService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -21,13 +22,20 @@ final class ProductController extends AbstractController
         try {
             $page = (int) $request->query->get('page', 1);
             $limit = (int) $request->query->get('limit', 20);
+            $search = $request->query->get('search', '');
             $filterValue = $request->query->get('filter');
             $productTypeValue = $request->query->get('productType');
 
             $filter = SortFilterCode::tryFrom($filterValue) ?? SortFilterCode::CREATED_DESC;
             $productType = SortFilterCode::tryFrom($productTypeValue) ?? SortFilterCode::PRODUCTS_ALL;
 
-            $result = $this->productService->getAllProducts($page, $limit, $filter, $productType);
+            $requestFiltersDto = new RequestFiltersDto(
+                search: $search,
+                filter: $filter,
+                productType: $productType,
+            );
+
+            $result = $this->productService->getAllProducts($page, $limit, $requestFiltersDto);
 
             return $this->json($result);
         } catch (\Exception $e) {
