@@ -53,6 +53,21 @@ class AppFixtures extends Fixture
         $manager->flush();
     }
 
+    private function getProducts(ObjectManager $manager): array
+    {
+        return $manager->getRepository(Product::class)->findAll();
+    }
+
+    private function getProductVariants(ObjectManager $manager): array
+    {
+        return $manager->getRepository(ProductVariant::class)->findAll();
+    }
+
+    private function getWoodTypes(ObjectManager $manager): array
+    {
+        return $manager->getRepository(Wood::class)->findAll();
+    }
+
     private function createOrderStatus(ObjectManager $manager): void
     {
         $statuses = ["PENDING", "CONFIRMED", "SHIPPED", "DELIVERED"];
@@ -77,29 +92,61 @@ class AppFixtures extends Fixture
     {
         $products = [
             [ // 0
-                'name' => 'Table de salle à manger',
-                'description' => 'Une belle table en bois massif pour vos repas en famille.',
+                'name' => 'Tabouret en bois',
+                'description' => 'Tabouret artisanal, assemblage tenon-mortaise, finition huile dure. Stable et compact, idéal pour un usage quotidien.',
             ],
             [ // 1
-                'name' => 'Chaise',
-                'description' => 'Chaise confortable en bois avec un design élégant.',
+                'name' => 'Planche de découpe premium',
+                'description' => 'Planche épaisse avec chanfreins, résistante à l’humidité, idéale pour cuisine ou service. Finition huile alimentaire.',
             ],
             [ // 2
-                'name' => 'Armoire',
-                'description' => 'Armoire spacieuse en chêne pour ranger vos vêtements.',
+                'name' => 'Étagère murale flottante',
+                'description' => 'Étagère minimaliste avec fixations invisibles. Parfaite pour salon, cuisine ou bureau. Surface légèrement brossée.',
             ],
             [ // 3
-                'name' => 'Étagère murale',
-                'description' => 'Étagère décorative en bois pour salon ou bureau.',
+                'name' => 'Table basse artisanale',
+                'description' => 'Table basse robuste, plateau massif, pieds trapèze, finition cire naturelle. Style sobre et moderne.',
             ],
             [ // 4
-                'name' => 'Bureau artisanal',
-                'description' => 'Bureau en bois massif avec finitions artisanales.',
+                'name' => 'Banc d’entrée compact',
+                'description' => 'Banc d’intérieur avec assise confortable, idéal pour chausser/déchausser. Structure renforcée, finition satinée.',
             ],
             [ // 5
-                'name' => 'Fenêtre en bois',
-                'description' => 'Fenêtre en bois massif sur mesures avec finitions artisanales.',
-            ]
+                'name' => 'Boîte de rangement décorative',
+                'description' => 'Petite boîte traditionnelle à assemblage à queues-d’aronde. Idéale pour bijoux, rangement de bureau ou objets précieux.',
+            ],
+            [ // 6
+                'name' => 'Lampe d’ambiance en bois massif',
+                'description' => 'Corps en bois tourné, vernis satiné, câble textile. Apporte une lumière chaude, idéale pour une chambre ou un bureau.',
+            ],
+            [ // 7
+                'name' => 'Plateau de service rectangulaire',
+                'description' => 'Plateau large avec poignées intégrées. Parfait pour cuisine, petit-déjeuner au lit ou service de boissons.',
+            ],
+            [ // 8
+                'name' => 'Porte-revues mural en bois',
+                'description' => 'Élément mural ajouré, permettant de ranger magazines, livres fins ou journaux. Finition huile naturelle.',
+            ],
+            [ // 9
+                'name' => 'Horloge murale artisanale',
+                'description' => 'Horloge silencieuse, disque en bois tourné, aiguilles en métal noir. Style minimaliste et chaleureux.',
+            ],
+            [ // 10
+                'name' => 'Porte-couteaux magnétique',
+                'description' => 'Barre murale magnétique en bois massif, idéale pour ranger les couteaux dans la cuisine.',
+            ],
+            [ // 11
+                'name' => 'Caisse de rangement empilable',
+                'description' => 'Caisse ajourée, robuste, conçue pour être empilée. Parfaite pour atelier, bureau ou chambre.',
+            ],
+            [ // 12
+                'name' => 'Cadre photo massif',
+                'description' => 'Cadre en bois massif, bords arrondis, verre anti-reflets. Disponible en plusieurs essences.',
+            ],
+            [ // 13
+                'name' => 'Porte-plantes sur pied',
+                'description' => 'Support élégant pour plantes, avec structure renforcée et finition vernie.',
+            ],
         ];
 
         foreach ($products as $p) {
@@ -110,21 +157,6 @@ class AppFixtures extends Fixture
         }
     }
 
-    private function getProducts(ObjectManager $manager): array
-    {
-        return $manager->getRepository(Product::class)->findAll();
-    }
-
-    private function getProductVariants(ObjectManager $manager): array
-    {
-        return $manager->getRepository(ProductVariant::class)->findAll();
-    }
-
-    private function getWoodTypes(ObjectManager $manager): array
-    {
-        return $manager->getRepository(Wood::class)->findAll();
-    }
-
     private function createProductVariants(ObjectManager $manager): void
     {
         $products = $this->getProducts($manager);
@@ -132,93 +164,180 @@ class AppFixtures extends Fixture
 
         $productVariants = [
             [ // 0
-                'product' => $products[0], // Table
+                'product' => $products[0],
                 'wood' => $woodTypes[0],
-                'publicId' => '537u4s94BWogtNsb8vKCo1',
+                'publicId' => '7Qf3sG9Lk2PzW81cNhA5',
                 'isDefault' => true,
-                'price' => 49900,
-                'stock' => 10,
-            ],
-            [ // 1
-                'product' => $products[0], // Table
-                'wood' => $woodTypes[1],
-                'publicId' => '537u4s94BWogtNsb8vKCo2',
-                'isDefault' => false,
-                'price' => 45900,
-                'stock' => 5,
-            ],
-            [ // 2
-                'product' => $products[1], // Chaise
-                'wood' => $woodTypes[1],
-                'publicId' => '537u4s94BWogtNsb8vKCo3',
-                'isDefault' => true,
-                'price' => 9900,
+                'price' => 950,
                 'stock' => 20,
             ],
-            [ // 3
-                'product' => $products[1], // Chaise
-                'wood' => $woodTypes[2],
-                'publicId' => '537u4s94BWogtNsb8vKCo4',
+            [ // 0
+                'product' => $products[0],
+                'wood' => $woodTypes[1],
+                'publicId' => '3Dz7LmJ1qR8TbP0fVwKe',
                 'isDefault' => false,
-                'price' => 8900,
+                'price' => 650,
+                'stock' => 35,
+            ],
+            [ // 0
+                'product' => $products[0],
+                'wood' => $woodTypes[6],
+                'publicId' => 'Zp1Kx8Fr2M5tQ0AeLu93',
+                'isDefault' => false,
+                'price' => 850,
+                'stock' => 22,
+            ],
+
+            [ // 1
+                'product' => $products[1],
+                'wood' => $woodTypes[5],
+                'publicId' => 'aS93FjK72Px1tVQm8LnC',
+                'isDefault' => true,
+                'price' => 1800,
                 'stock' => 15,
             ],
-            [ // 4
-                'product' => $products[2], // Armoire
-                'wood' => $woodTypes[3],
-                'publicId' => 'ARMOIRE-CHENE-005',
+            [ // 1
+                'product' => $products[1],
+                'wood' => $woodTypes[4],
+                'publicId' => 'bP0xTn92FrL6cQw1Je78',
+                'isDefault' => false,
+                'price' => 2100,
+                'stock' => 12,
+            ],
+            [ // 1
+                'product' => $products[1],
+                'wood' => $woodTypes[2],
+                'publicId' => 'Lk8Df12BnW9sEe5Qr7Ut',
+                'isDefault' => false,
+                'price' => 1300,
+                'stock' => 25,
+            ],
+
+            [ // 2
+                'product' => $products[2],
+                'wood' => $woodTypes[0],
+                'publicId' => 'Wm5Qe9L2aK8fTz13SbCd',
                 'isDefault' => true,
-                'price' => 89900,
-                'stock' => 3,
+                'price' => 3200,
+                'stock' => 10,
+            ],
+            [ // 2
+                'product' => $products[2],
+                'wood' => $woodTypes[1],
+                'publicId' => 'Nv4HsX7kP0wAa93LuQFe',
+                'isDefault' => false,
+                'price' => 2100,
+                'stock' => 18,
+            ],
+            [ // 2
+                'product' => $products[2],
+                'wood' => $woodTypes[7],
+                'publicId' => 'Rt7YpM2LfQ6bEw04JxSa',
+                'isDefault' => false,
+                'price' => 3500,
+                'stock' => 8,
+            ],
+
+            [ // 3
+                'product' => $products[3],
+                'wood' => $woodTypes[0],
+                'publicId' => 'Fq8R9aW1zLk0TpXm3Be7',
+                'isDefault' => true,
+                'price' => 18900,
+                'stock' => 5,
+            ],
+            [ // 3
+                'product' => $products[3],
+                'wood' => $woodTypes[6],
+                'publicId' => 'Gp2Bd7QxC1eT8Lv4Mf90',
+                'isDefault' => false,
+                'price' => 16500,
+                'stock' => 6,
+            ],
+            [ // 3
+                'product' => $products[3],
+                'wood' => $woodTypes[4],
+                'publicId' => 'Kx1Uw93RzJm8Fq2Hs7Pa',
+                'isDefault' => false,
+                'price' => 12500,
+                'stock' => 4,
+            ],
+
+            [ // 4
+                'product' => $products[4],
+                'wood' => $woodTypes[0],
+                'publicId' => 'Qe9P1sMb4Lk7Tw2DaVxH',
+                'isDefault' => true,
+                'price' => 18900,
+                'stock' => 7,
+            ],
+            [ // 4
+                'product' => $products[4],
+                'wood' => $woodTypes[2],
+                'publicId' => 'Mn4Vx8Qf1R0aKe9LpTzC',
+                'isDefault' => false,
+                'price' => 9900,
+                'stock' => 10,
+            ],
+            [ // 4
+                'product' => $products[4],
+                'wood' => $woodTypes[5],
+                'publicId' => 'Ts3Bf6Wn9Dp2Lm0QeAaX',
+                'isDefault' => false,
+                'price' => 11800,
+                'stock' => 8,
+            ],
+
+            [ // 5
+                'product' => $products[5],
+                'wood' => $woodTypes[7],
+                'publicId' => 'Uq4Kp1Mn8Ls0Tb3VwR9e',
+                'isDefault' => true,
+                'price' => 2500,
+                'stock' => 18,
             ],
             [ // 5
-                'product' => $products[3], // Étagère
+                'product' => $products[5],
+                'wood' => $woodTypes[0],
+                'publicId' => 'Hp6Vd2Sa1Wx7Lm9Qe0Fb',
+                'isDefault' => false,
+                'price' => 2700,
+                'stock' => 15,
+            ],
+            [ // 5
+                'product' => $products[5],
                 'wood' => $woodTypes[3],
-                'publicId' => 'ETAGERE-PIN-006',
+                'publicId' => 'Dx0Lw8Bn4Jp3Rk6Se2Mf',
+                'isDefault' => false,
+                'price' => 3400,
+                'stock' => 10,
+            ],
+
+            [ // 6
+                'product' => $products[6],
+                'wood' => $woodTypes[6],
+                'publicId' => 'Lp7Xw3Qa0Fn9Sg4Me1Tr',
                 'isDefault' => true,
-                'price' => 15900,
+                'price' => 4800,
+                'stock' => 14,
+            ],
+            [ // 6
+                'product' => $products[6],
+                'wood' => $woodTypes[7],
+                'publicId' => 'Cg2Mv8Lt1Qp5Rw0DbSx9',
+                'isDefault' => false,
+                'price' => 5200,
                 'stock' => 12,
             ],
             [ // 6
-                'product' => $products[4], // Bureau
-                'wood' => $woodTypes[1],
-                'publicId' => 'BUREAU-TECK-007',
-                'isDefault' => true,
-                'price' => 65900,
-                'stock' => 7,
-            ],
-            [ // 7
-                'product' => $products[4], // Bureau
-                'wood' => $woodTypes[3],
-                'publicId' => 'BUREAU-CHENE-008',
+                'product' => $products[6],
+                'wood' => $woodTypes[5],
+                'publicId' => 'Sf8Pa0Km3Xe9Wt1HbQ4L',
                 'isDefault' => false,
-                'price' => 69900,
-                'stock' => 4,
+                'price' => 5400,
+                'stock' => 10,
             ],
-            [ // 8
-                'product' => $products[5], // Fenêtre
-                'wood' => $woodTypes[1],
-                'publicId' => 'FENETRE-TECK-009',
-                'isDefault' => true,
-                'price' => 0,
-                'stock' => null,
-            ],
-            [ // 9
-                'product' => $products[5],
-                'wood' => $woodTypes[2],
-                'publicId' => 'FENETRE-TECK-009',
-                'isDefault' => false,
-                'price' => 0,
-                'stock' => null,
-            ],
-            [ // 10
-                'product' => $products[5],
-                'wood' => $woodTypes[3],
-                'publicId' => 'FENETRE-TECK-009',
-                'isDefault' => false,
-                'price' => 0,
-                'stock' => null,
-            ]
+
         ];
 
         foreach ($productVariants as $pv) {
@@ -237,109 +356,15 @@ class AppFixtures extends Fixture
     {
         $productVariants = $this->getProductVariants($manager);
 
-        $images = [
-            // Images pour le variant 0 (Table en CHENE - isDefault: true)
-            [
-                'folderName' => '537u4s94BWogtNsb8vKCo1',
-                'imageName' => '537u4s94BWogtNsb8vKCo1',
-                'format' => 'webp',
-                'isDefault' => true,
-                'productVariant' => 0,
-            ],
-            [
-                'folderName' => '537u4s94BWogtNsb8vKCo1',
-                'imageName' => '537u4s94BWogtNsb8vKCo1',
-                'format' => 'webp',
-                'isDefault' => false,
-                'productVariant' => 0,
-            ],
-            // Images pour le variant 1 (Table en PIN - isDefault: false)
-            [
-                'folderName' => '537u4s94BWogtNsb8vKCo2',
-                'imageName' => '537u4s94BWogtNsb8vKCo2',
-                'format' => 'webp',
-                'isDefault' => true,
-                'productVariant' => 1,
-            ],
-            // Images pour le variant 2 (Chaise en PIN - isDefault: true)
-            [
-                'folderName' => '537u4s94BWogtNsb8vKCo3',
-                'imageName' => '537u4s94BWogtNsb8vKCo3',
-                'format' => 'webp',
-                'isDefault' => true,
-                'productVariant' => 2,
-            ],
-            // Images pour le variant 3 (Chaise en BOULEAU - isDefault: false)
-            [
-                'folderName' => '537u4s94BWogtNsb8vKCo4',
-                'imageName' => '537u4s94BWogtNsb8vKCo4',
-                'format' => 'webp',
-                'isDefault' => true,
-                'productVariant' => 3,
-            ],
-            // Images pour le variant 4 (Armoire - isDefault: true)
-            [
-                'folderName' => '537u4s94BWogtNsb8vKCo3',
-                'imageName' => '537u4s94BWogtNsb8vKCo3',
-                'format' => 'webp',
-                'isDefault' => true,
-                'productVariant' => 4,
-            ],
-            // Images pour le variant 5 (Étagère - isDefault: true)
-            [
-                'folderName' => '537u4s94BWogtNsb8vKCo3',
-                'imageName' => '537u4s94BWogtNsb8vKCo3',
-                'format' => 'webp',
-                'isDefault' => true,
-                'productVariant' => 5,
-            ],
-            // Images pour le variant 6 (Bureau en TECK - isDefault: true)
-            [
-                'folderName' => '537u4s94BWogtNsb8vKCo3',
-                'imageName' => '537u4s94BWogtNsb8vKCo3',
-                'format' => 'webp',
-                'isDefault' => true,
-                'productVariant' => 6,
-            ],
-            // Images pour le variant 7 (Bureau en CHENE - isDefault: false)
-            [
-                'folderName' => '537u4s94BWogtNsb8vKCo3',
-                'imageName' => '537u4s94BWogtNsb8vKCo3',
-                'format' => 'webp',
-                'isDefault' => true,
-                'productVariant' => 7,
-            ],
-            // Images pour le variant 8 (Fenêtre - isDefault: false)
-            [
-                'folderName' => '537u4s94BWogtNsb8vKCo3',
-                'imageName' => '537u4s94BWogtNsb8vKCo3',
-                'format' => 'webp',
-                'isDefault' => true,
-                'productVariant' => 8,
-            ],
-            [
-                'folderName' => '537u4s94BWogtNsb8vKCo3',
-                'imageName' => '537u4s94BWogtNsb8vKCo3',
-                'format' => 'webp',
-                'isDefault' => false,
-                'productVariant' => 9,
-            ],
-            [
-                'folderName' => '537u4s94BWogtNsb8vKCo3',
-                'imageName' => '537u4s94BWogtNsb8vKCo3',
-                'format' => 'webp',
-                'isDefault' => false,
-                'productVariant' => 10,
-            ],
-        ];
-
-        foreach ($images as $img) {
+        for ($i = 0; $i < count($productVariants); $i++) {
+            dump($i % 3 === 0 ? true : false);
             $image = new Image();
-            $image->setFolderName($img['folderName'])
-                ->setImageName($img['imageName'])
-                ->setFormat($img['format'])
-                ->setIsDefault($img['isDefault'])
-                ->setProductVariantId($productVariants[$img['productVariant']]);
+            $image->setFolderName("Vw3Ln9Qb5Pe2Sa0HxF7A")
+                ->setImageName("Vw3Ln9Qb5Pe2Sa0HxF7B")
+                ->setFormat("webp")
+                ->setIsDefault($i % 3 === 0 ? true : false)
+                ->setProductVariantId($productVariants[$i]);
+
             $manager->persist($image);
         }
     }
