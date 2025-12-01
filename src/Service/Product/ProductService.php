@@ -6,6 +6,7 @@ use App\Enum\ProductType;
 use App\Enum\SortFilterCode;
 use Psr\Log\LoggerInterface;
 use App\Dto\Product\PriceDto;
+use App\Dto\Product\CategoryDto;
 use App\Dto\Product\PublicIdDto;
 use App\Dto\Product\PaginationData;
 use App\Dto\Product\ShortProductDto;
@@ -13,6 +14,7 @@ use App\Dto\Product\ProductDetailDto;
 use App\Service\Product\ImageService;
 use App\Dto\Product\RequestFiltersDto;
 use App\Entity\Product\ProductVariant;
+use App\Dto\Product\OtherProductVariant;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use App\Repository\Product\ProductRepository;
 use App\Repository\Product\ProductVariantRepository;
@@ -95,6 +97,10 @@ class ProductService
             $products[] = new ShortProductDto(
                 title: $product->getName(),
                 type: $productType,
+                category: new CategoryDto(
+                    name: $product->getCategoryId()->getName(),
+                    publicId: new PublicIdDto($product->getCategoryId()->getPublicId())
+                ),
                 unitPrice: new PriceDto($defaultVariant->getPrice()),
                 mainImage: $this->imageService->imageToImageDto($defaultImage),
                 publicId: new PublicIdDto($defaultVariant->getPublicId())
@@ -151,6 +157,10 @@ class ProductService
             shortProduct: new ShortProductDto(
                 title: $mainProductVariant->getProductId()->getName(),
                 type: $mainProductVariant->getStock() != null ? ProductType::IN_STOCK : ProductType::CUSTOM_MADE,
+                category: new CategoryDto(
+                    name: $mainProductVariant->getProductId()->getCategoryId()->getName(),
+                    publicId: new PublicIdDto($mainProductVariant->getProductId()->getCategoryId()->getPublicId())
+                ),
                 unitPrice: new PriceDto($mainProductVariant->getPrice()),
                 mainImage: $this->imageService->imageToImageDto($mainProductVariant->getImages()->first()),
                 publicId: new PublicIdDto($mainProductVariant->getPublicId())

@@ -3,6 +3,7 @@
 namespace App\Dto\Product;
 
 use App\Enum\ProductType;
+use App\Dto\Product\CategoryDto;
 use Symfony\Component\Validator\Constraints as Assert;
 
 class ShortProductDto
@@ -24,6 +25,8 @@ class ShortProductDto
         public readonly string $title,
 
         public readonly ProductType $type,
+
+        public readonly CategoryDto $category,
 
         public readonly ?PriceDto $unitPrice,
 
