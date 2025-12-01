@@ -7,6 +7,7 @@ use App\Entity\Product\Wood;
 use App\Entity\Product\Product;
 use Symfony\Component\Uid\Uuid;
 use App\Entity\Order\OrderStatus;
+use App\Entity\Product\Category;
 use App\Entity\Product\Image;
 use App\Entity\Product\ProductVariant;
 use Doctrine\Persistence\ObjectManager;
@@ -29,6 +30,10 @@ class AppFixtures extends Fixture
 
         // Create Wood Types
         $this->createWoodTypes($manager);
+
+        // Create Categories
+        $this->createCategories($manager);
+        $manager->flush();
 
         // Create Products
         $this->createProducts($manager);
@@ -68,6 +73,11 @@ class AppFixtures extends Fixture
         return $manager->getRepository(Wood::class)->findAll();
     }
 
+    private function getCategories(ObjectManager $manager): array
+    {
+        return $manager->getRepository(Category::class)->findAll();
+    }
+
     private function createOrderStatus(ObjectManager $manager): void
     {
         $statuses = ["PENDING", "CONFIRMED", "SHIPPED", "DELIVERED"];
@@ -88,71 +98,132 @@ class AppFixtures extends Fixture
         }
     }
 
+    private function createCategories(ObjectManager $manager): void
+    {
+        $categories = [
+            [   // 0
+                'publicId' => 'Vw3Ln9Qb5Pe2Sa0HxF1A',
+                'name' => 'Décoration',
+            ],
+            [   // 1
+                'publicId' => 'Vw3Ln9Qb5Pe2Sa0HxF1B',
+                'name' => 'Cuisine',
+            ],
+            [   // 2
+                'publicId' => 'Vw3Ln9Qb5Pe2Sa0HxF1C',
+                'name' => 'Rangement et organisation',
+            ],
+            [   // 3
+                'publicId' => 'Vw3Ln9Qb5Pe2Sa0HxF1D',
+                'name' => 'Entrée',
+            ],
+            [   // 4
+                'publicId' => 'Vw3Ln9Qb5Pe2Sa0HxF1E',
+                'name' => 'Bureau',
+            ],
+            [   // 5
+                'publicId' => 'Vw3Ln9Qb5Pe2Sa0HxF1F',
+                'name' => 'Salle de bain',
+            ],
+            [   // 6
+                'publicId' => 'Vw3Ln9Qb5Pe2Sa0HxF1G',
+                'name' => 'Accessoires',
+            ],
+            [   // 7
+                'publicId' => 'Vw3Ln9Qb5Pe2Sa0HxF1H',
+                'name' => 'Salon',
+            ]
+        ];
+        foreach ($categories as $c) {
+            $category = new Category();
+            $category->setName($c['name'])
+                ->setPublicId($c['publicId']);
+            $manager->persist($category);
+        }
+    }
+
     private function createProducts(ObjectManager $manager): void
     {
+        $categories = $this->getCategories($manager);
+
         $products = [
             [ // 0
                 'name' => 'Tabouret en bois',
                 'description' => 'Tabouret artisanal, assemblage tenon-mortaise, finition huile dure. Stable et compact, idéal pour un usage quotidien.',
+                'category' => $categories[4],
             ],
             [ // 1
                 'name' => 'Planche de découpe premium',
                 'description' => 'Planche épaisse avec chanfreins, résistante à l’humidité, idéale pour cuisine ou service. Finition huile alimentaire.',
+                'category' => $categories[1],
             ],
             [ // 2
                 'name' => 'Étagère murale flottante',
                 'description' => 'Étagère minimaliste avec fixations invisibles. Parfaite pour salon, cuisine ou bureau. Surface légèrement brossée.',
+                'category' => $categories[2],
             ],
             [ // 3
                 'name' => 'Table basse artisanale',
                 'description' => 'Table basse robuste, plateau massif, pieds trapèze, finition cire naturelle. Style sobre et moderne.',
+                'category' => $categories[7],
             ],
             [ // 4
                 'name' => 'Banc d’entrée compact',
                 'description' => 'Banc d’intérieur avec assise confortable, idéal pour chausser/déchausser. Structure renforcée, finition satinée.',
+                'category' => $categories[3],
             ],
             [ // 5
                 'name' => 'Boîte de rangement décorative',
                 'description' => 'Petite boîte traditionnelle à assemblage à queues-d’aronde. Idéale pour bijoux, rangement de bureau ou objets précieux.',
+                'category' => $categories[2],
             ],
             [ // 6
                 'name' => 'Lampe d’ambiance en bois massif',
                 'description' => 'Corps en bois tourné, vernis satiné, câble textile. Apporte une lumière chaude, idéale pour une chambre ou un bureau.',
+                'category' => $categories[7],
             ],
             [ // 7
                 'name' => 'Plateau de service rectangulaire',
                 'description' => 'Plateau large avec poignées intégrées. Parfait pour cuisine, petit-déjeuner au lit ou service de boissons.',
+                'category' => $categories[1],
             ],
             [ // 8
                 'name' => 'Porte-revues mural en bois',
                 'description' => 'Élément mural ajouré, permettant de ranger magazines, livres fins ou journaux. Finition huile naturelle.',
+                'category' => $categories[0],
             ],
             [ // 9
                 'name' => 'Horloge murale artisanale',
                 'description' => 'Horloge silencieuse, disque en bois tourné, aiguilles en métal noir. Style minimaliste et chaleureux.',
+                'category' => $categories[0],
             ],
             [ // 10
                 'name' => 'Porte-couteaux magnétique',
                 'description' => 'Barre murale magnétique en bois massif, idéale pour ranger les couteaux dans la cuisine.',
+                'category' => $categories[1],
             ],
             [ // 11
                 'name' => 'Caisse de rangement empilable',
                 'description' => 'Caisse ajourée, robuste, conçue pour être empilée. Parfaite pour atelier, bureau ou chambre.',
+                'category' => $categories[2],
             ],
             [ // 12
                 'name' => 'Cadre photo massif',
                 'description' => 'Cadre en bois massif, bords arrondis, verre anti-reflets. Disponible en plusieurs essences.',
+                'category' => $categories[0],
             ],
             [ // 13
                 'name' => 'Porte-plantes sur pied',
                 'description' => 'Support élégant pour plantes, avec structure renforcée et finition vernie.',
+                'category' => $categories[0],
             ],
         ];
 
         foreach ($products as $p) {
             $product = new Product();
             $product->setName($p['name'])
-                ->setDescription($p['description']);
+                ->setDescription($p['description'])
+                ->setCategoryId($p['category']);
             $manager->persist($product);
         }
     }
@@ -357,7 +428,6 @@ class AppFixtures extends Fixture
         $productVariants = $this->getProductVariants($manager);
 
         for ($i = 0; $i < count($productVariants); $i++) {
-            dump($i % 3 === 0 ? true : false);
             $image = new Image();
             $image->setFolderName("Vw3Ln9Qb5Pe2Sa0HxF7A")
                 ->setImageName("Vw3Ln9Qb5Pe2Sa0HxF7B")
