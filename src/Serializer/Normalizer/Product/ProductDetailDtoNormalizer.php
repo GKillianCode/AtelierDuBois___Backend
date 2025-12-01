@@ -13,6 +13,10 @@ class ProductDetailDtoNormalizer implements NormalizerInterface
             'title' => $object->shortProduct->title,
             'description' => $object->description,
             'type' => $object->shortProduct->type->value,
+            'category' => [
+                'name' => $object->shortProduct->category->name,
+                'publicId' => $object->shortProduct->category->publicId->publicId,
+            ],
             'unitPrice' => $object->shortProduct->unitPrice->amount,
             'publicId' => $object->shortProduct->publicId->publicId,
             'stock' => $object->stock,

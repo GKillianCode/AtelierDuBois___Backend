@@ -12,6 +12,10 @@ class ShortProductDtoNormalizer implements NormalizerInterface
         return [
             'title' => $object->title,
             'type' => $object->type->value,
+            'category' => [
+                'name' => $object->category->name,
+                'publicId' => $object->category->publicId->publicId,
+            ],
             'unitPrice' => $object->unitPrice->amount,
             'publicId' => $object->publicId->publicId,
             'imageUrl' => $object->mainImage->imageUrl,
