@@ -13,11 +13,3 @@ services:
 
     App\:
         resource: "../src/"
-
-    App\Serializer\Normalizer\Product\ProductDetailDtoNormalizer:
-        tags:
-            - { name: "serializer.normalizer", priority: 100 }
-
-    App\Serializer\Normalizer\Product\ShortProductDtoNormalizer:
-        tags:
-            - { name: "serializer.normalizer", priority: 100 }
