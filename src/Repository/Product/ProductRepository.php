@@ -8,27 +8,37 @@ use App\Dto\Product\RequestFiltersDto;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Psr\Log\LoggerInterface;
 
 /**
  * @extends ServiceEntityRepository<Product>
  */
 class ProductRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    private LoggerInterface $logger;
+
+    public function __construct(ManagerRegistry $registry, LoggerInterface $logger)
     {
         parent::__construct($registry, Product::class);
+        $this->logger = $logger;
     }
 
     public function paginateProducts(int $page, int $limit, RequestFiltersDto $requestFiltersDto): Paginator
     {
-
-
+        $this->logger->debug("ProductRepository::paginateProducts ENTER with page: $page, limit: $limit, filters: " . json_encode($requestFiltersDto));
         $query = $this->createQueryBuilder('p')
-            ->select('p', 'pv', 'i')
+            ->select('p', 'pv', 'i', 'c')
             ->leftJoin('p.productVariants', 'pv', 'WITH', 'pv.isDefault = :isDefault')
             ->leftJoin('pv.images', 'i', 'WITH', 'i.isDefault = :isDefault')
-            ->where('LOWER(p.name) LIKE LOWER(:search)')
-            ->setParameter('search', '%' . $requestFiltersDto->search . '%')
+            ->leftJoin('p.categoryId', 'c')
+            ->where('LOWER(p.name) LIKE LOWER(:search)');
+
+        if ($requestFiltersDto->categoryPublicId !== null) {
+            $query->andWhere('LOWER(c.publicId) = LOWER(:categoryId)')
+                ->setParameter('categoryId', $requestFiltersDto->categoryPublicId->publicId);
+        }
+
+        $query->setParameter('search', '%' . $requestFiltersDto->search . '%')
             ->setParameter('isDefault', true);
 
         match ($requestFiltersDto->filter) {
@@ -50,6 +60,8 @@ class ProductRepository extends ServiceEntityRepository
         $query->setFirstResult(($page - 1) * $limit)
             ->setMaxResults($limit)
             ->getQuery();
+
+        $this->logger->debug("ProductRepository::paginateProducts EXIT");
 
         return new Paginator($query, true);
     }
