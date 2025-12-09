@@ -3,12 +3,11 @@
 namespace App\Service\Product;
 
 use App\Enum\ProductType;
-use App\Enum\SortFilterCode;
 use Psr\Log\LoggerInterface;
 use App\Dto\Product\PriceDto;
 use App\Dto\Product\CategoryDto;
 use App\Dto\Product\PublicIdDto;
-use App\Dto\Product\PaginationData;
+use App\Dto\Product\PaginationDataDto;
 use App\Dto\Product\ShortProductDto;
 use App\Dto\Product\ProductDetailDto;
 use App\Service\Product\ImageService;
@@ -38,13 +37,13 @@ class ProductService
         $paginator = $this->productRepository->paginateProducts($page, $limit, $requestFiltersDto);
 
         $products = $this->getAllProductsInShortProductDto($paginator);
-        $paginationData = $this->getMetaPaginationData($paginator, $limit, $page);
+        $paginationDataDto = $this->getMetaPaginationData($paginator, $limit, $page);
 
         $this->logger->debug("ProductService::getAllProducts EXIT");
 
         return [
             'products' => $products,
-            'pagination' => $paginationData
+            'pagination' => $paginationDataDto
         ];
     }
 
@@ -112,14 +111,14 @@ class ProductService
         return $products;
     }
 
-    private function getMetaPaginationData(Paginator $paginator, int $limit, int $page): PaginationData
+    private function getMetaPaginationData(Paginator $paginator, int $limit, int $page): PaginationDataDto
     {
         $this->logger->debug("ProductService::getMetaPaginationData ENTER");
 
         $totalItems = count($paginator);
         $totalPages = (int) ceil($totalItems / $limit);
 
-        $paginationData = new PaginationData(
+        $paginationDataDto = new PaginationDataDto(
             currentPage: $page,
             totalPages: $totalPages,
             totalItems: $totalItems,
@@ -130,7 +129,7 @@ class ProductService
 
         $this->logger->debug("ProductService::getMetaPaginationData EXIT");
 
-        return $paginationData;
+        return $paginationDataDto;
     }
 
     private function ProductsVariantsToOtherProductVariantsDto($productsVariants): array

@@ -2,7 +2,7 @@
 
 namespace App\Dto\Product;
 
-class PaginationData
+class PaginationDataDto
 {
     public function __construct(
         public readonly int $currentPage,
