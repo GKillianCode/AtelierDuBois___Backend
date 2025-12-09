@@ -102,35 +102,35 @@ class AppFixtures extends Fixture
     {
         $categories = [
             [   // 0
-                'publicId' => 'Vw3Ln9Qb5Pe2Sa0HxF1A',
+                'publicId' => 'Vw3Ln9Qb5Pe2Sa0HxF1AAA',
                 'name' => 'Décoration',
             ],
             [   // 1
-                'publicId' => 'Vw3Ln9Qb5Pe2Sa0HxF1B',
+                'publicId' => 'Vw3Ln9Qb5Pe2Sa0HxF1BAA',
                 'name' => 'Cuisine',
             ],
             [   // 2
-                'publicId' => 'Vw3Ln9Qb5Pe2Sa0HxF1C',
+                'publicId' => 'Vw3Ln9Qb5Pe2Sa0HxF1CAA',
                 'name' => 'Rangement et organisation',
             ],
             [   // 3
-                'publicId' => 'Vw3Ln9Qb5Pe2Sa0HxF1D',
+                'publicId' => 'Vw3Ln9Qb5Pe2Sa0HxF1DAA',
                 'name' => 'Entrée',
             ],
             [   // 4
-                'publicId' => 'Vw3Ln9Qb5Pe2Sa0HxF1E',
+                'publicId' => 'Vw3Ln9Qb5Pe2Sa0HxF1EAA',
                 'name' => 'Bureau',
             ],
             [   // 5
-                'publicId' => 'Vw3Ln9Qb5Pe2Sa0HxF1F',
+                'publicId' => 'Vw3Ln9Qb5Pe2Sa0HxF1FAA',
                 'name' => 'Salle de bain',
             ],
             [   // 6
-                'publicId' => 'Vw3Ln9Qb5Pe2Sa0HxF1G',
+                'publicId' => 'Vw3Ln9Qb5Pe2Sa0HxF1GAA',
                 'name' => 'Accessoires',
             ],
             [   // 7
-                'publicId' => 'Vw3Ln9Qb5Pe2Sa0HxF1H',
+                'publicId' => 'Vw3Ln9Qb5Pe2Sa0HxF1HAA',
                 'name' => 'Salon',
             ]
         ];
