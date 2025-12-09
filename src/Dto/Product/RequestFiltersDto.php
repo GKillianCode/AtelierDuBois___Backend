@@ -10,5 +10,6 @@ class RequestFiltersDto
         public string $search,
         public SortFilterCode $filter,
         public SortFilterCode $productType,
+        public ?PublicIdDto $categoryPublicId,
     ) {}
 }
