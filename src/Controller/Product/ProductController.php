@@ -63,7 +63,7 @@ final class ProductController extends AbstractController
             $result = $this->productService->getAllProducts($page, $limit, $requestFiltersDto);
 
             $this->logger->debug("ProductController::getAllProducts EXIT 2");
-            return $this->json($result);
+            return $this->json($result, Response::HTTP_OK);
         } catch (\Exception $e) {
             $this->logger->error("ProductController::getAllProducts ERROR::" . $e->getMessage());
             return $this->json([
@@ -87,7 +87,7 @@ final class ProductController extends AbstractController
                 );
             }
             $this->logger->debug("ProductController::getProductById EXIT 2");
-            return $this->json($product);
+            return $this->json($product, Response::HTTP_OK);
         } catch (\Exception $e) {
             $this->logger->error("ProductController::getProductById ERROR::" . $e->getMessage());
             return $this->json([
