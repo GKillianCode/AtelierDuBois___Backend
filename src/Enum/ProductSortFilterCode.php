@@ -2,7 +2,7 @@
 
 namespace App\Enum;
 
-enum SortFilterCode: string
+enum ProductSortFilterCode: string
 {
     case NAME_DESC = 'NAME_DESC';
     case NAME_ASC = 'NAME_ASC';

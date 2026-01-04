@@ -13,7 +13,7 @@ use App\Dto\Product\ProductDetailDto;
 use App\Dto\Product\ProductReviewDto;
 use App\Entity\Product\ProductReview;
 use App\Service\Product\ImageService;
-use App\Dto\Product\RequestFiltersDto;
+use App\Dto\Product\RequestProductFiltersDto;
 use App\Entity\Product\ProductVariant;
 use App\Dto\Product\OtherProductVariant;
 use Doctrine\ORM\Tools\Pagination\Paginator;
@@ -32,7 +32,7 @@ class ProductService
         private readonly PaginationService $paginationService
     ) {}
 
-    public function getAllProducts(int $page, int $limit, RequestFiltersDto $requestFiltersDto): array
+    public function getAllProducts(int $page, int $limit, RequestProductFiltersDto $requestFiltersDto): array
     {
         $this->logger->debug("ProductService::getAllProducts ENTER");
 

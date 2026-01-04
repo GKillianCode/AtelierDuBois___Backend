@@ -3,12 +3,12 @@
 namespace App\Controller\Product;
 
 use App\Enum\ErrorCode;
-use App\Enum\SortFilterCode;
+use App\Enum\ProductSortFilterCode;
 use Psr\Log\LoggerInterface;
 use App\Response\ErrorResponse;
 use App\Dto\Product\PublicIdDto;
 use App\Service\ValidatorService;
-use App\Dto\Product\RequestFiltersDto;
+use App\Dto\Product\RequestProductFiltersDto;
 use App\Service\Product\ProductService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -37,8 +37,8 @@ final class ProductController extends AbstractController
             $productTypeValue = $request->query->get('productType');
             $categoryValue = $request->query->get('category');
 
-            $filter = SortFilterCode::tryFrom($filterValue) ?? SortFilterCode::CREATED_DESC;
-            $productType = SortFilterCode::tryFrom($productTypeValue) ?? SortFilterCode::PRODUCTS_ALL;
+            $filter = ProductSortFilterCode::tryFrom($filterValue) ?? ProductSortFilterCode::CREATED_DESC;
+            $productType = ProductSortFilterCode::tryFrom($productTypeValue) ?? ProductSortFilterCode::PRODUCTS_ALL;
 
             $categoryPublicIdDto = $categoryValue !== null
                 ? new PublicIdDto(publicId: $categoryValue)
@@ -53,7 +53,7 @@ final class ProductController extends AbstractController
                 );
             }
 
-            $requestFiltersDto = new RequestFiltersDto(
+            $requestFiltersDto = new RequestProductFiltersDto(
                 search: $search,
                 filter: $filter,
                 productType: $productType,
