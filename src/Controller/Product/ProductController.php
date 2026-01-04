@@ -72,7 +72,7 @@ final class ProductController extends AbstractController
         }
     }
 
-    #[Route('/api/public/v1/product/{publicId}', name: 'product_get_by_id', methods: ['GET'])]
+    #[Route('/api/public/v1/product/{publicId}', name: 'product_get_by_publicid', methods: ['GET'])]
     public function getProductById(string $publicId): Response
     {
         try {
@@ -90,6 +90,26 @@ final class ProductController extends AbstractController
             return $this->json($product, Response::HTTP_OK);
         } catch (\Exception $e) {
             $this->logger->error("ProductController::getProductById ERROR::" . $e->getMessage());
+            return $this->json([
+                'error' => 'An error occurred while fetching the product. ' . $e->getMessage()
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    #[Route('/api/public/v1/product/{publicId}/reviews', name: 'product_get_all_reviews_by_publicid', methods: ['GET'])]
+    public function getProductReviewsByProductVariantPublicId(Request $request, string $publicId): Response
+    {
+        try {
+            $this->logger->debug("ProductController::getProductReviewsByProductVariantPublicId ENTER with publicId: " . $publicId);
+            $page = (int) $request->query->get('page', 1);
+            $limit = (int) $request->query->get('limit', 10);
+
+            $productsReviewsDto = $this->productService->getProductReviewsByProductVariantPublicId($publicId, $page, $limit);
+
+            $this->logger->debug("ProductController::getProductReviewsByProductVariantPublicId EXIT 2");
+            return $this->json($productsReviewsDto, Response::HTTP_OK);
+        } catch (\Exception $e) {
+            $this->logger->error("ProductController::getProductReviewsByProductVariantPublicId ERROR::" . $e->getMessage());
             return $this->json([
                 'error' => 'An error occurred while fetching the product. ' . $e->getMessage()
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
