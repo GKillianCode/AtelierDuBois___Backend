@@ -9,6 +9,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 class ShortProductDto
 {
     public function __construct(
+        public readonly int $id,
+
         #[Assert\Type(
             type: 'string',
             message: 'La valeur {{ value }} n\'est pas valide pour le titre.'
@@ -33,5 +35,7 @@ class ShortProductDto
         public readonly ImageDto $mainImage,
 
         public readonly PublicIdDto $publicId,
+
+        public ?int $averageRating = null
     ) {}
 }
