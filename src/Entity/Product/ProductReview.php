@@ -27,7 +27,7 @@ class ProductReview
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
-    private ?ProductVariant $productId = null;
+    private ?ProductVariant $productVariantId = null;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
@@ -82,14 +82,14 @@ class ProductReview
         return $this;
     }
 
-    public function getProductId(): ?ProductVariant
+    public function getProductVariantId(): ?ProductVariant
     {
-        return $this->productId;
+        return $this->productVariantId;
     }
 
-    public function setProductId(?ProductVariant $productId): static
+    public function setProductVariantId(?ProductVariant $productVariantId): static
     {
-        $this->productId = $productId;
+        $this->productVariantId = $productVariantId;
 
         return $this;
     }
