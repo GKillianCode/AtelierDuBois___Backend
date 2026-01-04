@@ -3,12 +3,14 @@
 namespace App\Repository\Product;
 
 use App\Enum\SortFilterCode;
+use Psr\Log\LoggerInterface;
 use App\Entity\Product\Product;
+use App\Entity\Product\ProductReview;
 use App\Dto\Product\RequestFiltersDto;
+use App\Dto\Product\ShortProductDto;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Psr\Log\LoggerInterface;
 
 /**
  * @extends ServiceEntityRepository<Product>
@@ -23,6 +25,13 @@ class ProductRepository extends ServiceEntityRepository
         $this->logger = $logger;
     }
 
+    /**
+     * Get a paginated list of products based on filters.
+     * @param int $page
+     * @param int $limit
+     * @param RequestFiltersDto $requestFiltersDto
+     * @return Paginator
+     */
     public function paginateProducts(int $page, int $limit, RequestFiltersDto $requestFiltersDto): Paginator
     {
         $this->logger->debug("ProductRepository::paginateProducts ENTER with page: $page, limit: $limit, filters: " . json_encode($requestFiltersDto));
@@ -59,10 +68,43 @@ class ProductRepository extends ServiceEntityRepository
 
         $query->setFirstResult(($page - 1) * $limit)
             ->setMaxResults($limit)
-            ->getQuery();
+            ->getQuery()
+            ->getResult();
 
         $this->logger->debug("ProductRepository::paginateProducts EXIT");
 
         return new Paginator($query, true);
+    }
+
+    /**
+     * Get the average ratings for a list of products.
+     * @param array<Product> $products
+     * @return array<int, float> [productId => avgRating]
+     */
+    public function getAverageRatingsForProducts(array $products): array
+    {
+        if (empty($products)) {
+            return [];
+        }
+
+        $productIds = array_map(fn(ShortProductDto $p) => $p->id, $products);
+
+        $results = $this->createQueryBuilder('p')
+            ->select('p.id as productId', 'AVG(pr.rating) as avgRating')
+            ->leftJoin('p.productVariants', 'pv')
+            ->leftJoin(ProductReview::class, 'pr', 'WITH', 'pr.productVariantId = pv.id')
+            ->where('p.id IN (:productIds)')
+            ->setParameter('productIds', $productIds)
+            ->groupBy('p.id')
+            ->getQuery()
+            ->getResult();
+
+        $ratings = [];
+        foreach ($results as $result) {
+            $avgRating = $result['avgRating'] ? round((float) $result['avgRating'], 1) : null;
+            $ratings[$result['productId']] = $avgRating;
+        }
+
+        return $ratings;
     }
 }
