@@ -7,15 +7,18 @@ use Psr\Log\LoggerInterface;
 use App\Dto\Product\PriceDto;
 use App\Dto\Product\CategoryDto;
 use App\Dto\Product\PublicIdDto;
-use App\Dto\Product\PaginationDataDto;
+use App\Service\PaginationService;
 use App\Dto\Product\ShortProductDto;
 use App\Dto\Product\ProductDetailDto;
+use App\Dto\Product\ProductReviewDto;
+use App\Entity\Product\ProductReview;
 use App\Service\Product\ImageService;
 use App\Dto\Product\RequestFiltersDto;
 use App\Entity\Product\ProductVariant;
 use App\Dto\Product\OtherProductVariant;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use App\Repository\Product\ProductRepository;
+use App\Repository\Product\ProductReviewRepository;
 use App\Repository\Product\ProductVariantRepository;
 
 class ProductService
@@ -24,7 +27,9 @@ class ProductService
         private readonly LoggerInterface $logger,
         private readonly ProductRepository $productRepository,
         private readonly ProductVariantRepository $productVariantRepository,
-        private readonly ImageService $imageService
+        private readonly ProductReviewRepository $productReviewRepository,
+        private readonly ImageService $imageService,
+        private readonly PaginationService $paginationService
     ) {}
 
     public function getAllProducts(int $page, int $limit, RequestFiltersDto $requestFiltersDto): array
@@ -36,13 +41,60 @@ class ProductService
 
         $paginator = $this->productRepository->paginateProducts($page, $limit, $requestFiltersDto);
 
-        $products = $this->getAllProductsInShortProductDto($paginator);
-        $paginationDataDto = $this->getMetaPaginationData($paginator, $limit, $page);
+        $productsDto = $this->getAllProductsInShortProductDto($paginator);
+        $ratings = $this->productRepository->getAverageRatingsForProducts($productsDto);
+
+        foreach ($productsDto as $productDto) {
+            $productDto->averageRating = isset($ratings[$productDto->id]) ? (int) round($ratings[$productDto->id]) : null;
+        }
+
+        $paginationDataDto = $this->paginationService->getMetaPaginationData($paginator, $limit, $page);
 
         $this->logger->debug("ProductService::getAllProducts EXIT");
 
         return [
-            'products' => $products,
+            'products' => $productsDto,
+            'pagination' => $paginationDataDto
+        ];
+    }
+
+    public function getProductReviewsByProductVariantPublicId(string $publicId, int $page, int $limit): array
+    {
+        $this->logger->debug("ProductService::getProductReviewsByProductVariantPublicId ENTER", ['publicId' => $publicId, 'page' => $page, 'limit' => $limit]);
+
+        $page = max(1, $page);
+        $limit = min(10, max(1, $limit));
+
+        $productVariant = $this->productVariantRepository->findOneBy(['publicId' => $publicId]);
+
+
+        if (!$productVariant) {
+            $this->logger->debug("ProductService::getProductReviewsByProductVariantPublicId EXIT 1 - Product variant not found", ['publicId' => $publicId]);
+            return [
+                'reviews' => [],
+                'pagination' => null
+            ];
+        }
+
+        $paginator = $this->productReviewRepository->paginateProductReviews($page, $limit, $productVariant->getId());
+
+        $reviewsDto = [];
+
+        foreach ($paginator as $review) {
+            $user = $review->getUserId();
+            if ($user) {
+                $author = $user->getFirstName() . ' ' . $user->getLastName();
+                $reviewsDto[] = $this->productReviewToProductReviewDto($review, $author);
+            }
+        }
+
+
+        $paginationDataDto = $this->paginationService->getMetaPaginationData($paginator, $limit, $page);
+
+        $this->logger->debug("ProductService::getProductReviewsByProductVariantPublicId EXIT");
+
+        return [
+            'products' => $reviewsDto,
             'pagination' => $paginationDataDto
         ];
     }
@@ -94,6 +146,7 @@ class ProductService
             $productType = $defaultVariant->getStock() != null ? ProductType::IN_STOCK : ProductType::CUSTOM_MADE;
 
             $products[] = new ShortProductDto(
+                id: $product->getId(),
                 title: $product->getName(),
                 type: $productType,
                 category: new CategoryDto(
@@ -109,27 +162,6 @@ class ProductService
         $this->logger->debug("ProductService::getAllProductsInShortProductDto EXIT");
 
         return $products;
-    }
-
-    private function getMetaPaginationData(Paginator $paginator, int $limit, int $page): PaginationDataDto
-    {
-        $this->logger->debug("ProductService::getMetaPaginationData ENTER");
-
-        $totalItems = count($paginator);
-        $totalPages = (int) ceil($totalItems / $limit);
-
-        $paginationDataDto = new PaginationDataDto(
-            currentPage: $page,
-            totalPages: $totalPages,
-            totalItems: $totalItems,
-            itemsPerPage: $limit,
-            hasNextPage: $page < $totalPages,
-            hasPreviousPage: $page > 1
-        );
-
-        $this->logger->debug("ProductService::getMetaPaginationData EXIT");
-
-        return $paginationDataDto;
     }
 
     private function ProductsVariantsToOtherProductVariantsDto($productsVariants): array
@@ -154,6 +186,7 @@ class ProductService
         $this->logger->debug("ProductService::ProductVariantToProductDetailDto ENTER");
         $dto = new ProductDetailDto(
             shortProduct: new ShortProductDto(
+                id: $mainProductVariant->getProductId()->getId(),
                 title: $mainProductVariant->getProductId()->getName(),
                 type: $mainProductVariant->getStock() != null ? ProductType::IN_STOCK : ProductType::CUSTOM_MADE,
                 category: new CategoryDto(
@@ -171,6 +204,25 @@ class ProductService
         );
 
         $this->logger->debug("ProductService::ProductVariantToProductDetailDto EXIT");
+        return $dto;
+    }
+
+    private function productReviewToProductReviewDto(ProductReview $productReview, string $author): ProductReviewDto
+    {
+        $this->logger->debug("ProductService::productReviewToProductReviewDto ENTER");
+
+        $sanitizedComment = htmlspecialchars($productReview->getComment(), ENT_QUOTES, 'UTF-8');
+        $sanitizedAuthor = htmlspecialchars(trim($author), ENT_QUOTES, 'UTF-8');
+
+        $dto = new ProductReviewDto(
+            averageRating: $productReview->getRating(),
+            comment: $sanitizedComment,
+            authorName: $sanitizedAuthor,
+            postedtedAt: $productReview->getCreatedAt()
+        );
+
+        $this->logger->debug("ProductService::productReviewToProductReviewDto EXIT");
+
         return $dto;
     }
 }
