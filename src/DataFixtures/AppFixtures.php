@@ -4,15 +4,17 @@ namespace App\DataFixtures;
 
 use App\Entity\User\User;
 use App\Entity\Product\Wood;
+use App\Entity\Product\Image;
 use App\Entity\Product\Product;
 use Symfony\Component\Uid\Uuid;
-use App\Entity\Order\OrderStatus;
 use App\Entity\Product\Category;
-use App\Entity\Product\Image;
+use App\Entity\Order\OrderStatus;
+use App\Entity\Product\ProductReview;
 use App\Entity\Product\ProductVariant;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use DateTime;
 
 class AppFixtures extends Fixture
 {
@@ -47,14 +49,11 @@ class AppFixtures extends Fixture
         $this->createImagesForProductVariants($manager);
 
         // Create a User
-        $user = new User();
-        $user->setUuid(Uuid::v4()->toRfc4122())
-            ->setFirstname('Killian')
-            ->setLastname('Godet')
-            ->setEmail('godetkillian@yahoo.com')
-            ->setPlainPassword('Abricot2024!');
-        $manager->persist($user);
+        $this->createUser($manager);
+        $manager->flush();
 
+        // Create Product Reviews
+        $this->createProductReviews($manager);
         $manager->flush();
     }
 
@@ -76,6 +75,24 @@ class AppFixtures extends Fixture
     private function getCategories(ObjectManager $manager): array
     {
         return $manager->getRepository(Category::class)->findAll();
+    }
+
+    private function getUsers(ObjectManager $manager): array
+    {
+        return $manager->getRepository(User::class)->findAll();
+    }
+
+    private function createUser(ObjectManager $manager): void
+    {
+        for ($i = 0; $i < 20; $i++) {
+            $user = new User();
+            $user->setUuid(Uuid::v4()->toRfc4122())
+                ->setFirstname('prenom' . $i)
+                ->setLastname('nom' . $i)
+                ->setEmail('example' . $i . '@email.com')
+                ->setPlainPassword('Abricot2024!');
+            $manager->persist($user);
+        }
     }
 
     private function createOrderStatus(ObjectManager $manager): void
@@ -436,6 +453,24 @@ class AppFixtures extends Fixture
                 ->setProductVariantId($productVariants[$i]);
 
             $manager->persist($image);
+        }
+    }
+
+    private function createProductReviews(ObjectManager $manager): void
+    {
+        $users = $this->getUsers($manager);
+        $products = $this->getProductVariants($manager);
+
+        foreach ($users as $user) {
+            foreach ($products as $product) {
+                $review = new ProductReview();
+                $review->setUserId($user)
+                    ->setProductVariantId($product)
+                    ->setRating(rand(1, 10))
+                    ->setComment("Product ID: " . $product->getId() . ", User ID: " . $user->getId());
+
+                $manager->persist($review);
+            }
         }
     }
 }
