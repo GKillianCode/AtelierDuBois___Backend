@@ -3,13 +3,13 @@
 namespace App\Controller\Product;
 
 use App\Enum\ErrorCode;
-use App\Enum\ProductSortFilterCode;
 use Psr\Log\LoggerInterface;
 use App\Response\ErrorResponse;
 use App\Dto\Product\PublicIdDto;
 use App\Service\ValidatorService;
-use App\Dto\Product\RequestProductFiltersDto;
+use App\Enum\ProductSortFilterCode;
 use App\Service\Product\ProductService;
+use App\Dto\Product\RequestProductFiltersDto;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -104,7 +104,12 @@ final class ProductController extends AbstractController
             $page = (int) $request->query->get('page', 1);
             $limit = (int) $request->query->get('limit', 10);
 
-            $productsReviewsDto = $this->productService->getProductReviewsByProductVariantPublicId($publicId, $page, $limit);
+            $ratingOrderValue = $request->query->get('ratingOrder');
+            $ratingValue = (int) $request->query->get('rating');
+            $publicationOrderValue = $request->query->get('publicationOrder');
+
+            $requestRatingFiltersDto = $this->productService->requestRatingFiltersDtoBuilder($ratingOrderValue, $ratingValue, $publicationOrderValue);
+            $productsReviewsDto = $this->productService->getProductReviewsByProductVariantPublicId($publicId, $page, $limit, $requestRatingFiltersDto);
 
             $this->logger->debug("ProductController::getProductReviewsByProductVariantPublicId EXIT 2");
             return $this->json($productsReviewsDto, Response::HTTP_OK);

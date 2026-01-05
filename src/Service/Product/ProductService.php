@@ -8,15 +8,17 @@ use App\Dto\Product\PriceDto;
 use App\Dto\Product\CategoryDto;
 use App\Dto\Product\PublicIdDto;
 use App\Service\PaginationService;
+use App\Enum\CommentSortFilterCode;
 use App\Dto\Product\ShortProductDto;
 use App\Dto\Product\ProductDetailDto;
 use App\Dto\Product\ProductReviewDto;
 use App\Entity\Product\ProductReview;
 use App\Service\Product\ImageService;
-use App\Dto\Product\RequestProductFiltersDto;
 use App\Entity\Product\ProductVariant;
 use App\Dto\Product\OtherProductVariant;
 use Doctrine\ORM\Tools\Pagination\Paginator;
+use App\Dto\Product\RequestRatingFiltersDto;
+use App\Dto\Product\RequestProductFiltersDto;
 use App\Repository\Product\ProductRepository;
 use App\Repository\Product\ProductReviewRepository;
 use App\Repository\Product\ProductVariantRepository;
@@ -58,7 +60,7 @@ class ProductService
         ];
     }
 
-    public function getProductReviewsByProductVariantPublicId(string $publicId, int $page, int $limit): array
+    public function getProductReviewsByProductVariantPublicId(string $publicId, int $page, int $limit, RequestRatingFiltersDto $requestRatingFiltersDto): array
     {
         $this->logger->debug("ProductService::getProductReviewsByProductVariantPublicId ENTER", ['publicId' => $publicId, 'page' => $page, 'limit' => $limit]);
 
@@ -76,7 +78,7 @@ class ProductService
             ];
         }
 
-        $paginator = $this->productReviewRepository->paginateProductReviews($page, $limit, $productVariant->getId());
+        $paginator = $this->productReviewRepository->paginateProductReviews($page, $limit, $productVariant->getId(), $requestRatingFiltersDto);
 
         $reviewsDto = [];
 
@@ -222,6 +224,38 @@ class ProductService
         );
 
         $this->logger->debug("ProductService::productReviewToProductReviewDto EXIT");
+
+        return $dto;
+    }
+
+    public function requestRatingFiltersDtoBuilder(?string $ratingOrder, ?int $rating, ?string $publicationOrder): RequestRatingFiltersDto
+    {
+        $this->logger->debug("ProductService::requestRatingFiltersDtoBuilder ENTER");
+
+        $filterRatingOrder = null;
+        $filterRating = null;
+        $filterPublicationOrder = null;
+
+        if ($rating !== null && $rating >= 1 && $rating <= 5) {
+            $filterRating = $rating;
+            $filterRatingOrder = CommentSortFilterCode::RATING_AVERAGE_EQUAL;
+        } else {
+            $tryFromFilterRatingOrder = CommentSortFilterCode::tryFrom($ratingOrder);
+            $filterRatingOrder = $tryFromFilterRatingOrder == null ? CommentSortFilterCode::RATING_AVERAGE_DESC : $tryFromFilterRatingOrder;
+        }
+
+        if ($publicationOrder !== null) {
+            $tryFromFilterPublicationOrder = CommentSortFilterCode::tryFrom($publicationOrder);
+            $filterPublicationOrder = $tryFromFilterPublicationOrder == null ? CommentSortFilterCode::POSTED_DESC : $tryFromFilterPublicationOrder;
+        }
+
+        $dto = new RequestRatingFiltersDto(
+            ratingOrder: $filterRatingOrder,
+            rating: $filterRating,
+            publicationOrder: $filterPublicationOrder
+        );
+
+        $this->logger->debug("ProductService::requestCommentFiltersDtoBuilder EXIT");
 
         return $dto;
     }
