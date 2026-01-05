@@ -1,6 +1,8 @@
 <?php
 
-namespace App\Dto\Product;
+namespace App\Dto\Types;
+
+use App\Dto\Types\PublicIdDto;
 
 class CategoryDto
 {

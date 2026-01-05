@@ -1,8 +1,9 @@
 <?php
 
-namespace App\Dto\Product;
+namespace App\Dto\Product\RequestFilter;
 
-use App\Enum\ProductSortFilterCode;
+use App\Dto\Types\PublicIdDto;
+use App\Enum\SortFilter\ProductSortFilterCode;
 
 class RequestProductFiltersDto
 {

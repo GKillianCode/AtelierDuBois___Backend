@@ -2,11 +2,11 @@
 
 namespace App\Repository\Product;
 
-use App\Enum\ProductSortFilterCode;
+use App\Enum\SortFilter\ProductSortFilterCode;
 use Psr\Log\LoggerInterface;
 use App\Entity\Product\Product;
 use App\Entity\Product\ProductReview;
-use App\Dto\Product\RequestProductFiltersDto;
+use App\Dto\Product\RequestFilter\RequestProductFiltersDto;
 use App\Dto\Product\ShortProductDto;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\ORM\Tools\Pagination\Paginator;

@@ -2,7 +2,7 @@
 
 namespace App\Service\Product;
 
-use App\Dto\Product\ImageDto;
+use App\Dto\Types\ImageDto;
 use App\Entity\Product\Image;
 
 class ImageService

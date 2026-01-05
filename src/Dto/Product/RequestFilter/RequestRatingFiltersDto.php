@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Dto\Product;
+namespace App\Dto\Product\RequestFilter;
 
-use App\Enum\CommentSortFilterCode;
+use App\Enum\SortFilter\CommentSortFilterCode;
 
 class RequestRatingFiltersDto
 {

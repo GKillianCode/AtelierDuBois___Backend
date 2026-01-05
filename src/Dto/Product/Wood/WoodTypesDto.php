@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Dto\Product;
+namespace App\Dto\Product\Wood;
 
 class WoodTypesDto
 {

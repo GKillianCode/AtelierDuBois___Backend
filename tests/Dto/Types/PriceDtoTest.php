@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Tests\Dto\Product;
+namespace App\Tests\Dto\Types;
 
-use App\Dto\Product\PublicIdDto;
+use App\Dto\Types\PriceDto;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
-class PublicIdDtoTest extends KernelTestCase
+class PriceDtoTest extends KernelTestCase
 {
     private ValidatorInterface $validator;
 
@@ -16,17 +16,21 @@ class PublicIdDtoTest extends KernelTestCase
         $this->validator = static::getContainer()->get(ValidatorInterface::class);
     }
 
-    public function testValidPublicId(): void
+    public function testValidPrice(): void
     {
-        $dto = new PublicIdDto(publicId: '1A2bC3dE4fG5hI6jK7lM22');
+        $dto = new PriceDto(
+            amount: 10000
+        );
 
         $violations = $this->validator->validate($dto);
         $this->assertCount(0, $violations);
     }
 
-    public function testInvalidPublicId(): void
+    public function testInvalidPrice(): void
     {
-        $dto = new PublicIdDto(publicId: '22');
+        $dto = new PriceDto(
+            amount: -100
+        );
 
         $violations = $this->validator->validate($dto);
         $this->assertGreaterThan(0, $violations);

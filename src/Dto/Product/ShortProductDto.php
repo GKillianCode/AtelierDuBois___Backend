@@ -3,7 +3,10 @@
 namespace App\Dto\Product;
 
 use App\Enum\ProductType;
-use App\Dto\Product\CategoryDto;
+use App\Dto\Types\ImageDto;
+use App\Dto\Types\PriceDto;
+use App\Dto\Types\CategoryDto;
+use App\Dto\Types\PublicIdDto;
 use Symfony\Component\Validator\Constraints as Assert;
 
 class ShortProductDto

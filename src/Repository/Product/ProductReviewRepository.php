@@ -5,8 +5,8 @@ namespace App\Repository\Product;
 use Psr\Log\LoggerInterface;
 use App\Entity\Product\ProductReview;
 use Doctrine\Persistence\ManagerRegistry;
-use App\Dto\Product\RequestRatingFiltersDto;
-use App\Enum\CommentSortFilterCode;
+use App\Dto\Product\RequestFilter\RequestRatingFiltersDto;
+use App\Enum\SortFilter\CommentSortFilterCode;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 

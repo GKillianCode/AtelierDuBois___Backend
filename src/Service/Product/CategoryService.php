@@ -3,8 +3,8 @@
 namespace App\Service\Product;
 
 use Psr\Log\LoggerInterface;
-use App\Dto\Product\CategoryDto;
-use App\Dto\Product\PublicIdDto;
+use App\Dto\Types\CategoryDto;
+use App\Dto\Types\PublicIdDto;
 use App\Repository\Product\CategoryRepository;
 
 class CategoryService

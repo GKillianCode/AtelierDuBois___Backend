@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Dto\Product;
+namespace App\Dto\Product\Wood;
 
+use App\Dto\Types\ImageDto;
 use Symfony\Component\Validator\Constraints as Assert;
 
 class WoodTypeDto

@@ -2,8 +2,8 @@
 
 namespace App\Tests\Dto\Product;
 
-use App\Dto\Product\ImageDto;
-use App\Dto\Product\WoodTypeDto;
+use App\Dto\Types\ImageDto;
+use App\Dto\Product\Wood\WoodTypeDto;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 

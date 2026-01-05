@@ -3,7 +3,7 @@
 namespace App\Service;
 
 use Psr\Log\LoggerInterface;
-use App\Dto\Product\PaginationDataDto;
+use App\Dto\Types\PaginationDataDto;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 
 class PaginationService

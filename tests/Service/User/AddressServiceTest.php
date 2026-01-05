@@ -4,7 +4,7 @@ namespace App\Tests\Service\Product;
 
 use App\Entity\User\User;
 use App\Dto\User\AddressDto;
-use App\Dto\Product\PublicIdDto;
+use App\Dto\Types\PublicIdDto;
 use App\Entity\User\Address;
 use App\Service\UuidService;
 use Psr\Log\LoggerInterface;
