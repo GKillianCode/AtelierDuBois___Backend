@@ -15,6 +15,7 @@ use Doctrine\Persistence\ObjectManager;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use DateTime;
+use DateTimeImmutable;
 
 class AppFixtures extends Fixture
 {
@@ -466,8 +467,20 @@ class AppFixtures extends Fixture
                 $review = new ProductReview();
                 $review->setUserId($user)
                     ->setProductVariantId($product)
-                    ->setRating(rand(1, 10))
+                    ->setRating(mt_rand(1, 5))
                     ->setComment("Product ID: " . $product->getId() . ", User ID: " . $user->getId());
+
+                $year = mt_rand(2020, 2024);
+                $month = mt_rand(1, 12);
+                $day = mt_rand(1, 28);
+                $hour = mt_rand(0, 23);
+                $minute = mt_rand(0, 59);
+                $second = mt_rand(0, 59);
+                $randomDate = new DateTimeImmutable();
+                $randomDate = $randomDate->setDate($year, $month, $day)
+                    ->setTime($hour, $minute, $second);
+
+                $review->setCreatedAt($randomDate);
 
                 $manager->persist($review);
             }
