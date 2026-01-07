@@ -2,7 +2,7 @@
 
 namespace App\Dto\User;
 
-use App\Dto\Product\PublicIdDto;
+use App\Dto\Types\PublicIdDto;
 use Symfony\Component\Validator\Constraints as Assert;
 
 class AddressDto

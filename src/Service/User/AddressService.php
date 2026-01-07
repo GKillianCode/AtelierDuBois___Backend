@@ -7,7 +7,7 @@ use App\Dto\User\AddressDto;
 use App\Entity\User\Address;
 use App\Service\UuidService;
 use Psr\Log\LoggerInterface;
-use App\Dto\Product\PublicIdDto;
+use App\Dto\Types\PublicIdDto;
 use App\Service\ValidatorService;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\User\AddressRepository;
