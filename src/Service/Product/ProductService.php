@@ -106,6 +106,12 @@ class ProductService
         $this->logger->debug("ProductService::getProductVariantByPublicId ENTER", ['publicId' => $publicId]);
 
         $productVariant = $this->productVariantRepository->getProductVariantByPublicId($publicId);
+
+        if (!$productVariant) {
+            $this->logger->debug("ProductService::getProductVariantByPublicId EXIT 2", ['publicId' => $publicId]);
+            return null;
+        }
+
         $productId = $productVariant->getProductId()->getId();
         $productsVariants = $this->productVariantRepository->getAllMinimalProductVariant($productId);
 
@@ -240,13 +246,19 @@ class ProductService
             $filterRating = $rating;
             $filterRatingOrder = CommentSortFilterCode::RATING_AVERAGE_EQUAL;
         } else {
-            $tryFromFilterRatingOrder = CommentSortFilterCode::tryFrom($ratingOrder);
-            $filterRatingOrder = $tryFromFilterRatingOrder == null ? CommentSortFilterCode::RATING_AVERAGE_DESC : $tryFromFilterRatingOrder;
+            if ($ratingOrder !== null) {
+                $tryFromFilterRatingOrder = CommentSortFilterCode::tryFrom($ratingOrder);
+                $filterRatingOrder = $tryFromFilterRatingOrder == null ? CommentSortFilterCode::RATING_AVERAGE_DESC : $tryFromFilterRatingOrder;
+            } else {
+                $filterRatingOrder = CommentSortFilterCode::RATING_AVERAGE_DESC;
+            }
         }
 
         if ($publicationOrder !== null) {
             $tryFromFilterPublicationOrder = CommentSortFilterCode::tryFrom($publicationOrder);
             $filterPublicationOrder = $tryFromFilterPublicationOrder == null ? CommentSortFilterCode::POSTED_DESC : $tryFromFilterPublicationOrder;
+        } else {
+            $filterPublicationOrder = null;
         }
 
         $dto = new RequestRatingFiltersDto(
