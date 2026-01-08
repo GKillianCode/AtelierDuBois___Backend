@@ -37,8 +37,12 @@ final class ProductController extends AbstractController
             $productTypeValue = $request->query->get('productType');
             $categoryValue = $request->query->get('category');
 
-            $filter = ProductSortFilterCode::tryFrom($filterValue) ?? ProductSortFilterCode::CREATED_DESC;
-            $productType = ProductSortFilterCode::tryFrom($productTypeValue) ?? ProductSortFilterCode::PRODUCTS_ALL;
+            $filter = $filterValue !== null
+                ? (ProductSortFilterCode::tryFrom($filterValue) ?? ProductSortFilterCode::CREATED_DESC)
+                : ProductSortFilterCode::CREATED_DESC;
+            $productType = $productTypeValue !== null
+                ? (ProductSortFilterCode::tryFrom($productTypeValue) ?? ProductSortFilterCode::PRODUCTS_ALL)
+                : ProductSortFilterCode::PRODUCTS_ALL;
 
             $categoryPublicIdDto = $categoryValue !== null
                 ? new PublicIdDto(publicId: $categoryValue)
