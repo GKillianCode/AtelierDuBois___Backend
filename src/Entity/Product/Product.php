@@ -28,6 +28,9 @@ class Product
     #[ORM\OneToMany(targetEntity: ProductVariant::class, mappedBy: 'productId')]
     private Collection $productVariants;
 
+    #[ORM\ManyToOne(inversedBy: 'products')]
+    private ?Category $categoryId = null;
+
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
@@ -37,6 +40,8 @@ class Product
     public function __construct()
     {
         $this->productVariants = new ArrayCollection();
+        $this->createdAt = new \DateTimeImmutable();
+        $this->updatedAt = new \DateTimeImmutable();
     }
 
     public function getId(): ?int
@@ -94,6 +99,18 @@ class Product
                 $productVariant->setProductId(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getCategoryId(): ?Category
+    {
+        return $this->categoryId;
+    }
+
+    public function setCategoryId(?Category $categoryId): static
+    {
+        $this->categoryId = $categoryId;
 
         return $this;
     }

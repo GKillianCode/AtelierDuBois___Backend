@@ -2,8 +2,8 @@
 
 namespace App\Tests\Dto\Order;
 
-use App\Dto\Product\PriceDto;
-use App\Dto\Product\PublicIdDto;
+use App\Dto\Types\PriceDto;
+use App\Dto\Types\PublicIdDto;
 use App\Dto\Order\OrderProductDto;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Validator\Validator\ValidatorInterface;

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Dto\Product;
+namespace App\Dto\Types;
 
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -28,9 +28,4 @@ class ImageDto
         )]
         public readonly string $imageUrl,
     ) {}
-
-    public function getPath(): string
-    {
-        return $this->imageUrl;
-    }
 }

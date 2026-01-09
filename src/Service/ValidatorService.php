@@ -36,7 +36,8 @@ class ValidatorService
     public function hasViolations(object $object, ?array $groups = null): bool
     {
         $this->logger->debug("ValidatorService::hasViolations ENTER");
-        $asViolations = !empty($this->validate($object, $groups)) > 0;
+        $violations = $this->validate($object, $groups);
+        $asViolations = count($violations) > 0 ? true : false;
         $this->logger->debug("ValidatorService::hasViolations EXIT");
         return $asViolations;
     }

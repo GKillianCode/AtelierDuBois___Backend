@@ -2,8 +2,8 @@
 
 namespace App\Dto\Order;
 
-use App\Dto\Product\PriceDto;
-use App\Dto\Product\PublicIdDto;
+use App\Dto\Types\PriceDto;
+use App\Dto\Types\PublicIdDto;
 use Symfony\Component\Validator\Constraints as Assert;
 
 class OrderProductDto
