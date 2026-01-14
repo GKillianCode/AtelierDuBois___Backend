@@ -2,42 +2,45 @@
 
 namespace App\Repository\Order;
 
+use App\Entity\User\User;
 use App\Entity\Order\Order;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\ORM\Tools\Pagination\Paginator;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Psr\Log\LoggerInterface;
 
 /**
  * @extends ServiceEntityRepository<Order>
  */
 class OrderRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    private LoggerInterface $logger;
+
+    public function __construct(ManagerRegistry $registry, LoggerInterface $logger)
     {
         parent::__construct($registry, Order::class);
+        $this->logger = $logger;
     }
 
-    //    /**
-    //     * @return Order[] Returns an array of Order objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('o')
-    //            ->andWhere('o.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('o.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    public function paginateOrders(int $page, int $limit, User $user): Paginator
+    {
+        $this->logger->debug("OrderRepository::paginateOrders ENTER with page: $page, limit: $limit");
 
-    //    public function findOneBySomeField($value): ?Order
-    //    {
-    //        return $this->createQueryBuilder('o')
-    //            ->andWhere('o.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+        $query = $this->createQueryBuilder('tOrder')
+            ->select('tOrder', 'tUser')
+            ->leftJoin('tOrder.userId', 'tUser')
+            ->where('tOrder.userId = :userId')
+            ->setParameter('userId', $user->getId());
+
+        $query->orderBy('tOrder.createdAt', 'DESC');
+
+        $query->setFirstResult(($page - 1) * $limit)
+            ->setMaxResults($limit)
+            ->getQuery()
+            ->getResult();
+
+        $this->logger->debug("OrderRepository::paginateOrders EXIT");
+
+        return new Paginator($query, true);
+    }
 }
