@@ -6,6 +6,7 @@ use App\Entity\User\User;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Uid\Uuid;
 use App\Dto\User\RegisterUserDto;
+use App\Enum\UserType;
 use App\Service\ValidatorService;
 use App\Repository\User\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -33,6 +34,7 @@ class UserService
         $this->logger->debug("UserService::registerUser ENTER");
         $user = new User();
         $user->setUuid(Uuid::v4()->toRfc4122());
+        $user->setUserType(UserType::CUSTOMER);
         $user->setFirstname($registerUserDto->firstname);
         $user->setLastname($registerUserDto->lastname);
         $user->setEmail($registerUserDto->email);
