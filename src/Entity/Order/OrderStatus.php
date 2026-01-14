@@ -2,8 +2,9 @@
 
 namespace App\Entity\Order;
 
-use App\Repository\Order\OrderStatusRepository;
+use App\Enum\OrderStatusCode;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\Order\OrderStatusRepository;
 
 #[ORM\Entity(repositoryClass: OrderStatusRepository::class)]
 class OrderStatus
@@ -15,6 +16,9 @@ class OrderStatus
 
     #[ORM\Column(length: 50)]
     private ?string $name = null;
+
+    #[ORM\Column(length: 50, unique: true)]
+    private ?string $code = null;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
@@ -41,6 +45,18 @@ class OrderStatus
     public function setName(string $name): static
     {
         $this->name = $name;
+
+        return $this;
+    }
+
+    public function getCode(): ?OrderStatusCode
+    {
+        return OrderStatusCode::tryFrom($this->code);
+    }
+
+    public function setCode(OrderStatusCode $code): static
+    {
+        $this->code = $code->value;
 
         return $this;
     }
