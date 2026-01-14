@@ -18,8 +18,17 @@ class Order
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 50, nullable: true)]
+    #[ORM\Column(length: 22, nullable: true)]
     private ?string $trackingNumber = null;
+
+    /**
+     * @var Collection<int, OrderProduct>
+     */
+    #[ORM\OneToMany(targetEntity: OrderProduct::class, mappedBy: 'orderId')]
+    private Collection $orderProducts;
+
+    #[ORM\Column(length: 17)]
+    private ?string $orderNumber = null;
 
     #[ORM\ManyToOne(inversedBy: 'orders')]
     #[ORM\JoinColumn(nullable: false)]
@@ -43,12 +52,6 @@ class Order
     #[ORM\Column]
     private ?\DateTimeImmutable $updatedAt = null;
 
-    /**
-     * @var Collection<int, OrderProduct>
-     */
-    #[ORM\OneToMany(targetEntity: OrderProduct::class, mappedBy: 'orderId')]
-    private Collection $orderProducts;
-
     public function __construct()
     {
         $this->orderProducts = new ArrayCollection();
@@ -69,6 +72,48 @@ class Order
     public function setTrackingNumber(string $trackingNumber): static
     {
         $this->trackingNumber = $trackingNumber;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, OrderProduct>
+     */
+    public function getOrderProducts(): Collection
+    {
+        return $this->orderProducts;
+    }
+
+    public function addOrderProduct(OrderProduct $orderProduct): static
+    {
+        if (!$this->orderProducts->contains($orderProduct)) {
+            $this->orderProducts->add($orderProduct);
+            $orderProduct->setOrderId($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOrderProduct(OrderProduct $orderProduct): static
+    {
+        if ($this->orderProducts->removeElement($orderProduct)) {
+            // set the owning side to null (unless already changed)
+            if ($orderProduct->getOrderId() === $this) {
+                $orderProduct->setOrderId(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getOrderNumber(): ?string
+    {
+        return $this->orderNumber;
+    }
+
+    public function setOrderNumber(string $orderNumber): static
+    {
+        $this->orderNumber = $orderNumber;
 
         return $this;
     }
@@ -141,36 +186,6 @@ class Order
     public function setUpdatedAt(\DateTimeImmutable $updatedAt): static
     {
         $this->updatedAt = $updatedAt;
-
-        return $this;
-    }
-
-    /**
-     * @return Collection<int, OrderProduct>
-     */
-    public function getOrderProducts(): Collection
-    {
-        return $this->orderProducts;
-    }
-
-    public function addOrderProduct(OrderProduct $orderProduct): static
-    {
-        if (!$this->orderProducts->contains($orderProduct)) {
-            $this->orderProducts->add($orderProduct);
-            $orderProduct->setOrderId($this);
-        }
-
-        return $this;
-    }
-
-    public function removeOrderProduct(OrderProduct $orderProduct): static
-    {
-        if ($this->orderProducts->removeElement($orderProduct)) {
-            // set the owning side to null (unless already changed)
-            if ($orderProduct->getOrderId() === $this) {
-                $orderProduct->setOrderId(null);
-            }
-        }
 
         return $this;
     }
