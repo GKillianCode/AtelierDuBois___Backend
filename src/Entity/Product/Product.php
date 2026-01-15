@@ -22,6 +22,21 @@ class Product
     #[ORM\Column(type: Types::TEXT)]
     private ?string $description = null;
 
+    #[ORM\Column]
+    private int $weightInGrams;
+
+    #[ORM\Column(length: 255)]
+    private string $lengthInCentimeters;
+
+    #[ORM\Column]
+    private int $widthInCentimeters;
+
+    #[ORM\Column]
+    private int $heightInCentimeters;
+
+    #[ORM\Column(type: Types::SMALLINT)]
+    private int $maxStackSize;
+
     /**
      * @var Collection<int, ProductVariant>
      */
@@ -69,6 +84,66 @@ class Product
     public function setDescription(string $description): static
     {
         $this->description = $description;
+
+        return $this;
+    }
+
+    public function getWeightInGrams(): ?int
+    {
+        return $this->weightInGrams;
+    }
+
+    public function setWeightInGrams(int $weightInGrams): static
+    {
+        $this->weightInGrams = $weightInGrams;
+
+        return $this;
+    }
+
+    public function getLengthInCentimeters(): ?string
+    {
+        return $this->lengthInCentimeters;
+    }
+
+    public function setLengthInCentimeters(string $lengthInCentimeters): static
+    {
+        $this->lengthInCentimeters = $lengthInCentimeters;
+
+        return $this;
+    }
+
+    public function getWidthInCentimeters(): ?int
+    {
+        return $this->widthInCentimeters;
+    }
+
+    public function setWidthInCentimeters(int $widthInCentimeter): static
+    {
+        $this->widthInCentimeters = $widthInCentimeter;
+
+        return $this;
+    }
+
+    public function getHeightInCentimeters(): ?int
+    {
+        return $this->heightInCentimeters;
+    }
+
+    public function setHeightInCentimeters(int $heightInCentimeters): static
+    {
+        $this->heightInCentimeters = $heightInCentimeters;
+
+        return $this;
+    }
+
+    public function getMaxStackSize(): ?int
+    {
+        return $this->maxStackSize;
+    }
+
+    public function setMaxStackSize(int $maxStackSize): static
+    {
+        $this->maxStackSize = $maxStackSize;
 
         return $this;
     }
