@@ -28,4 +28,9 @@ enum OrderStatusCode: string
             self::PARCEL_CANCELED => 'Commande annulée',
         };
     }
+
+    public static function getFirstStatus(): self
+    {
+        return self::PARCEL_CREATED;
+    }
 }
