@@ -181,6 +181,19 @@ class AddressService
         return $address;
     }
 
+    public function getDefaultAddressForUser(User $user): ?Address
+    {
+        $this->logger->debug("AddressService::getDefaultAddress ENTER");
+
+        $address = $this->addressRepository->findOneBy([
+            'userId' => $user,
+            'isDefault' => true
+        ]);
+
+        $this->logger->debug("AddressService::getDefaultAddress EXIT");
+        return $address;
+    }
+
     public function getAllAddresses(User $user): array
     {
         $this->logger->debug("AddressService::getAllAddresses ENTER");
