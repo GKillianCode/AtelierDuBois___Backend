@@ -2,14 +2,16 @@
 
 namespace App\DataFixtures;
 
-use DateTimeImmutable;
 use App\Enum\UserType;
-use App\Enum\OrderStatusCode;
+use DateTimeImmutable;
 use App\Entity\Order\Order;
-use App\Entity\Order\OrderProduct;
-use App\Entity\Order\OrderStatus;
 use App\Service\UuidService;
+use App\Entity\Order\Carrier;
+use App\Enum\OrderStatusCode;
+use App\Entity\Order\OrderStatus;
+use App\Entity\Order\OrderProduct;
 use App\Service\Order\OrderService;
+use App\Service\Order\ShipmentService;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
@@ -18,14 +20,11 @@ class OrderFixtures extends Fixture implements DependentFixtureInterface
 {
     public const ORDER_STATUS_REFERENCE = 'order_status';
 
-    private UuidService $uuidService;
-    private OrderService $orderService;
-
-    public function __construct(UuidService $uuidService, OrderService $orderService)
-    {
-        $this->uuidService = $uuidService;
-        $this->orderService = $orderService;
-    }
+    public function __construct(
+        private readonly UuidService $uuidService,
+        private readonly OrderService $orderService,
+        private readonly ShipmentService $shipmentService,
+    ) {}
 
     /**
      * Creates sample order statuses and orders with order products
@@ -36,6 +35,9 @@ class OrderFixtures extends Fixture implements DependentFixtureInterface
         $manager->flush();
 
         $this->createOrders($manager);
+        $manager->flush();
+
+        $this->createCarrier($manager);
         $manager->flush();
     }
 
@@ -72,6 +74,8 @@ class OrderFixtures extends Fixture implements DependentFixtureInterface
             $addressesByUser[$userId][] = $address;
         }
 
+        $currentDate = $this->getRandomDateTimeImmuable();
+
         foreach ($users as $user) {
             $userAddresses = $addressesByUser[$user->getId()] ?? [];
             if (empty($userAddresses)) {
@@ -89,24 +93,13 @@ class OrderFixtures extends Fixture implements DependentFixtureInterface
                 }
 
                 $order = new Order();
-                $randomStatus = $orderStatuses[array_rand($orderStatuses)];
-                $deliveryAddress = $userAddresses[array_rand($userAddresses)];
-                $billingAddress = $userAddresses[array_rand($userAddresses)];
-
-                $randomDate = $this->getRandomDateTimeImmuable();
-                $trackingNumber = $this->uuidService->generateUuid62();
-                $orderNumber = $this->orderService->generateNewOrderNumber();
-
                 $order->setUserId($user)
-                    ->setDeliveryAddressId($deliveryAddress)
-                    ->setBillingAddressId($billingAddress)
-                    ->setStatusId($randomStatus)
-                    ->setTrackingNumber($trackingNumber)
-                    ->setOrderNumber($orderNumber)
-                    ->setUpdatedAt($randomDate);
+                    ->setUpdatedAt($currentDate);
 
-                $manager->persist($order);
-                $order->setUpdatedAt($randomDate);
+                $daysToAdd = mt_rand(1, 7);
+                $hoursToAdd = mt_rand(1, 23);
+                $minutesToAdd = mt_rand(1, 59);
+                $currentDate = $currentDate->modify("+{$daysToAdd} days +{$hoursToAdd} hours +{$minutesToAdd} minutes");
 
                 $numProducts = mt_rand(1, 4);
                 $selectedVariants = array_rand($productVariants, min($numProducts, count($productVariants)));
@@ -114,6 +107,7 @@ class OrderFixtures extends Fixture implements DependentFixtureInterface
                     $selectedVariants = [$selectedVariants];
                 }
 
+                $totalPrice = 0;
                 foreach ($selectedVariants as $variantIndex) {
                     $variant = $productVariants[$variantIndex];
                     $quantity = mt_rand(1, 3);
@@ -124,10 +118,29 @@ class OrderFixtures extends Fixture implements DependentFixtureInterface
                         ->setPrice($variant->getPrice())
                         ->setQuantity($quantity);
 
+                    $totalPrice += $variant->getPrice() * $quantity;
                     $manager->persist($orderProduct);
                 }
+
+                $order->setTotalPrice($totalPrice);
+                $manager->persist($order);
+                $manager->flush();
+
+                $this->createShipment($order);
             }
         }
+    }
+
+    private function createShipment(Order $order): void
+    {
+        $this->shipmentService->createShipmentsForOrder($order);
+    }
+
+    private function createCarrier(ObjectManager $manager): void
+    {
+        $carrier = new Carrier();
+        $carrier->setName('Internal');
+        $manager->persist($carrier);
     }
 
     /**
