@@ -2,18 +2,22 @@
 
 namespace App\Service\Order;
 
-use App\Dto\Order\ShortOrderDto;
 use App\Entity\User\User;
+use App\Entity\Order\Order;
 use App\Service\UuidService;
 use Psr\Log\LoggerInterface;
+use App\Dto\Order\ShortOrderDto;
+use App\Repository\Order\OrderProductRepository;
 use App\Service\PaginationService;
 use App\Repository\Order\OrderRepository;
+use App\Repository\User\UserRepository;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 
 class OrderService
 {
     public function __construct(
         private readonly OrderRepository $orderRepository,
+        private readonly OrderProductRepository $orderProductRepository,
         private readonly PaginationService $paginationService,
         private readonly UuidService $uuidService,
         private readonly LoggerInterface $logger,
@@ -40,6 +44,16 @@ class OrderService
         ];
     }
 
+    public function getOrderProductsByOrder(Order $order): array
+    {
+        $this->logger->debug("OrderService::getOrderProducts ENTER");
+
+        $orderProducts = $this->orderProductRepository->getOrderProductsByOrder($order)->getQuery()->getResult();
+
+        $this->logger->debug("OrderService::getOrderProducts EXIT");
+        return $orderProducts;
+    }
+
     private function getAllOrdersInShortOrderDto(Paginator $paginator): array
     {
         $this->logger->debug("OrderService::getAllOrdersInShortOrderDto ENTER");
@@ -47,7 +61,7 @@ class OrderService
         $products = [];
         foreach ($paginator as $order) {
             $products[] = new ShortOrderDto(
-                orderNumber: $this->generateNewOrderNumber(),
+                orderNumber: "ABC",
                 trackingNumber: $this->uuidService->generateUuid62(),
                 productCount: $this->calculateTotalQuantity($order),
                 totalAmount: $this->calculateTotalAmount($order),
@@ -84,17 +98,5 @@ class OrderService
 
         $this->logger->debug("OrderService::calculateTotalAmount EXIT");
         return $totalAmount;
-    }
-
-    public function generateNewOrderNumber(): string
-    {
-        $this->logger->debug("OrderService::generateNewOrderNumber ENTER");
-
-        $yearMonth = (new \DateTimeImmutable())->format('ym');
-        $uuid = $this->uuidService->generateUuid62();
-        $last8Digits = strtoupper(str_split($uuid, 8)[1]);
-
-        $this->logger->debug("OrderService::generateNewOrderNumber EXIT");
-        return "ORD-{$yearMonth}-{$last8Digits}";
     }
 }
