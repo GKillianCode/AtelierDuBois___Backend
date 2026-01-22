@@ -2,42 +2,47 @@
 
 namespace App\Repository\Order;
 
+use App\Entity\Order\OrderStatus;
+use Psr\Log\LoggerInterface;
 use App\Entity\Order\ShipmentItem;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use App\Entity\Product\ProductVariant;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 /**
  * @extends ServiceEntityRepository<ShipmentItem>
  */
 class ShipmentItemRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    private LoggerInterface $logger;
+
+    public function __construct(ManagerRegistry $registry, LoggerInterface $logger)
     {
         parent::__construct($registry, ShipmentItem::class);
+        $this->logger = $logger;
     }
 
-    //    /**
-    //     * @return ShipmentItem[] Returns an array of ShipmentItem objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('s')
-    //            ->andWhere('s.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('s.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
+    public function getReservedStockForProductVariant(ProductVariant $productVariant, OrderStatus $status): int
+    {
+        $this->logger->debug("ShipmentItemRepository::getReservedStockForProductVariant ENTER");
 
-    //    public function findOneBySomeField($value): ?ShipmentItem
-    //    {
-    //        return $this->createQueryBuilder('s')
-    //            ->andWhere('s.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
+        $query = $this->createQueryBuilder('tShipmentItem')
+            ->select('COALESCE(SUM(tShipmentItem.quantity), 0) as reservedStock')
+            ->leftJoin('tShipmentItem.shipmentId', 'tShipment')
+            ->leftJoin('tShipment.statusId', 'tStatus')
+            ->leftJoin('tShipmentItem.orderProductId', 'tOrderProduct')
+            ->where('tOrderProduct.productVariantId = :productVariant')
+            ->andWhere('tStatus = :status')
+            ->setParameter('productVariant', $productVariant)
+            ->setParameter('status', $status);
+
+        $result = $query->getQuery()
+            ->getSingleScalarResult();
+
+        $reservedStock = (int) $result;
+
+        $this->logger->debug("ShipmentItemRepository::getReservedStockForProductVariant EXIT");
+
+        return $reservedStock;
+    }
 }
