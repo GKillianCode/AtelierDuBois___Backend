@@ -2,11 +2,12 @@
 
 namespace App\Service\User;
 
+use App\Enum\UserType;
 use App\Entity\User\User;
+use App\Util\ValidatorUtil;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Uid\Uuid;
 use App\Dto\User\RegisterUserDto;
-use App\Enum\UserType;
 use App\Service\ValidatorService;
 use App\Repository\User\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -16,7 +17,7 @@ class UserService
     public function __construct(
         public readonly LoggerInterface $logger,
         public readonly EntityManagerInterface $entityManager,
-        public readonly ValidatorService $validatorService,
+        public readonly ValidatorUtil $validatorUtil,
         public readonly UserRepository $userRepository,
     ) {}
 
@@ -49,7 +50,7 @@ class UserService
     {
         $this->logger->debug("UserService::validateUser ENTER");
 
-        $violations = $this->validatorService->getViolationsAsArray($user);
+        $violations = $this->validatorUtil->getViolationsAsArray($user);
         if (!empty($violations)) {
             $this->logger->error("UserService::validateUser VALIDATION ERROR");
             throw new \RuntimeException('Validation error while adding user: ' . json_encode($violations));
