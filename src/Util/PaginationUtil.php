@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Service;
+namespace App\Util;
 
 use Psr\Log\LoggerInterface;
 use App\Dto\Types\PaginationDataDto;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 
-class PaginationService
+class PaginationUtil
 {
     public function __construct(
         private readonly LoggerInterface $logger
@@ -14,9 +14,9 @@ class PaginationService
 
     public function getMetaPaginationData(Paginator $paginator, int $limit, int $page): PaginationDataDto
     {
-        $this->logger->debug("PaginationService::getMetaPaginationData ENTER");
+        $this->logger->debug("PaginationUtil::getMetaPaginationData ENTER");
 
-        $totalItems = count($paginator);
+        $totalItems = \count($paginator);
         $totalPages = (int) ceil($totalItems / $limit);
 
         $paginationDataDto = new PaginationDataDto(
@@ -28,7 +28,7 @@ class PaginationService
             hasPreviousPage: $page > 1
         );
 
-        $this->logger->debug("PaginationService::getMetaPaginationData EXIT");
+        $this->logger->debug("PaginationUtil::getMetaPaginationData EXIT");
 
         return $paginationDataDto;
     }

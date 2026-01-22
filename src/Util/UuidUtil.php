@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Service;
+namespace App\Util;
 
 use Ramsey\Uuid\Uuid;
 use Psr\Log\LoggerInterface;
 use Ramsey\Uuid\UuidInterface;
 
-class UuidService
+class UuidUtil
 {
     private const BASE62 = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
 
@@ -20,9 +20,9 @@ class UuidService
      */
     public function generateUuid62(): string
     {
-        $this->logger->debug("UuidService::generateUuid62 ENTER");
+        $this->logger->debug("UuidUtil::generateUuid62 ENTER");
         $uuidBase62 = $this->uuidToBase62(Uuid::uuid4());
-        $this->logger->debug("UuidService::generateUuid62 EXIT");
+        $this->logger->debug("UuidUtil::generateUuid62 EXIT");
         return $uuidBase62;
     }
 
@@ -33,7 +33,7 @@ class UuidService
      */
     public function uuidToBase62(UuidInterface $uuid): string
     {
-        $this->logger->debug("UuidService::uuidToBase62 ENTER");
+        $this->logger->debug("UuidUtil::uuidToBase62 ENTER");
         $bytes = $uuid->getBytes();
         $number = gmp_import($bytes);
         $base62 = '';
@@ -49,7 +49,7 @@ class UuidService
         }
 
         $uuidBase62 = str_pad($base62, 22, '0', STR_PAD_LEFT);
-        $this->logger->debug("UuidService::uuidToBase62 EXIT");
+        $this->logger->debug("UuidUtil::uuidToBase62 EXIT");
         return $uuidBase62;
     }
 }
