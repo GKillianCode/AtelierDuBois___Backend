@@ -8,6 +8,7 @@ use App\Util\ValidatorUtil;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Uid\Uuid;
 use App\Dto\User\RegisterUserDto;
+use App\Manager\User\UserManager;
 use App\Service\ValidatorService;
 use App\Repository\User\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
@@ -17,6 +18,7 @@ class UserService
     public function __construct(
         public readonly LoggerInterface $logger,
         public readonly EntityManagerInterface $entityManager,
+        private UserManager $userManager,
         public readonly ValidatorUtil $validatorUtil,
         public readonly UserRepository $userRepository,
     ) {}
@@ -42,7 +44,8 @@ class UserService
         $user->setPlainPassword($registerUserDto->password);
 
         $this->validateUser($user);
-        $this->persistUser($user);
+        $this->userManager->create($user);
+
         $this->logger->debug("UserService::registerUser EXIT");
     }
 
@@ -57,20 +60,5 @@ class UserService
         }
 
         $this->logger->debug("UserService::validateUser EXIT");
-    }
-
-    /**
-     * Persist the User entity to the database.
-     * @param User $user
-     * @return void
-     */
-    private function persistUser(User $user): void
-    {
-        $this->logger->debug("UserService::persistUser ENTER");
-
-        $this->entityManager->persist($user);
-        $this->entityManager->flush();
-
-        $this->logger->debug("UserService::persistUser EXIT");
     }
 }
