@@ -2,8 +2,9 @@
 
 namespace App\Entity\Order;
 
-use App\Repository\Order\ShipmentItemRepository;
 use Doctrine\ORM\Mapping as ORM;
+use App\Trait\TimestampableTrait;
+use App\Repository\Order\ShipmentItemRepository;
 
 #[ORM\Entity(repositoryClass: ShipmentItemRepository::class)]
 class ShipmentItem
@@ -24,16 +25,12 @@ class ShipmentItem
     #[ORM\JoinColumn(nullable: false)]
     private ?OrderProduct $orderProductId = null;
 
-    #[ORM\Column]
-    private ?\DateTimeImmutable $createdAt = null;
-
-    #[ORM\Column]
-    private ?\DateTimeImmutable $updatedAt = null;
+    use TimestampableTrait;
 
     public function __construct()
     {
-        $this->createdAt = new \DateTimeImmutable();
-        $this->updatedAt = new \DateTimeImmutable();
+        $this->setCreatedAtValue();
+        $this->setUpdatedAtValue();
     }
 
     public function getId(): ?int
@@ -73,30 +70,6 @@ class ShipmentItem
     public function setOrderProductId(?OrderProduct $orderProductId): static
     {
         $this->orderProductId = $orderProductId;
-
-        return $this;
-    }
-
-    public function getCreatedAt(): ?\DateTimeImmutable
-    {
-        return $this->createdAt;
-    }
-
-    public function setCreatedAt(\DateTimeImmutable $createdAt): static
-    {
-        $this->createdAt = $createdAt;
-
-        return $this;
-    }
-
-    public function getUpdatedAt(): ?\DateTimeImmutable
-    {
-        return $this->updatedAt;
-    }
-
-    public function setUpdatedAt(\DateTimeImmutable $updatedAt): static
-    {
-        $this->updatedAt = $updatedAt;
 
         return $this;
     }

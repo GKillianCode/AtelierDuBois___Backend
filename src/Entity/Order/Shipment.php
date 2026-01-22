@@ -3,10 +3,11 @@
 namespace App\Entity\Order;
 
 use App\Entity\User\Address;
+use Doctrine\ORM\Mapping as ORM;
+use App\Trait\TimestampableTrait;
+use Doctrine\Common\Collections\Collection;
 use App\Repository\Order\ShipmentRepository;
 use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
-use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ShipmentRepository::class)]
 class Shipment
@@ -47,17 +48,13 @@ class Shipment
     #[ORM\OneToMany(targetEntity: ShipmentItem::class, mappedBy: 'shipmentId')]
     private Collection $shipmentItems;
 
-    #[ORM\Column]
-    private ?\DateTimeImmutable $createdAt = null;
-
-    #[ORM\Column]
-    private ?\DateTimeImmutable $updatedAt = null;
+    use TimestampableTrait;
 
     public function __construct()
     {
         $this->shipmentItems = new ArrayCollection();
-        $this->createdAt = new \DateTimeImmutable();
-        $this->updatedAt = new \DateTimeImmutable();
+        $this->setCreatedAtValue();
+        $this->setUpdatedAtValue();
     }
 
     public function getId(): ?int
@@ -175,30 +172,6 @@ class Shipment
                 $shipmentItem->setShipmentId(null);
             }
         }
-
-        return $this;
-    }
-
-    public function getCreatedAt(): ?\DateTimeImmutable
-    {
-        return $this->createdAt;
-    }
-
-    public function setCreatedAt(\DateTimeImmutable $createdAt): static
-    {
-        $this->createdAt = $createdAt;
-
-        return $this;
-    }
-
-    public function getUpdatedAt(): ?\DateTimeImmutable
-    {
-        return $this->updatedAt;
-    }
-
-    public function setUpdatedAt(\DateTimeImmutable $updatedAt): static
-    {
-        $this->updatedAt = $updatedAt;
 
         return $this;
     }

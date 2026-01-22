@@ -2,8 +2,9 @@
 
 namespace App\Entity\Order;
 
-use App\Repository\Order\CarrierRepository;
 use Doctrine\ORM\Mapping as ORM;
+use App\Trait\TimestampableTrait;
+use App\Repository\Order\CarrierRepository;
 
 #[ORM\Entity(repositoryClass: CarrierRepository::class)]
 class Carrier
@@ -19,16 +20,12 @@ class Carrier
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $trackingUrlTemplate = null;
 
-    #[ORM\Column]
-    private ?\DateTimeImmutable $createdAt = null;
-
-    #[ORM\Column]
-    private ?\DateTimeImmutable $updatedAt = null;
+    use TimestampableTrait;
 
     public function __construct()
     {
-        $this->createdAt = new \DateTimeImmutable();
-        $this->updatedAt = new \DateTimeImmutable();
+        $this->setCreatedAtValue();
+        $this->setUpdatedAtValue();
     }
 
     public function getId(): ?int
@@ -56,30 +53,6 @@ class Carrier
     public function setTrackingUrlTemplate(?string $trackingUrlTemplate): static
     {
         $this->trackingUrlTemplate = $trackingUrlTemplate;
-
-        return $this;
-    }
-
-    public function getCreatedAt(): ?\DateTimeImmutable
-    {
-        return $this->createdAt;
-    }
-
-    public function setCreatedAt(\DateTimeImmutable $createdAt): static
-    {
-        $this->createdAt = $createdAt;
-
-        return $this;
-    }
-
-    public function getUpdatedAt(): ?\DateTimeImmutable
-    {
-        return $this->updatedAt;
-    }
-
-    public function setUpdatedAt(\DateTimeImmutable $updatedAt): static
-    {
-        $this->updatedAt = $updatedAt;
 
         return $this;
     }

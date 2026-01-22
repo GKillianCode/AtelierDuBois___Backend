@@ -2,10 +2,11 @@
 
 namespace App\Entity\Product;
 
-use App\Repository\Product\WoodRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use App\Trait\TimestampableTrait;
+use App\Repository\Product\WoodRepository;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
 
 #[ORM\Entity(repositoryClass: WoodRepository::class)]
 class Wood
@@ -24,17 +25,13 @@ class Wood
     #[ORM\OneToMany(targetEntity: ProductVariant::class, mappedBy: 'woodId')]
     private Collection $productVariants;
 
-    #[ORM\Column]
-    private ?\DateTimeImmutable $createdAt = null;
-
-    #[ORM\Column]
-    private ?\DateTimeImmutable $updatedAt = null;
+    use TimestampableTrait;
 
     public function __construct()
     {
         $this->productVariants = new ArrayCollection();
-        $this->createdAt = new \DateTimeImmutable();
-        $this->updatedAt = new \DateTimeImmutable();
+        $this->setCreatedAtValue();
+        $this->setUpdatedAtValue();
     }
 
     public function getId(): ?int
@@ -80,30 +77,6 @@ class Wood
                 $productVariant->setWoodId(null);
             }
         }
-
-        return $this;
-    }
-
-    public function getCreatedAt(): ?\DateTimeImmutable
-    {
-        return $this->createdAt;
-    }
-
-    public function setCreatedAt(\DateTimeImmutable $createdAt): static
-    {
-        $this->createdAt = $createdAt;
-
-        return $this;
-    }
-
-    public function getUpdatedAt(): ?\DateTimeImmutable
-    {
-        return $this->updatedAt;
-    }
-
-    public function setUpdatedAt(\DateTimeImmutable $updatedAt): static
-    {
-        $this->updatedAt = $updatedAt;
 
         return $this;
     }

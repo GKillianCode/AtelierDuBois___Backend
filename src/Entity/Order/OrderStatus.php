@@ -4,6 +4,7 @@ namespace App\Entity\Order;
 
 use App\Enum\OrderStatusCode;
 use Doctrine\ORM\Mapping as ORM;
+use App\Trait\TimestampableTrait;
 use App\Repository\Order\OrderStatusRepository;
 
 #[ORM\Entity(repositoryClass: OrderStatusRepository::class)]
@@ -20,16 +21,12 @@ class OrderStatus
     #[ORM\Column(length: 50, unique: true)]
     private ?string $code = null;
 
-    #[ORM\Column]
-    private ?\DateTimeImmutable $createdAt = null;
-
-    #[ORM\Column]
-    private ?\DateTimeImmutable $updatedAt = null;
+    use TimestampableTrait;
 
     public function __construct()
     {
-        $this->createdAt = new \DateTimeImmutable();
-        $this->updatedAt = new \DateTimeImmutable();
+        $this->setCreatedAtValue();
+        $this->setUpdatedAtValue();
     }
 
     public function getId(): ?int
@@ -57,30 +54,6 @@ class OrderStatus
     public function setCode(OrderStatusCode $code): static
     {
         $this->code = $code->value;
-
-        return $this;
-    }
-
-    public function getCreatedAt(): ?\DateTimeImmutable
-    {
-        return $this->createdAt;
-    }
-
-    public function setCreatedAt(\DateTimeImmutable $createdAt): static
-    {
-        $this->createdAt = $createdAt;
-
-        return $this;
-    }
-
-    public function getUpdatedAt(): ?\DateTimeImmutable
-    {
-        return $this->updatedAt;
-    }
-
-    public function setUpdatedAt(\DateTimeImmutable $updatedAt): static
-    {
-        $this->updatedAt = $updatedAt;
 
         return $this;
     }

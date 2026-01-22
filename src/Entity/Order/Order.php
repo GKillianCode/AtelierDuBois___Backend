@@ -3,10 +3,11 @@
 namespace App\Entity\Order;
 
 use App\Entity\User\User;
-use App\Repository\Order\OrderRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use App\Trait\TimestampableTrait;
+use App\Repository\Order\OrderRepository;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
 
 #[ORM\Entity(repositoryClass: OrderRepository::class)]
 #[ORM\Table(name: '`order`')]
@@ -24,22 +25,18 @@ class Order
     #[ORM\Column]
     private ?int $total_price = null;
 
-    #[ORM\Column]
-    private ?\DateTimeImmutable $createdAt = null;
-
-    #[ORM\Column]
-    private ?\DateTimeImmutable $updatedAt = null;
-
     /**
      * @var Collection<int, Shipment>
      */
     #[ORM\OneToMany(targetEntity: Shipment::class, mappedBy: 'orderId')]
     private Collection $shipments;
 
+    use TimestampableTrait;
+
     public function __construct()
     {
-        $this->createdAt = new \DateTimeImmutable();
-        $this->updatedAt = new \DateTimeImmutable();
+        $this->setCreatedAtValue();
+        $this->setUpdatedAtValue();
         $this->shipments = new ArrayCollection();
     }
 
@@ -68,30 +65,6 @@ class Order
     public function setTotalPrice(int $total_price): static
     {
         $this->total_price = $total_price;
-
-        return $this;
-    }
-
-    public function getCreatedAt(): ?\DateTimeImmutable
-    {
-        return $this->createdAt;
-    }
-
-    public function setCreatedAt(\DateTimeImmutable $createdAt): static
-    {
-        $this->createdAt = $createdAt;
-
-        return $this;
-    }
-
-    public function getUpdatedAt(): ?\DateTimeImmutable
-    {
-        return $this->updatedAt;
-    }
-
-    public function setUpdatedAt(\DateTimeImmutable $updatedAt): static
-    {
-        $this->updatedAt = $updatedAt;
 
         return $this;
     }
