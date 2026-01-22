@@ -9,6 +9,7 @@ use Psr\Log\LoggerInterface;
 use OpenApi\Attributes as OA;
 use App\Response\ErrorResponse;
 use App\Dto\User\RegisterUserDto;
+use App\Manager\User\UserManager;
 use App\Service\User\UserService;
 use Nelmio\ApiDocBundle\Attribute\Model;
 use Symfony\Component\HttpFoundation\Request;
@@ -25,7 +26,8 @@ final class UserController extends AbstractController
         public readonly SerializerInterface $serializer,
         public readonly LoggerInterface $logger,
         public readonly UserService $userService,
-        public readonly ValidatorUtil $validatorUtil
+        public readonly ValidatorUtil $validatorUtil,
+        private readonly UserManager $userManager,
     ) {}
 
     #[OA\Post(
@@ -101,7 +103,7 @@ final class UserController extends AbstractController
 
             $violations = $this->validatorUtil->getViolationsAsArray($registerUserDto, ['registration']);
             if (empty($violations)) {
-                if ($this->userService->isUserExistsByEmail($registerUserDto->email)) {
+                if ($this->userManager->emailExists($registerUserDto->email)) {
                     $this->logger->debug("UserController::register EXIT 1");
                     return $this->createErrorResponse(
                         ErrorCode::USER_ALREADY_EXISTS,
