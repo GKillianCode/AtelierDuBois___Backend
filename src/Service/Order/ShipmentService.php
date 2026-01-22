@@ -3,6 +3,7 @@
 namespace App\Service\Order;
 
 use App\Entity\Order\Order;
+use App\Entity\User\Address;
 use App\Service\UuidService;
 use Psr\Log\LoggerInterface;
 use App\Enum\OrderStatusCode;
@@ -38,7 +39,7 @@ class ShipmentService
             $productVariant = $orderProduct->getProductVariantId();
             $product = $productVariant->getProductId();
 
-            $this->createShipment(
+            $this->createShipments(
                 $product,
                 $order,
                 $address,
@@ -49,12 +50,18 @@ class ShipmentService
         }
     }
 
-    private function createShipment(Product $product, Order $order, mixed $address, OrderProduct $orderProduct, int $quantity, int $productMaxStackSize): void
+    private function createShipments(Product $product, Order $order, mixed $address, OrderProduct $orderProduct, int $quantity, int $productMaxStackSize): void
     {
         $quantity = $orderProduct->getQuantity();
         $productMaxStackSize = $product->getMaxStackSize();
         $numberOfShipments = $this->calculateNumberOfShipments($quantity, $productMaxStackSize);
+        $realStock = $this->orderService->getRealStockForProductVariant($orderProduct->getProductVariantId());
 
+        $this->createShipment($realStock, $address, $order, $orderProduct, $quantity, $productMaxStackSize, $numberOfShipments);
+    }
+
+    private function createShipment(int $realStock, Address $address, Order $order, OrderProduct $orderProduct, int $quantity, int $productMaxStackSize, int $numberOfShipments): void
+    {
         for ($i = 0; $i < $numberOfShipments; $i++) {
             $shipment = new Shipment();
             $shipment->setOrderId($order)
@@ -68,19 +75,28 @@ class ShipmentService
             $this->entityManager->persist($shipment);
             $this->entityManager->flush();
 
-
             $itemsQuantity = $quantity >= $productMaxStackSize ? $productMaxStackSize : $quantity;
 
-            $shipmentItem = new ShipmentItem();
-            $shipmentItem->setQuantity($itemsQuantity)
-                ->setShipmentId($shipment)
-                ->setOrderProductId($orderProduct);
+            dd($productMaxStackSize . ' - ' . $quantity . ' - ' . $itemsQuantity);
 
-            $this->entityManager->persist($shipmentItem);
-            $this->entityManager->flush();
+            dump($realStock . ' - ' . $itemsQuantity . ' - ' . $quantity);
+
+
+            $this->createShipmentItem($shipment, $orderProduct, $itemsQuantity);
 
             $quantity -= $itemsQuantity;
         }
+    }
+
+    private function createShipmentItem(Shipment $shipment, OrderProduct $orderProduct, int $itemsQuantity): void
+    {
+        $shipmentItem = new ShipmentItem();
+        $shipmentItem->setQuantity($itemsQuantity)
+            ->setShipmentId($shipment)
+            ->setOrderProductId($orderProduct);
+
+        $this->entityManager->persist($shipmentItem);
+        $this->entityManager->flush();
     }
 
     private function calculateNumberOfShipments(int $quantity, int $maxStackSize): int
