@@ -2,15 +2,18 @@
 
 namespace App\Service\User;
 
+use App\Util\UuidUtil;
 use App\Entity\User\User;
 use App\Dto\User\AddressDto;
 use App\Entity\User\Address;
 use App\Service\UuidService;
 use Psr\Log\LoggerInterface;
 use App\Dto\Types\PublicIdDto;
+use App\Manager\User\AddressManager;
 use App\Service\ValidatorService;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\User\AddressRepository;
+use App\Util\ValidatorUtil;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 class AddressService
@@ -19,9 +22,10 @@ class AddressService
     public function __construct(
         public readonly LoggerInterface $logger,
         public readonly EntityManagerInterface $entityManager,
-        public readonly UuidService $uuidService,
         public readonly AddressRepository $addressRepository,
-        public readonly ValidatorService $validatorService,
+        private readonly AddressManager $addressManager,
+        public readonly UuidUtil $uuidUtil,
+        public readonly ValidatorUtil $validatorUtil,
         #[Autowire('%env(int:USER_MAX_ADDRESSES)%')]
         private readonly int $userMaxAddresses = 5
     ) {}
@@ -63,8 +67,7 @@ class AddressService
         if ($addressDto->isDefault)
             $this->setAddressesAsNonDefault($user);
 
-        $this->validateAddress($address);
-        $this->persistAddress($address);
+        $this->addressManager->create($address);
 
         $this->logger->debug("AddressService::addAddress EXIT");
     }
@@ -100,7 +103,7 @@ class AddressService
     {
         $this->logger->debug("AddressService::createAddressFromDto ENTER");
 
-        $newUuidBase62 = $this->uuidService->generateUuid62();
+        $newUuidBase62 = $this->uuidUtil->generateUuid62();
 
         $address = new Address();
         $address->setUserId($user)
@@ -143,7 +146,7 @@ class AddressService
     {
         $this->logger->debug("AddressService::validateAddress ENTER");
 
-        $violations = $this->validatorService->getViolationsAsArray($address);
+        $violations = $this->validatorUtil->getViolationsAsArray($address);
 
         if (!empty($violations)) {
             $this->logger->error("AddressService::validateAddress VALIDATION ERROR");
@@ -151,21 +154,6 @@ class AddressService
         }
 
         $this->logger->debug("AddressService::validateAddress EXIT");
-    }
-
-    /**
-     * Persist the Address entity to the database.
-     * @param Address $address
-     * @return void
-     */
-    private function persistAddress(Address $address): void
-    {
-        $this->logger->debug("AddressService::persistAddress ENTER");
-
-        $this->entityManager->persist($address);
-        $this->entityManager->flush();
-
-        $this->logger->debug("AddressService::persistAddress EXIT");
     }
 
     public function getAddressByPublicId(User $user, string $publicId): ?Address
@@ -250,7 +238,8 @@ class AddressService
             $this->setAddressesAsNonDefault($user);
 
         $this->validateAddress($address);
-        $this->persistAddress($address);
+
+        $this->addressManager->update($address);
 
         $this->logger->debug("AddressService::updateAddress EXIT");
     }
@@ -258,8 +247,7 @@ class AddressService
     public function removeAddressByPublicId(Address $address): void
     {
         $this->logger->debug("AddressService::removeAddressByPublicId ENTER");
-        $this->entityManager->remove($address);
-        $this->entityManager->flush();
+        $this->addressManager->delete($address);
         $this->logger->debug("AddressService::removeAddressByPublicId EXIT");
     }
 }
