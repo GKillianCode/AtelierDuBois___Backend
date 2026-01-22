@@ -10,6 +10,7 @@ use App\Service\ValidatorService;
 use App\Enum\SortFilter\ProductSortFilterCode;
 use App\Service\Product\ProductService;
 use App\Dto\Product\RequestFilter\RequestProductFiltersDto;
+use App\Util\ValidatorUtil;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -20,7 +21,7 @@ final class ProductController extends AbstractController
 {
     public function __construct(
         private readonly ProductService $productService,
-        private readonly ValidatorService $validatorService,
+        private readonly ValidatorUtil $validatorUtil,
         private readonly LoggerInterface $logger,
     ) {}
 
@@ -48,7 +49,7 @@ final class ProductController extends AbstractController
                 ? new PublicIdDto(publicId: $categoryValue)
                 : null;
 
-            if ($categoryPublicIdDto !== null && $this->validatorService->hasViolations($categoryPublicIdDto)) {
+            if ($categoryPublicIdDto !== null && $this->validatorUtil->hasViolations($categoryPublicIdDto)) {
                 $this->logger->debug("ProductController::getAllProducts EXIT 1 - Invalid category format");
                 return $this->createErrorResponse(
                     ErrorCode::INVALID_DATA,

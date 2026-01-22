@@ -3,11 +3,11 @@
 namespace App\Controller\User;
 
 use App\Enum\ErrorCode;
+use App\Util\ValidatorUtil;
 use App\Dto\User\AddressDto;
-use App\Response\ErrorResponse;
-use App\Service\ValidatorService;
-use App\Service\User\AddressService;
 use Psr\Log\LoggerInterface;
+use App\Response\ErrorResponse;
+use App\Service\User\AddressService;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -20,7 +20,7 @@ final class AddressController extends AbstractController
 
     public function __construct(
         public readonly AddressService $addressService,
-        public readonly ValidatorService $validatorService,
+        public readonly ValidatorUtil $validatorUtil,
         public readonly SerializerInterface $serializer,
         private readonly LoggerInterface $logger
     ) {}
@@ -40,7 +40,7 @@ final class AddressController extends AbstractController
                     'json'
                 );
 
-                $violations = $this->validatorService->getViolationsAsArray($addressDto, null);
+                $violations = $this->validatorUtil->getViolationsAsArray($addressDto, null);
                 if (empty($violations)) {
                     $user = $this->getUser();
                     $this->addressService->addAddress($addressDto, $user);
@@ -143,7 +143,7 @@ final class AddressController extends AbstractController
                 'json'
             );
 
-            $violations = $this->validatorService->getViolationsAsArray($addressDto, null);
+            $violations = $this->validatorUtil->getViolationsAsArray($addressDto, null);
             if (empty($violations)) {
                 $user = $this->getUser();
                 $address = $this->addressService->getAddressByPublicId($user, $publicId);

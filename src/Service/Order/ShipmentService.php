@@ -2,9 +2,9 @@
 
 namespace App\Service\Order;
 
+use App\Util\UuidUtil;
 use App\Entity\Order\Order;
 use App\Entity\User\Address;
-use App\Service\UuidService;
 use Psr\Log\LoggerInterface;
 use App\Enum\OrderStatusCode;
 use App\Entity\Order\Shipment;
@@ -20,8 +20,8 @@ class ShipmentService
 {
     public function __construct(
         private readonly OrderService $orderService,
-        private readonly UuidService $uuidService,
         private readonly AddressService $addressService,
+        private readonly UuidUtil $uuidUtil,
         private readonly OrderStatusRepository $orderStatusRepository,
         private readonly CarrierRepository $carrierRepository,
         private readonly LoggerInterface $logger,
@@ -65,7 +65,7 @@ class ShipmentService
         for ($i = 0; $i < $numberOfShipments; $i++) {
             $shipment = new Shipment();
             $shipment->setOrderId($order)
-                ->setTrackingNumber($this->uuidService->generateUuid62())
+                ->setTrackingNumber($this->uuidUtil->generateUuid62())
                 ->setOrderNumber($this->generateNewOrderNumber())
                 ->setDeliveryAddressId($address)
                 ->setBillingAddressId($address)
@@ -109,7 +109,7 @@ class ShipmentService
         $this->logger->debug("ShipmentService::generateNewOrderNumber ENTER");
 
         $yearMonth = (new \DateTimeImmutable())->format('ym');
-        $uuid = $this->uuidService->generateUuid62();
+        $uuid = $this->uuidUtil->generateUuid62();
         $last8Digits = strtoupper(str_split($uuid, 8)[1]);
 
         $this->logger->debug("ShipmentService::generateNewOrderNumber EXIT");

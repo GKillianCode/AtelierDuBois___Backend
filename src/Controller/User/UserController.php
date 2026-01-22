@@ -4,19 +4,19 @@ namespace App\Controller\User;
 
 use App\Enum\ErrorCode;
 
+use App\Util\ValidatorUtil;
 use Psr\Log\LoggerInterface;
 use OpenApi\Attributes as OA;
 use App\Response\ErrorResponse;
 use App\Dto\User\RegisterUserDto;
 use App\Service\User\UserService;
-use App\Service\ValidatorService;
 use Nelmio\ApiDocBundle\Attribute\Model;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 #[OA\Tag(name: 'Users')]
 final class UserController extends AbstractController
@@ -25,7 +25,7 @@ final class UserController extends AbstractController
         public readonly SerializerInterface $serializer,
         public readonly LoggerInterface $logger,
         public readonly UserService $userService,
-        public readonly ValidatorService $validatorService
+        public readonly ValidatorUtil $validatorUtil
     ) {}
 
     #[OA\Post(
@@ -99,7 +99,7 @@ final class UserController extends AbstractController
                 'json'
             );
 
-            $violations = $this->validatorService->getViolationsAsArray($registerUserDto, ['registration']);
+            $violations = $this->validatorUtil->getViolationsAsArray($registerUserDto, ['registration']);
             if (empty($violations)) {
                 if ($this->userService->isUserExistsByEmail($registerUserDto->email)) {
                     $this->logger->debug("UserController::register EXIT 1");

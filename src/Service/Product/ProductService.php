@@ -7,7 +7,6 @@ use Psr\Log\LoggerInterface;
 use App\Dto\Types\PriceDto;
 use App\Dto\Types\CategoryDto;
 use App\Dto\Types\PublicIdDto;
-use App\Service\PaginationService;
 use App\Enum\SortFilter\CommentSortFilterCode;
 use App\Dto\Product\ShortProductDto;
 use App\Dto\Product\ProductDetailDto;
@@ -22,6 +21,7 @@ use App\Dto\Product\RequestFilter\RequestProductFiltersDto;
 use App\Repository\Product\ProductRepository;
 use App\Repository\Product\ProductReviewRepository;
 use App\Repository\Product\ProductVariantRepository;
+use App\Util\PaginationUtil;
 
 class ProductService
 {
@@ -31,7 +31,7 @@ class ProductService
         private readonly ProductVariantRepository $productVariantRepository,
         private readonly ProductReviewRepository $productReviewRepository,
         private readonly ImageService $imageService,
-        private readonly PaginationService $paginationService
+        private readonly PaginationUtil $paginationUtil
     ) {}
 
     public function getAllProducts(int $page, int $limit, RequestProductFiltersDto $requestFiltersDto): array
@@ -50,7 +50,7 @@ class ProductService
             $productDto->averageRating = isset($ratings[$productDto->id]) ? (int) round($ratings[$productDto->id]) : null;
         }
 
-        $paginationDataDto = $this->paginationService->getMetaPaginationData($paginator, $limit, $page);
+        $paginationDataDto = $this->paginationUtil->getMetaPaginationData($paginator, $limit, $page);
 
         $this->logger->debug("ProductService::getAllProducts EXIT");
 
@@ -91,7 +91,7 @@ class ProductService
         }
 
 
-        $paginationDataDto = $this->paginationService->getMetaPaginationData($paginator, $limit, $page);
+        $paginationDataDto = $this->paginationUtil->getMetaPaginationData($paginator, $limit, $page);
 
         $this->logger->debug("ProductService::getProductReviewsByProductVariantPublicId EXIT");
 

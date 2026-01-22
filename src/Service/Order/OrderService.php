@@ -4,16 +4,16 @@ namespace App\Service\Order;
 
 use App\Entity\User\User;
 use App\Entity\Order\Order;
-use App\Service\UuidService;
 use Psr\Log\LoggerInterface;
 use App\Enum\OrderStatusCode;
 use App\Dto\Order\ShortOrderDto;
-use App\Service\PaginationService;
 use App\Repository\Order\OrderRepository;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use App\Repository\Order\OrderStatusRepository;
 use App\Repository\Order\OrderProductRepository;
 use App\Repository\Order\ShipmentItemRepository;
+use App\Util\PaginationUtil;
+use App\Util\UuidUtil;
 
 class OrderService
 {
@@ -22,8 +22,8 @@ class OrderService
         private readonly OrderProductRepository $orderProductRepository,
         private readonly ShipmentItemRepository $shipmentItemRepository,
         private readonly OrderStatusRepository $orderStatusRepository,
-        private readonly PaginationService $paginationService,
-        private readonly UuidService $uuidService,
+        private readonly PaginationUtil $paginationUtil,
+        private readonly UuidUtil $uuidUtil,
         private readonly LoggerInterface $logger,
     ) {}
 
@@ -52,7 +52,7 @@ class OrderService
 
         $ordersDto = $this->getAllOrdersInShortOrderDto($paginator);
 
-        $paginationDataDto = $this->paginationService->getMetaPaginationData($paginator, $limit, $page);
+        $paginationDataDto = $this->paginationUtil->getMetaPaginationData($paginator, $limit, $page);
 
         $this->logger->debug("OrderService::getAllOrders EXIT");
 
@@ -80,7 +80,7 @@ class OrderService
         foreach ($paginator as $order) {
             $products[] = new ShortOrderDto(
                 orderNumber: "ABC",
-                trackingNumber: $this->uuidService->generateUuid62(),
+                trackingNumber: $this->uuidUtil->generateUuid62(),
                 productCount: $this->calculateTotalQuantity($order),
                 totalAmount: $this->calculateTotalAmount($order),
                 status: $order->getStatusId()->getName(),
