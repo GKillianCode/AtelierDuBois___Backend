@@ -6,22 +6,40 @@ use App\Entity\User\User;
 use App\Entity\Order\Order;
 use App\Service\UuidService;
 use Psr\Log\LoggerInterface;
+use App\Enum\OrderStatusCode;
 use App\Dto\Order\ShortOrderDto;
-use App\Repository\Order\OrderProductRepository;
 use App\Service\PaginationService;
 use App\Repository\Order\OrderRepository;
-use App\Repository\User\UserRepository;
 use Doctrine\ORM\Tools\Pagination\Paginator;
+use App\Repository\Order\OrderStatusRepository;
+use App\Repository\Order\OrderProductRepository;
+use App\Repository\Order\ShipmentItemRepository;
 
 class OrderService
 {
     public function __construct(
         private readonly OrderRepository $orderRepository,
         private readonly OrderProductRepository $orderProductRepository,
+        private readonly ShipmentItemRepository $shipmentItemRepository,
+        private readonly OrderStatusRepository $orderStatusRepository,
         private readonly PaginationService $paginationService,
         private readonly UuidService $uuidService,
         private readonly LoggerInterface $logger,
     ) {}
+
+    public function getRealStockForProductVariant($productVariant): int
+    {
+        $stock = $productVariant->getStock();
+        $status = $this->orderStatusRepository->findOneBy(['code' => OrderStatusCode::PENDING]);
+
+        if ($status === null) {
+            throw new \Exception("Order status '" . OrderStatusCode::PENDING->value . "' not found.");
+        }
+
+        $reservedStock = $this->shipmentItemRepository->getReservedStockForProductVariant($productVariant, $status);
+
+        return $stock - $reservedStock;
+    }
 
     public function getAllOrders(int $page, int $limit, User $user): array
     {
