@@ -2,13 +2,14 @@
 
 namespace App\Repository\Order;
 
-use App\Entity\User\User;
 use App\Entity\Order\Order;
+use Psr\Log\LoggerInterface;
+use App\Enum\OrderStatusCode;
 use Doctrine\ORM\QueryBuilder;
 use App\Entity\Order\OrderProduct;
+use App\Entity\Order\OrderStatus;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Psr\Log\LoggerInterface;
 
 /**
  * @extends ServiceEntityRepository<OrderProduct>
