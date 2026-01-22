@@ -21,8 +21,6 @@ class OrderFixtures extends Fixture implements DependentFixtureInterface
     public const ORDER_STATUS_REFERENCE = 'order_status';
 
     public function __construct(
-        private readonly UuidService $uuidService,
-        private readonly OrderService $orderService,
         private readonly ShipmentService $shipmentService,
     ) {}
 
