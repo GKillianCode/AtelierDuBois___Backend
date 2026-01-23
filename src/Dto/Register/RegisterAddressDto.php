@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Dto\User;
+namespace App\Dto\Register;
 
 use App\Dto\Types\PublicIdDto;
 use Symfony\Component\Validator\Constraints as Assert;
 
-class AddressDto
+class RegisterAddressDto
 {
     public function __construct(
         public ?PublicIdDto $publicId = null,

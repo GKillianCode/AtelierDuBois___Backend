@@ -2,7 +2,7 @@
 
 namespace App\Dto\User;
 
-use App\Dto\User\AddressDto;
+use App\Dto\Register\ResponseAddressDto;
 use Symfony\Component\Validator\Constraints as Assert;
 
 class DefineAddressDto
@@ -12,12 +12,12 @@ class DefineAddressDto
             message: 'L\'adresse de livraison ne doit pas être nulle.'
         )]
         #[Assert\Valid()]
-        public readonly AddressDto $deliveryAddress,
+        public readonly ResponseAddressDto $deliveryAddress,
 
         #[Assert\NotNull(
             message: 'L\'adresse de facturation ne doit pas être nulle.'
         )]
         #[Assert\Valid()]
-        public readonly ?AddressDto $billingAddress,
+        public readonly ?ResponseAddressDto $billingAddress,
     ) {}
 }
