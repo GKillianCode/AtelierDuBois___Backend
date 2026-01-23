@@ -2,9 +2,10 @@
 
 namespace App\Controller\User;
 
+use App\Dto\Register\RegisterAddressDto;
 use App\Enum\ErrorCode;
 use App\Util\ValidatorUtil;
-use App\Dto\User\AddressDto;
+use App\Manager\User\AddressManager;
 use Psr\Log\LoggerInterface;
 use App\Response\ErrorResponse;
 use App\Service\User\AddressService;
@@ -22,7 +23,8 @@ final class AddressController extends AbstractController
         public readonly AddressService $addressService,
         public readonly ValidatorUtil $validatorUtil,
         public readonly SerializerInterface $serializer,
-        private readonly LoggerInterface $logger
+        private readonly LoggerInterface $logger,
+        private readonly AddressManager $addressManager
     ) {}
 
     #[Route('/api/v1/user/address/add', name: 'address_add', methods: ['POST'])]
@@ -31,12 +33,12 @@ final class AddressController extends AbstractController
         try {
             $this->logger->debug("AddressController::addAddress ENTER");
 
-            $areUserCanAddAddress = $this->addressService->canAddAddress($this->getUser());
+            $areUserCanAddAddress = $this->addressManager->canUserAddAddress($this->getUser());
             if ($areUserCanAddAddress) {
 
                 $addressDto = $this->serializer->deserialize(
                     $request->getContent(),
-                    AddressDto::class,
+                    RegisterAddressDto::class,
                     'json'
                 );
 
@@ -75,7 +77,7 @@ final class AddressController extends AbstractController
         try {
             $this->logger->debug("AddressController::canUserAddAddress ENTER");
 
-            $areUserCanAddAddress = $this->addressService->canAddAddress($this->getUser());
+            $areUserCanAddAddress = $this->addressManager->canUserAddAddress($this->getUser());
 
             $this->logger->debug("AddressController::canUserAddAddress EXIT");
             return $this->json([
@@ -139,14 +141,14 @@ final class AddressController extends AbstractController
 
             $addressDto = $this->serializer->deserialize(
                 $request->getContent(),
-                AddressDto::class,
+                RegisterAddressDto::class,
                 'json'
             );
 
             $violations = $this->validatorUtil->getViolationsAsArray($addressDto, null);
             if (empty($violations)) {
                 $user = $this->getUser();
-                $address = $this->addressService->getAddressByPublicId($user, $publicId);
+                $address = $this->addressManager->getAddressByPublicId($user, $publicId);
 
                 if ($address) {
                     $this->addressService->updateAddress($address, $addressDto, $user);
@@ -181,13 +183,12 @@ final class AddressController extends AbstractController
     {
         try {
             $user = $this->getUser();
-            $address = $this->addressService->getAddressByPublicId($user, $publicId);
-            $countRegisteredAddresses = $this->addressService->countUserAddresses($user);
+            $address = $this->addressManager->getAddressByPublicId($user, $publicId);
+            $countRegisteredAddresses = $this->addressManager->countTheNumberOfAddressesForAUser($user);
 
             if ($address) {
                 if ($countRegisteredAddresses > 1) {
-                    $this->addressService->removeAddressByPublicId($address);
-
+                    $this->addressManager->delete($address);
                     $this->logger->debug("AddressController::removeAddress EXIT 1");
                     return $this->json([
                         'status' => 'Address removed successfully'
