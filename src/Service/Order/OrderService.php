@@ -2,18 +2,18 @@
 
 namespace App\Service\Order;
 
+use App\Util\UuidUtil;
 use App\Entity\User\User;
 use App\Entity\Order\Order;
+use App\Util\PaginationUtil;
 use Psr\Log\LoggerInterface;
-use App\Enum\OrderStatusCode;
 use App\Dto\Order\ShortOrderDto;
+use App\Enum\ShipmentStatusCode;
+use App\Manager\Order\ShipmentStatusManager;
 use App\Repository\Order\OrderRepository;
 use Doctrine\ORM\Tools\Pagination\Paginator;
-use App\Repository\Order\OrderStatusRepository;
 use App\Repository\Order\OrderProductRepository;
 use App\Repository\Order\ShipmentItemRepository;
-use App\Util\PaginationUtil;
-use App\Util\UuidUtil;
 
 class OrderService
 {
@@ -21,19 +21,19 @@ class OrderService
         private readonly OrderRepository $orderRepository,
         private readonly OrderProductRepository $orderProductRepository,
         private readonly ShipmentItemRepository $shipmentItemRepository,
-        private readonly OrderStatusRepository $orderStatusRepository,
         private readonly PaginationUtil $paginationUtil,
         private readonly UuidUtil $uuidUtil,
         private readonly LoggerInterface $logger,
+        private readonly ShipmentStatusManager $shipmentStatusManager
     ) {}
 
     public function getRealStockForProductVariant($productVariant): int
     {
         $stock = $productVariant->getStock();
-        $status = $this->orderStatusRepository->findOneBy(['code' => OrderStatusCode::PENDING]);
+        $status = $this->shipmentStatusManager->getShipmentStatusByCode(ShipmentStatusCode::PENDING);
 
         if ($status === null) {
-            throw new \Exception("Order status '" . OrderStatusCode::PENDING->value . "' not found.");
+            throw new \Exception("Order status '" . ShipmentStatusCode::PENDING->value . "' not found.");
         }
 
         $reservedStock = $this->shipmentItemRepository->getReservedStockForProductVariant($productVariant, $status);

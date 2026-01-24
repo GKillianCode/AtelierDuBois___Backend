@@ -6,26 +6,26 @@ use App\Util\UuidUtil;
 use App\Entity\Order\Order;
 use App\Entity\User\Address;
 use Psr\Log\LoggerInterface;
-use App\Enum\OrderStatusCode;
 use App\Entity\Order\Shipment;
 use App\Entity\Product\Product;
+use App\Enum\ShipmentStatusCode;
 use App\Entity\Order\OrderProduct;
 use App\Entity\Order\ShipmentItem;
+use App\Manager\Order\ShipmentStatusManager;
 use App\Manager\User\AddressManager;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\Order\CarrierRepository;
-use App\Repository\Order\OrderStatusRepository;
 
 class ShipmentService
 {
     public function __construct(
         private readonly OrderService $orderService,
         private readonly UuidUtil $uuidUtil,
-        private readonly OrderStatusRepository $orderStatusRepository,
         private readonly CarrierRepository $carrierRepository,
         private readonly LoggerInterface $logger,
         private readonly EntityManagerInterface $entityManager,
-        private readonly AddressManager $addressManager
+        private readonly AddressManager $addressManager,
+        private readonly ShipmentStatusManager $shipmentStatusManager
     ) {}
 
     public function createShipmentsForOrder(Order $order): void
@@ -70,7 +70,7 @@ class ShipmentService
                 ->setDeliveryAddressId($address)
                 ->setBillingAddressId($address)
                 ->setCarrierId($this->carrierRepository->findOneBy(['name' => 'INTERNAL']))
-                ->setStatusId($this->orderStatusRepository->findOneBy(['code' => OrderStatusCode::getFirstStatus()]));
+                ->setStatusId($this->shipmentStatusManager->getShipmentStatusByCode(ShipmentStatusCode::getFirstStatus()));
 
             $this->entityManager->persist($shipment);
             $this->entityManager->flush();
