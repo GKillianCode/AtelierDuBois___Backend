@@ -8,7 +8,7 @@ use App\Entity\User\Address;
 use Psr\Log\LoggerInterface;
 use App\Dto\Types\PublicIdDto;
 use App\Dto\Register\RegisterAddressDto;
-use App\Dto\Register\ResponseAddressDto;
+use App\Dto\Response\ResponseAddressDto;
 
 class AddressMapper
 {
