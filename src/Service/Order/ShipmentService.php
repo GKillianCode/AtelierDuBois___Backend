@@ -11,7 +11,7 @@ use App\Entity\Order\Shipment;
 use App\Entity\Product\Product;
 use App\Entity\Order\OrderProduct;
 use App\Entity\Order\ShipmentItem;
-use App\Service\User\AddressService;
+use App\Manager\User\AddressManager;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\Order\CarrierRepository;
 use App\Repository\Order\OrderStatusRepository;
@@ -20,19 +20,19 @@ class ShipmentService
 {
     public function __construct(
         private readonly OrderService $orderService,
-        private readonly AddressService $addressService,
         private readonly UuidUtil $uuidUtil,
         private readonly OrderStatusRepository $orderStatusRepository,
         private readonly CarrierRepository $carrierRepository,
         private readonly LoggerInterface $logger,
         private readonly EntityManagerInterface $entityManager,
+        private readonly AddressManager $addressManager
     ) {}
 
     public function createShipmentsForOrder(Order $order): void
     {
         $orderProducts = $this->orderService->getOrderProductsByOrder($order);
         $user = $order->getUserId();
-        $address = $this->addressService->getDefaultAddressForUser($user);
+        $address = $this->addressManager->getDefaultAddressForUser($user);
 
         foreach ($orderProducts as $orderProduct) {
 
@@ -50,7 +50,7 @@ class ShipmentService
         }
     }
 
-    private function createShipments(Product $product, Order $order, mixed $address, OrderProduct $orderProduct, int $quantity, int $productMaxStackSize): void
+    private function createShipments(Product $product, Order $order, Address $address, OrderProduct $orderProduct, int $quantity, int $productMaxStackSize): void
     {
         $quantity = $orderProduct->getQuantity();
         $productMaxStackSize = $product->getMaxStackSize();
