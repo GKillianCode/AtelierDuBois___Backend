@@ -1,11 +1,9 @@
 <?php
 
-namespace App\Dto\User;
+namespace App\Dto\Register;
 
 use App\Validator\Constraints\Password\StrongPassword;
 use Symfony\Component\Validator\Constraints as Assert;
-use Symfony\Component\Serializer\Annotation\Context;
-use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 
 class RegisterUserDto
 {

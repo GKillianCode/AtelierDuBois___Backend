@@ -8,7 +8,7 @@ use App\Util\ValidatorUtil;
 use Psr\Log\LoggerInterface;
 use OpenApi\Attributes as OA;
 use App\Response\ErrorResponse;
-use App\Dto\User\RegisterUserDto;
+use App\Dto\Register\RegisterUserDto;
 use App\Manager\User\UserManager;
 use App\Service\User\UserService;
 use Nelmio\ApiDocBundle\Attribute\Model;
