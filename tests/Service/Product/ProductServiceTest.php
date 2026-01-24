@@ -11,7 +11,6 @@ use App\Entity\Product\ProductVariant;
 use App\Entity\Product\ProductReview;
 use App\Service\Product\ProductService;
 use App\Service\Product\ImageService;
-use App\Service\PaginationService;
 use App\Repository\Product\ProductRepository;
 use App\Repository\Product\ProductVariantRepository;
 use App\Repository\Product\ProductReviewRepository;
@@ -25,6 +24,7 @@ use App\Dto\Types\PaginationDataDto;
 use App\Enum\ProductType;
 use App\Enum\SortFilter\ProductSortFilterCode;
 use App\Enum\SortFilter\CommentSortFilterCode;
+use App\Util\PaginationUtil;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Log\LoggerInterface;
@@ -48,7 +48,7 @@ class ProductServiceTest extends TestCase
         $this->productVariantRepository = $this->createMock(ProductVariantRepository::class);
         $this->productReviewRepository = $this->createMock(ProductReviewRepository::class);
         $this->imageService = $this->createMock(ImageService::class);
-        $this->paginationService = $this->createMock(PaginationService::class);
+        $this->paginationService = $this->createMock(PaginationUtil::class);
 
         $this->productService = new ProductService(
             $this->logger,

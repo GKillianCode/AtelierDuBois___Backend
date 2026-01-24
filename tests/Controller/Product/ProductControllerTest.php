@@ -3,7 +3,6 @@
 namespace App\Tests\Controller\Product;
 
 use App\Service\Product\ProductService;
-use App\Service\ValidatorService;
 use App\Dto\Product\ShortProductDto;
 use App\Dto\Product\ProductDetailDto;
 use App\Dto\Product\ProductReviewDto;
@@ -14,6 +13,7 @@ use App\Dto\Types\PriceDto;
 use App\Dto\Types\ImageDto;
 use App\Dto\Types\PaginationDataDto;
 use App\Enum\ProductType;
+use App\Util\ValidatorUtil;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 class ProductControllerTest extends WebTestCase
@@ -78,7 +78,7 @@ class ProductControllerTest extends WebTestCase
     public function testGetAllProductsWithParameters(): void
     {
         $productService = $this->createMock(ProductService::class);
-        $validatorService = $this->createMock(ValidatorService::class);
+        $validatorService = $this->createMock(ValidatorUtil::class);
 
         $validatorService
             ->expects($this->once())
@@ -91,7 +91,7 @@ class ProductControllerTest extends WebTestCase
             ->willReturn(['products' => [], 'pagination' => null]);
 
         self::getContainer()->set(ProductService::class, $productService);
-        self::getContainer()->set(ValidatorService::class, $validatorService);
+        self::getContainer()->set(ValidatorUtil::class, $validatorService);
 
         $this->client->request('GET', '/api/public/v1/product/all', [
             'page' => '2',
@@ -107,13 +107,13 @@ class ProductControllerTest extends WebTestCase
 
     public function testGetAllProductsWithInvalidCategory(): void
     {
-        $validatorService = $this->createMock(ValidatorService::class);
+        $validatorService = $this->createMock(ValidatorUtil::class);
         $validatorService
             ->expects($this->once())
             ->method('hasViolations')
             ->willReturn(true);
 
-        self::getContainer()->set(ValidatorService::class, $validatorService);
+        self::getContainer()->set(ValidatorUtil::class, $validatorService);
 
         $this->client->request('GET', '/api/public/v1/product/all', [
             'category' => 'invalid-category'
