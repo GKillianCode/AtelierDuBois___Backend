@@ -1,15 +1,14 @@
 <?php
 
-namespace App\Manager\Order;
+namespace App\Manager\Shipment;
 
-use App\Entity\Order\OrderStatus;
+use App\Entity\Shipment\OrderStatus;
 use App\Util\ValidatorUtil;
 use Psr\Log\LoggerInterface;
-use App\Entity\Product\Category;
 use App\Enum\ShipmentStatusCode;
 use App\Trait\ValidateAndSaveTrait;
 use Doctrine\ORM\EntityManagerInterface;
-use App\Repository\Order\OrderStatusRepository;
+use App\Repository\Shipment\OrderStatusRepository;
 
 class ShipmentStatusManager
 {
