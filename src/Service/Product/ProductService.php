@@ -18,6 +18,7 @@ use App\Dto\Product\OtherProductVariant;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use App\Dto\Product\RequestFilter\RequestRatingFiltersDto;
 use App\Dto\Product\RequestFilter\RequestProductFiltersDto;
+use App\Mapper\Product\ImageMapper;
 use App\Repository\Product\ProductRepository;
 use App\Repository\Product\ProductReviewRepository;
 use App\Repository\Product\ProductVariantRepository;
@@ -30,7 +31,7 @@ class ProductService
         private readonly ProductRepository $productRepository,
         private readonly ProductVariantRepository $productVariantRepository,
         private readonly ProductReviewRepository $productReviewRepository,
-        private readonly ImageService $imageService,
+        private readonly ImageMapper $imageMapper,
         private readonly PaginationUtil $paginationUtil
     ) {}
 
@@ -162,7 +163,7 @@ class ProductService
                     publicId: new PublicIdDto($product->getCategoryId()->getPublicId())
                 ),
                 unitPrice: new PriceDto($defaultVariant->getPrice()),
-                mainImage: $this->imageService->imageToImageDto($defaultImage),
+                mainImage: $this->imageMapper->toDtoFromEntity($defaultImage),
                 publicId: new PublicIdDto($defaultVariant->getPublicId())
             );
         }
@@ -177,7 +178,7 @@ class ProductService
         $this->logger->debug("ProductService::ProductsVariantsToOtherProductVariantsDto ENTER");
         $otherProductVariants = [];
         foreach ($productsVariants as $productVariant) {
-            $imageDto = $this->imageService->imageToImageDto($productVariant->getImages()->first());
+            $imageDto = $this->imageMapper->toDtoFromEntity($productVariant->getImages()->first());
             $otherProductVariants[] = new OtherProductVariant(
                 publicId: $productVariant->getPublicId(),
                 wood: $productVariant->getWoodId()->getName(),
@@ -202,12 +203,15 @@ class ProductService
                     publicId: new PublicIdDto($mainProductVariant->getProductId()->getCategoryId()->getPublicId())
                 ),
                 unitPrice: new PriceDto($mainProductVariant->getPrice()),
-                mainImage: $this->imageService->imageToImageDto($mainProductVariant->getImages()->first()),
+                mainImage: $this->imageMapper->toDtoFromEntity($mainProductVariant->getImages()->first()),
                 publicId: new PublicIdDto($mainProductVariant->getPublicId())
             ),
             description: $mainProductVariant->getProductId()->getDescription(),
             stock: $mainProductVariant->getStock(),
-            imageUrls: $this->imageService->imagesToImageDtos($mainProductVariant->getImages()->toArray()),
+            imageUrls: array_map(
+                [$this->imageMapper, 'toDtoFromEntity'],
+                $mainProductVariant->getImages()->toArray()
+            ),
             otherProductVariants: $otherProductVariants
         );
 
