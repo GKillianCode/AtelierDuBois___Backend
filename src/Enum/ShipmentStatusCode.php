@@ -2,7 +2,7 @@
 
 namespace App\Enum;
 
-enum OrderStatusCode: string
+enum ShipmentStatusCode: string
 {
     case PENDING = 'PENDING'; // En attente de traitement
     case IN_TRANSIT = 'IN_TRANSIT'; // En transit

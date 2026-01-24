@@ -2,7 +2,7 @@
 
 namespace App\Entity\Order;
 
-use App\Enum\OrderStatusCode;
+use App\Enum\ShipmentStatusCode;
 use Doctrine\ORM\Mapping as ORM;
 use App\Trait\TimestampableTrait;
 use App\Repository\Order\OrderStatusRepository;
@@ -46,12 +46,12 @@ class OrderStatus
         return $this;
     }
 
-    public function getCode(): ?OrderStatusCode
+    public function getCode(): ?ShipmentStatusCode
     {
-        return OrderStatusCode::tryFrom($this->code);
+        return ShipmentStatusCode::tryFrom($this->code);
     }
 
-    public function setCode(OrderStatusCode $code): static
+    public function setCode(ShipmentStatusCode $code): static
     {
         $this->code = $code->value;
 

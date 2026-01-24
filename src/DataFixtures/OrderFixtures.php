@@ -5,12 +5,10 @@ namespace App\DataFixtures;
 use App\Enum\UserType;
 use DateTimeImmutable;
 use App\Entity\Order\Order;
-use App\Service\UuidService;
 use App\Entity\Order\Carrier;
-use App\Enum\OrderStatusCode;
+use App\Enum\ShipmentStatusCode;
 use App\Entity\Order\OrderStatus;
 use App\Entity\Order\OrderProduct;
-use App\Service\Order\OrderService;
 use App\Service\Order\ShipmentService;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Bundle\FixturesBundle\Fixture;
@@ -44,7 +42,7 @@ class OrderFixtures extends Fixture implements DependentFixtureInterface
      */
     private function createOrderStatus(ObjectManager $manager): void
     {
-        foreach (OrderStatusCode::cases() as $index => $statusCode) {
+        foreach (ShipmentStatusCode::cases() as $index => $statusCode) {
             $orderStatus = new OrderStatus();
             $orderStatus->setName($statusCode->getLabel())
                 ->setCode($statusCode);
