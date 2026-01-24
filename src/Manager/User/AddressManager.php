@@ -3,6 +3,7 @@
 namespace App\Manager\User;
 
 use App\Entity\User\User;
+use App\Trait\ValidateAndSaveTrait;
 use App\Util\ValidatorUtil;
 use App\Entity\User\Address;
 use Psr\Log\LoggerInterface;
@@ -39,16 +40,7 @@ class AddressManager
         $this->entityManager->flush();
     }
 
-    public function validateAndSave(Address $address): void
-    {
-        $violations = $this->validatorUtil->getViolationsAsArray($address);
-        if (!empty($violations)) {
-            $this->logger->error("AddressManager::validateAndSave VALIDATION ERROR");
-            throw new \RuntimeException('Validation error while adding address: ' . json_encode($violations));
-        }
-        $this->entityManager->persist($address);
-        $this->entityManager->flush();
-    }
+    use ValidateAndSaveTrait;
 
     /**
      * Check if the user can add a new address based on the maximum allowed addresses.

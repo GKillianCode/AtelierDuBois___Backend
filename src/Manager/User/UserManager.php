@@ -6,7 +6,8 @@ use App\Enum\UserType;
 use App\Entity\User\User;
 use App\Util\ValidatorUtil;
 use Psr\Log\LoggerInterface;
-use App\Dto\User\RegisterUserDto;
+use App\Dto\Register\RegisterUserDto;
+use App\Trait\ValidateAndSaveTrait;
 use App\Repository\User\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -55,14 +56,5 @@ class UserManager
         return $userExists;
     }
 
-    public function validateAndSave(User $user): void
-    {
-        $violations = $this->validatorUtil->getViolationsAsArray($user);
-        if (!empty($violations)) {
-            $this->logger->error("UserManager::validateAndSave VALIDATION ERROR");
-            throw new \RuntimeException('Validation error while adding user: ' . json_encode($violations));
-        }
-        $this->entityManager->persist($user);
-        $this->entityManager->flush();
-    }
+    use ValidateAndSaveTrait;
 }
