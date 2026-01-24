@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Dto\Register;
+namespace App\Dto\Response;
 
 use App\Dto\Types\PublicIdDto;
 
