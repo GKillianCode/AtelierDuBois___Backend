@@ -9,11 +9,11 @@ use App\Util\PaginationUtil;
 use Psr\Log\LoggerInterface;
 use App\Dto\Order\ShortOrderDto;
 use App\Enum\ShipmentStatusCode;
-use App\Manager\Order\ShipmentStatusManager;
+use App\Manager\Shipment\ShipmentStatusManager;
 use App\Repository\Order\OrderRepository;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use App\Repository\Order\OrderProductRepository;
-use App\Repository\Order\ShipmentItemRepository;
+use App\Repository\Shipment\ShipmentItemRepository;
 
 class OrderService
 {

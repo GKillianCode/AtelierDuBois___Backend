@@ -4,6 +4,7 @@ namespace App\Entity\Order;
 
 use App\Entity\User\User;
 use Doctrine\ORM\Mapping as ORM;
+use App\Entity\Shipment\Shipment;
 use App\Trait\TimestampableTrait;
 use App\Repository\Order\OrderRepository;
 use Doctrine\Common\Collections\Collection;
