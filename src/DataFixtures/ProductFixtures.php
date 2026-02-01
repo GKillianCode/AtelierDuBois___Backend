@@ -476,21 +476,21 @@ class ProductFixtures extends Fixture implements DependentFixtureInterface
      */
     private function createImagesForProductVariants(ObjectManager $manager): void
     {
-        $variantCount = 21;
-        for ($i = 0; $i < $variantCount; $i++) {
-            $productVariants = $manager->getRepository(ProductVariant::class)->findAll();
-            if (empty($productVariants) || !isset($productVariants[$i])) {
-                continue;
+        $productVariants = $manager->getRepository(ProductVariant::class)->findAll();
+
+        foreach ($productVariants as $variant) {
+            $imageCount = mt_rand(2, 4);
+
+            for ($i = 0; $i < $imageCount; $i++) {
+                $image = new Image();
+                $image->setFolderName("Vw3Ln9Qb5Pe2Sa0HxF7A")
+                    ->setImageName("Vw3Ln9Qb5Pe2Sa0HxF7B{$i}")
+                    ->setFormat("webp")
+                    ->setIsDefault($i === 0)
+                    ->setProductVariantId($variant);
+
+                $manager->persist($image);
             }
-
-            $image = new Image();
-            $image->setFolderName("Vw3Ln9Qb5Pe2Sa0HxF7A")
-                ->setImageName("Vw3Ln9Qb5Pe2Sa0HxF7B")
-                ->setFormat("webp")
-                ->setIsDefault($i % 3 === 0 ? true : false)
-                ->setProductVariantId($productVariants[$i]);
-
-            $manager->persist($image);
         }
     }
 
