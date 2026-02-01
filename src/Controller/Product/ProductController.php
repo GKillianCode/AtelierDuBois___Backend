@@ -3,26 +3,30 @@
 namespace App\Controller\Product;
 
 use App\Enum\ErrorCode;
-use Psr\Log\LoggerInterface;
-use App\Response\ErrorResponse;
-use App\Dto\Types\PublicIdDto;
-use App\Service\ValidatorService;
-use App\Enum\SortFilter\ProductSortFilterCode;
-use App\Service\Product\ProductService;
-use App\Dto\Product\RequestFilter\RequestProductFiltersDto;
 use App\Util\ValidatorUtil;
+use Psr\Log\LoggerInterface;
+use App\Dto\Types\PublicIdDto;
+use App\Response\ErrorResponse;
+use App\Manager\Product\ProductManager;
+use App\Service\Product\ProductService;
+use App\Mapper\Product\ProductReviewMapper;
 use Symfony\Component\HttpFoundation\Request;
+use App\Enum\SortFilter\ProductSortFilterCode;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use App\Dto\Product\RequestFilter\RequestProductFiltersDto;
+use App\Mapper\Request\ProductRequestMapper;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 final class ProductController extends AbstractController
 {
     public function __construct(
         private readonly ProductService $productService,
-        private readonly ValidatorUtil $validatorUtil,
         private readonly LoggerInterface $logger,
+        private readonly ProductManager $productManager,
+        private readonly ProductReviewMapper $productReviewMapper,
+        private readonly ProductRequestMapper $productRequestMapper,
     ) {}
 
     #[Route('/api/public/v1/product/all', name: 'product_get_all', methods: ['GET'])]
@@ -31,43 +35,11 @@ final class ProductController extends AbstractController
         try {
             $this->logger->debug("ProductController::getAllProducts ENTER");
 
-            $page = (int) $request->query->get('page', 1);
-            $limit = (int) $request->query->get('limit', 20);
-            $search = $request->query->get('search', '');
-            $filterValue = $request->query->get('filter');
-            $productTypeValue = $request->query->get('productType');
-            $categoryValue = $request->query->get('category');
-
-            $filter = $filterValue !== null
-                ? (ProductSortFilterCode::tryFrom($filterValue) ?? ProductSortFilterCode::CREATED_DESC)
-                : ProductSortFilterCode::CREATED_DESC;
-            $productType = $productTypeValue !== null
-                ? (ProductSortFilterCode::tryFrom($productTypeValue) ?? ProductSortFilterCode::PRODUCTS_ALL)
-                : ProductSortFilterCode::PRODUCTS_ALL;
-
-            $categoryPublicIdDto = $categoryValue !== null
-                ? new PublicIdDto(publicId: $categoryValue)
-                : null;
-
-            if ($categoryPublicIdDto !== null && $this->validatorUtil->hasViolations($categoryPublicIdDto)) {
-                $this->logger->debug("ProductController::getAllProducts EXIT 1 - Invalid category format");
-                return $this->createErrorResponse(
-                    ErrorCode::INVALID_DATA,
-                    'Invalid category format. Expected 22 characters in base62 format.',
-                    "Format de catégorie invalide.",
-                );
-            }
-
-            $requestFiltersDto = new RequestProductFiltersDto(
-                search: $search,
-                filter: $filter,
-                productType: $productType,
-                categoryPublicId: $categoryPublicIdDto,
-            );
-
-            $result = $this->productService->getAllProducts($page, $limit, $requestFiltersDto);
+            $getAllProductsRequestDto = $this->productRequestMapper->mapGetAllProductsRequest($request);
+            $result = $this->productService->getPaginatedProducts($getAllProductsRequestDto);
 
             $this->logger->debug("ProductController::getAllProducts EXIT 2");
+
             return $this->json($result, Response::HTTP_OK);
         } catch (\Exception $e) {
             $this->logger->error("ProductController::getAllProducts ERROR::" . $e->getMessage());
@@ -82,7 +54,9 @@ final class ProductController extends AbstractController
     {
         try {
             $this->logger->debug("ProductController::getProductById ENTER with publicId: " . $publicId);
-            $product = $this->productService->getProductVariantByPublicId($publicId);
+
+            $product = $this->productService->findVariantWithDetails($publicId);
+
             if (!$product) {
                 $this->logger->debug("ProductController::getProductById EXIT 1");
                 return $this->createErrorResponse(
@@ -92,6 +66,7 @@ final class ProductController extends AbstractController
                 );
             }
             $this->logger->debug("ProductController::getProductById EXIT 2");
+
             return $this->json($product, Response::HTTP_OK);
         } catch (\Exception $e) {
             $this->logger->error("ProductController::getProductById ERROR::" . $e->getMessage());
@@ -113,8 +88,8 @@ final class ProductController extends AbstractController
             $ratingValue = (int) $request->query->get('rating');
             $publicationOrderValue = $request->query->get('publicationOrder');
 
-            $requestRatingFiltersDto = $this->productService->requestRatingFiltersDtoBuilder($ratingOrderValue, $ratingValue, $publicationOrderValue);
-            $productsReviewsDto = $this->productService->getProductReviewsByProductVariantPublicId($publicId, $page, $limit, $requestRatingFiltersDto);
+            $requestRatingFiltersDto = $this->productReviewMapper->buildRatingFiltersDto($ratingOrderValue, $ratingValue, $publicationOrderValue);
+            $productsReviewsDto = $this->productService->getProductVariantReviews($publicId, $page, $limit, $requestRatingFiltersDto);
 
             $this->logger->debug("ProductController::getProductReviewsByProductVariantPublicId EXIT 2");
             return $this->json($productsReviewsDto, Response::HTTP_OK);
