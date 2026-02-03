@@ -44,7 +44,7 @@ final class ProductController extends AbstractController
     }
 
     #[Route('/api/public/v1/product/{publicId}', name: 'product_get_by_publicid', methods: ['GET'])]
-    public function getProductById(string $publicId): Response
+    public function getProductByPublicId(string $publicId): Response
     {
         try {
             $this->logger->debug("ProductController::getProductById ENTER with publicId: " . $publicId);
@@ -70,8 +70,8 @@ final class ProductController extends AbstractController
         }
     }
 
-    #[Route('/api/public/v1/product/{publicId}/reviews', name: 'product_get_all_reviews_by_publicid', methods: ['GET'])]
-    public function getProductReviewsByProductVariantPublicId(Request $request, string $publicId): Response
+    #[Route('/api/public/v1/product/{publicId}/reviews', name: 'product_get_reviews_by_publicid', methods: ['GET'])]
+    public function getReviewsByVariant(Request $request, string $publicId): Response
     {
         try {
             $this->logger->debug("ProductController::getProductReviewsByProductVariantPublicId ENTER with publicId: " . $publicId);
