@@ -3,19 +3,14 @@
 namespace App\Controller\Product;
 
 use App\Enum\ErrorCode;
-use App\Util\ValidatorUtil;
+use App\Mapper\Request\CommentRequestMapper;
 use Psr\Log\LoggerInterface;
-use App\Dto\Types\PublicIdDto;
 use App\Response\ErrorResponse;
-use App\Manager\Product\ProductManager;
 use App\Service\Product\ProductService;
-use App\Mapper\Product\ProductReviewMapper;
 use Symfony\Component\HttpFoundation\Request;
-use App\Enum\SortFilter\ProductSortFilterCode;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use App\Dto\Product\RequestFilter\RequestProductFiltersDto;
 use App\Mapper\Request\ProductRequestMapper;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
@@ -24,9 +19,8 @@ final class ProductController extends AbstractController
     public function __construct(
         private readonly ProductService $productService,
         private readonly LoggerInterface $logger,
-        private readonly ProductManager $productManager,
-        private readonly ProductReviewMapper $productReviewMapper,
         private readonly ProductRequestMapper $productRequestMapper,
+        private readonly CommentRequestMapper $commentRequestMapper,
     ) {}
 
     #[Route('/api/public/v1/product/all', name: 'product_get_all', methods: ['GET'])]
@@ -81,15 +75,9 @@ final class ProductController extends AbstractController
     {
         try {
             $this->logger->debug("ProductController::getProductReviewsByProductVariantPublicId ENTER with publicId: " . $publicId);
-            $page = (int) $request->query->get('page', 1);
-            $limit = (int) $request->query->get('limit', 10);
 
-            $ratingOrderValue = $request->query->get('ratingOrder');
-            $ratingValue = (int) $request->query->get('rating');
-            $publicationOrderValue = $request->query->get('publicationOrder');
-
-            $requestRatingFiltersDto = $this->productReviewMapper->buildRatingFiltersDto($ratingOrderValue, $ratingValue, $publicationOrderValue);
-            $productsReviewsDto = $this->productService->getProductVariantReviews($publicId, $page, $limit, $requestRatingFiltersDto);
+            $getProductReviewsRequestDto = $this->commentRequestMapper->mapGetAllCommentsRequest($request, $publicId);
+            $productsReviewsDto = $this->productService->getProductVariantReviews($getProductReviewsRequestDto);
 
             $this->logger->debug("ProductController::getProductReviewsByProductVariantPublicId EXIT 2");
             return $this->json($productsReviewsDto, Response::HTTP_OK);
