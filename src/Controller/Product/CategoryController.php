@@ -2,6 +2,7 @@
 
 namespace App\Controller\Product;
 
+use App\Response\ApiResponse;
 use Psr\Log\LoggerInterface;
 use App\Service\Product\CategoryService;
 use Symfony\Component\HttpFoundation\Response;
@@ -21,13 +22,15 @@ final class CategoryController extends AbstractController
         try {
             $this->logger->debug("CategoryController::getAllProducts ENTER");
             $categoriesDto = $this->categoryService->getAllCategoriesInCategoryDto();
-
             $this->logger->debug("CategoryController::getAllProducts EXIT");
-            return $this->json($categoriesDto, Response::HTTP_OK);
+
+            return ApiResponse::success($categoriesDto);
         } catch (\Exception $e) {
-            return $this->json([
-                'error' => 'An error occurred while fetching products. ' . $e->getMessage()
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return ApiResponse::error(
+                'An error occurred while fetching categories. ' . $e->getMessage(),
+                null,
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
         }
     }
 }

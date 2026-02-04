@@ -2,16 +2,14 @@
 
 namespace App\Controller\Product;
 
-use App\Enum\ErrorCode;
-use App\Mapper\Request\CommentRequestMapper;
 use Psr\Log\LoggerInterface;
-use App\Response\ErrorResponse;
+use App\Response\ApiResponse;
 use App\Service\Product\ProductService;
+use App\Mapper\Request\CommentRequestMapper;
+use App\Mapper\Request\ProductRequestMapper;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use App\Mapper\Request\ProductRequestMapper;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 final class ProductController extends AbstractController
@@ -34,12 +32,15 @@ final class ProductController extends AbstractController
 
             $this->logger->debug("ProductController::getAllProducts EXIT 2");
 
-            return $this->json($result, Response::HTTP_OK);
+            return ApiResponse::success($result);
         } catch (\Exception $e) {
             $this->logger->error("ProductController::getAllProducts ERROR::" . $e->getMessage());
-            return $this->json([
-                'error' => 'An error occurred while fetching products. ' . $e->getMessage()
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+
+            return ApiResponse::error(
+                'An error occurred while fetching products. ' . $e->getMessage(),
+                null,
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
         }
     }
 
@@ -53,20 +54,18 @@ final class ProductController extends AbstractController
 
             if (!$product) {
                 $this->logger->debug("ProductController::getProductById EXIT 1");
-                return $this->createErrorResponse(
-                    ErrorCode::PRODUCT_NOT_FOUND,
-                    'Product not found.',
-                    "Produit non trouvé."
-                );
+                return ApiResponse::notFound('Product not found.');
             }
             $this->logger->debug("ProductController::getProductById EXIT 2");
 
-            return $this->json($product, Response::HTTP_OK);
+            return ApiResponse::success($product);
         } catch (\Exception $e) {
             $this->logger->error("ProductController::getProductById ERROR::" . $e->getMessage());
-            return $this->json([
-                'error' => 'An error occurred while fetching the product. ' . $e->getMessage()
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return ApiResponse::error(
+                'An error occurred while fetching the product. ' . $e->getMessage(),
+                null,
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
         }
     }
 
@@ -80,18 +79,15 @@ final class ProductController extends AbstractController
             $productsReviewsDto = $this->productService->getProductVariantReviews($getProductReviewsRequestDto);
 
             $this->logger->debug("ProductController::getProductReviewsByProductVariantPublicId EXIT 2");
-            return $this->json($productsReviewsDto, Response::HTTP_OK);
+
+            return ApiResponse::success($productsReviewsDto);
         } catch (\Exception $e) {
             $this->logger->error("ProductController::getProductReviewsByProductVariantPublicId ERROR::" . $e->getMessage());
-            return $this->json([
-                'error' => 'An error occurred while fetching the product. ' . $e->getMessage()
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+            return ApiResponse::error(
+                'An error occurred while fetching the product. ' . $e->getMessage(),
+                null,
+                Response::HTTP_INTERNAL_SERVER_ERROR
+            );
         }
-    }
-
-    private function createErrorResponse(ErrorCode $code, string $message, string $userMessage, array $details = []): JsonResponse
-    {
-        $errorResponse = new ErrorResponse($code->value, $message, $details, $userMessage);
-        return new JsonResponse($errorResponse->toArray(), Response::HTTP_BAD_REQUEST);
     }
 }
