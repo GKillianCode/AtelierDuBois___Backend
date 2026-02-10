@@ -2,27 +2,18 @@
 
 namespace App\Service\Product;
 
-use App\Enum\ProductType;
-use Psr\Log\LoggerInterface;
-use App\Dto\Types\PriceDto;
-use App\Dto\Types\CategoryDto;
-use App\Dto\Types\PublicIdDto;
-use App\Enum\SortFilter\CommentSortFilterCode;
-use App\Dto\Product\ShortProductDto;
-use App\Dto\Product\ProductDetailDto;
-use App\Dto\Product\ProductReviewDto;
-use App\Entity\Product\ProductReview;
-use App\Service\Product\ImageService;
-use App\Entity\Product\ProductVariant;
-use App\Dto\Product\OtherProductVariant;
-use Doctrine\ORM\Tools\Pagination\Paginator;
-use App\Dto\Product\RequestFilter\RequestRatingFiltersDto;
-use App\Dto\Product\RequestFilter\RequestProductFiltersDto;
-use App\Mapper\Product\ImageMapper;
-use App\Repository\Product\ProductRepository;
-use App\Repository\Product\ProductReviewRepository;
-use App\Repository\Product\ProductVariantRepository;
+use Exception;
 use App\Util\PaginationUtil;
+use Psr\Log\LoggerInterface;
+use App\Manager\Product\ProductManager;
+use App\Dto\Response\ResponseProductDto;
+use App\Mapper\Product\ProductVariantMapper;
+use App\Manager\Product\ProductReviewManager;
+use App\Repository\Product\ProductRepository;
+use App\Dto\Request\Filter\GetAllProductsRequestDto;
+use App\Repository\Product\ProductVariantRepository;
+use App\Dto\Request\Filter\GetProductReviewsRequestDto;
+use App\Dto\Product\RequestFilter\RequestRatingFiltersDto;
 
 class ProductService
 {
@@ -30,30 +21,35 @@ class ProductService
         private readonly LoggerInterface $logger,
         private readonly ProductRepository $productRepository,
         private readonly ProductVariantRepository $productVariantRepository,
-        private readonly ProductReviewRepository $productReviewRepository,
-        private readonly ImageMapper $imageMapper,
-        private readonly PaginationUtil $paginationUtil
+        private readonly PaginationUtil $paginationUtil,
+        private readonly ProductVariantMapper $productVariantMapper,
+        private readonly ProductManager $productManager,
+        private readonly ProductReviewManager $productReviewManager,
     ) {}
 
-    public function getAllProducts(int $page, int $limit, RequestProductFiltersDto $requestFiltersDto): array
+    /**
+     * Retrieves paginated products according to provided filters
+     *
+     * @param GetAllProductsRequestDto $getAllProductsRequestDto The DTO containing pagination and filter parameters
+     * @return array Array containing products and pagination data
+     */
+    public function getPaginatedProducts(GetAllProductsRequestDto $getAllProductsRequestDto): array
     {
-        $this->logger->debug("ProductService::getAllProducts ENTER");
+        $this->logger->debug("ProductService::getPaginatedProducts ENTER");
 
-        $page = max(1, $page);
-        $limit = min(80, max(1, $limit));
+        $paginator = $this->productRepository->paginateProducts($getAllProductsRequestDto);
 
-        $paginator = $this->productRepository->paginateProducts($page, $limit, $requestFiltersDto);
-
-        $productsDto = $this->getAllProductsInShortProductDto($paginator);
+        $productsDto = $this->productVariantMapper->mapProductsToShortDtos($paginator);
         $ratings = $this->productRepository->getAverageRatingsForProducts($productsDto);
 
         foreach ($productsDto as $productDto) {
-            $productDto->averageRating = isset($ratings[$productDto->id]) ? (int) round($ratings[$productDto->id]) : null;
+            $rating = $ratings[$productDto->id] ?? null;
+            $productDto->averageRating = isset($rating) ? (int) round($rating) : null;
         }
 
-        $paginationDataDto = $this->paginationUtil->getMetaPaginationData($paginator, $limit, $page);
+        $paginationDataDto = $this->paginationUtil->getMetaPaginationData($paginator, $getAllProductsRequestDto->getLimit(), $getAllProductsRequestDto->getPage());
 
-        $this->logger->debug("ProductService::getAllProducts EXIT");
+        $this->logger->debug("ProductService::getPaginatedProducts EXIT");
 
         return [
             'products' => $productsDto,
@@ -61,55 +57,44 @@ class ProductService
         ];
     }
 
-    public function getProductReviewsByProductVariantPublicId(string $publicId, int $page, int $limit, RequestRatingFiltersDto $requestRatingFiltersDto): array
+    /**
+     * Retrieves product reviews for a variant by its public ID
+     *
+     * @param string $publicId The public ID of the product variant
+     * @param int $page The page number
+     * @param int $limit The items per page limit
+     * @param RequestRatingFiltersDto $requestRatingFiltersDto The rating filters
+     * @return array Array containing reviews and pagination data
+     */
+    public function getProductVariantReviews(GetProductReviewsRequestDto $getProductReviewsRequestDto): array
     {
-        $this->logger->debug("ProductService::getProductReviewsByProductVariantPublicId ENTER", ['publicId' => $publicId, 'page' => $page, 'limit' => $limit]);
+        $this->logger->debug("ProductService::getProductVariantReviews ENTER", ['publicId' => $getProductReviewsRequestDto->getProductVariantPublicId(), 'page' => $getProductReviewsRequestDto->getPage(), 'limit' => $getProductReviewsRequestDto->getLimit()]);
 
-        $page = max(1, $page);
-        $limit = min(10, max(1, $limit));
-
-        $productVariant = $this->productVariantRepository->findOneBy(['publicId' => $publicId]);
-
-
+        $productVariant = $this->productManager->getProductVariantByPublicId($getProductReviewsRequestDto->getProductVariantPublicId());
         if (!$productVariant) {
-            $this->logger->debug("ProductService::getProductReviewsByProductVariantPublicId EXIT 1 - Product variant not found", ['publicId' => $publicId]);
-            return [
-                'reviews' => [],
-                'pagination' => null
-            ];
+            throw new Exception("Product variant not found for public ID: " . $getProductReviewsRequestDto->getProductVariantPublicId());
         }
 
-        $paginator = $this->productReviewRepository->paginateProductReviews($page, $limit, $productVariant->getId(), $requestRatingFiltersDto);
+        $result = $this->productReviewManager->getReviewsByVariantId($getProductReviewsRequestDto);
 
-        $reviewsDto = [];
-
-        foreach ($paginator as $review) {
-            $user = $review->getUserId();
-            if ($user) {
-                $author = $user->getFirstName() . ' ' . $user->getLastName();
-                $reviewsDto[] = $this->productReviewToProductReviewDto($review, $author);
-            }
-        }
-
-
-        $paginationDataDto = $this->paginationUtil->getMetaPaginationData($paginator, $limit, $page);
-
-        $this->logger->debug("ProductService::getProductReviewsByProductVariantPublicId EXIT");
-
-        return [
-            'products' => $reviewsDto,
-            'pagination' => $paginationDataDto
-        ];
+        $this->logger->debug("ProductService::getProductVariantReviews EXIT");
+        return $result;
     }
 
-    public function getProductVariantByPublicId(string $publicId)
+    /**
+     * Finds a product variant with all its associated details
+     *
+     * @param string $publicId The public ID of the product variant
+     * @return ResponseProductDto|null The detailed product DTO or null if not found
+     */
+    public function findVariantWithDetails(string $publicId): ResponseProductDto|null
     {
-        $this->logger->debug("ProductService::getProductVariantByPublicId ENTER", ['publicId' => $publicId]);
+        $this->logger->debug("ProductManager::findVariantWithDetails ENTER", ['publicId' => $publicId]);
 
-        $productVariant = $this->productVariantRepository->getProductVariantByPublicId($publicId);
+        $productVariant = $this->productManager->getProductVariantByPublicId($publicId);
 
         if (!$productVariant) {
-            $this->logger->debug("ProductService::getProductVariantByPublicId EXIT 2", ['publicId' => $publicId]);
+            $this->logger->debug("ProductManager::findVariantWithDetails EXIT - Variant not found", ['publicId' => $publicId]);
             return null;
         }
 
@@ -117,162 +102,14 @@ class ProductService
         $productsVariants = $this->productVariantRepository->getAllMinimalProductVariant($productId);
 
         if ($productVariant && $productsVariants) {
-            $this->logger->debug("ProductService::getProductVariantByPublicId EXIT 1", ['publicId' => $publicId]);
+            $this->logger->debug("ProductManager::findVariantWithDetails EXIT - Success", ['publicId' => $publicId]);
 
-            $otherProductsVariantsDto = $this->ProductsVariantsToOtherProductVariantsDto($productsVariants);
-            $productDetailDto = $this->ProductVariantToProductDetailDto($productVariant, $otherProductsVariantsDto);
-            return $productDetailDto;
+            $otherProductsVariantsDto = $this->productVariantMapper->mapVariantsToOtherVariantDtos($productsVariants);
+            $responseProductDto = $this->productVariantMapper->variantToDto($productVariant, $otherProductsVariantsDto);
+            return $responseProductDto;
         }
 
-        $this->logger->debug("ProductService::getProductVariantByPublicId EXIT 2", ['publicId' => $publicId]);
+        $this->logger->debug("ProductManager::findVariantWithDetails EXIT - No data found", ['publicId' => $publicId]);
         return null;
-    }
-
-    private function getAllProductsInShortProductDto(Paginator $paginator): array
-    {
-        $this->logger->debug("ProductService::getAllProductsInShortProductDto ENTER");
-
-        $products = [];
-        foreach ($paginator as $product) {
-            $defaultVariant = $product->getProductVariants()->first();
-
-            if (!$defaultVariant) {
-                $this->logger->warning("Product without default variant", [
-                    'productId' => $product->getId()
-                ]);
-                continue;
-            }
-
-            if ($defaultVariant->getImages()->isEmpty()) {
-                $this->logger->warning("Product variant without image", [
-                    'variantId' => $defaultVariant->getId()
-                ]);
-                continue;
-            }
-
-            $defaultImage = $defaultVariant->getImages()->first();
-
-            $productType = $defaultVariant->getStock() != null ? ProductType::IN_STOCK : ProductType::CUSTOM_MADE;
-
-            $products[] = new ShortProductDto(
-                id: $product->getId(),
-                title: $product->getName(),
-                type: $productType,
-                category: new CategoryDto(
-                    name: $product->getCategoryId()->getName(),
-                    publicId: new PublicIdDto($product->getCategoryId()->getPublicId())
-                ),
-                unitPrice: new PriceDto($defaultVariant->getPrice()),
-                mainImage: $this->imageMapper->toDtoFromEntity($defaultImage),
-                publicId: new PublicIdDto($defaultVariant->getPublicId())
-            );
-        }
-
-        $this->logger->debug("ProductService::getAllProductsInShortProductDto EXIT");
-
-        return $products;
-    }
-
-    private function ProductsVariantsToOtherProductVariantsDto($productsVariants): array
-    {
-        $this->logger->debug("ProductService::ProductsVariantsToOtherProductVariantsDto ENTER");
-        $otherProductVariants = [];
-        foreach ($productsVariants as $productVariant) {
-            $imageDto = $this->imageMapper->toDtoFromEntity($productVariant->getImages()->first());
-            $otherProductVariants[] = new OtherProductVariant(
-                publicId: $productVariant->getPublicId(),
-                wood: $productVariant->getWoodId()->getName(),
-                unitPrice: $productVariant->getPrice(),
-                imageUrl: $imageDto->imageUrl,
-            );
-        }
-        $this->logger->debug("ProductService::ProductsVariantsToOtherProductVariantsDto EXIT");
-        return $otherProductVariants;
-    }
-
-    private function ProductVariantToProductDetailDto(ProductVariant $mainProductVariant, array $otherProductVariants): ProductDetailDto
-    {
-        $this->logger->debug("ProductService::ProductVariantToProductDetailDto ENTER");
-        $dto = new ProductDetailDto(
-            shortProduct: new ShortProductDto(
-                id: $mainProductVariant->getProductId()->getId(),
-                title: $mainProductVariant->getProductId()->getName(),
-                type: $mainProductVariant->getStock() != null ? ProductType::IN_STOCK : ProductType::CUSTOM_MADE,
-                category: new CategoryDto(
-                    name: $mainProductVariant->getProductId()->getCategoryId()->getName(),
-                    publicId: new PublicIdDto($mainProductVariant->getProductId()->getCategoryId()->getPublicId())
-                ),
-                unitPrice: new PriceDto($mainProductVariant->getPrice()),
-                mainImage: $this->imageMapper->toDtoFromEntity($mainProductVariant->getImages()->first()),
-                publicId: new PublicIdDto($mainProductVariant->getPublicId())
-            ),
-            description: $mainProductVariant->getProductId()->getDescription(),
-            stock: $mainProductVariant->getStock(),
-            imageUrls: array_map(
-                [$this->imageMapper, 'toDtoFromEntity'],
-                $mainProductVariant->getImages()->toArray()
-            ),
-            otherProductVariants: $otherProductVariants
-        );
-
-        $this->logger->debug("ProductService::ProductVariantToProductDetailDto EXIT");
-        return $dto;
-    }
-
-    private function productReviewToProductReviewDto(ProductReview $productReview, string $author): ProductReviewDto
-    {
-        $this->logger->debug("ProductService::productReviewToProductReviewDto ENTER");
-
-        $sanitizedComment = htmlspecialchars($productReview->getComment(), ENT_QUOTES, 'UTF-8');
-        $sanitizedAuthor = htmlspecialchars(trim($author), ENT_QUOTES, 'UTF-8');
-
-        $dto = new ProductReviewDto(
-            averageRating: $productReview->getRating(),
-            comment: $sanitizedComment,
-            authorName: $sanitizedAuthor,
-            postedtedAt: $productReview->getCreatedAt()
-        );
-
-        $this->logger->debug("ProductService::productReviewToProductReviewDto EXIT");
-
-        return $dto;
-    }
-
-    public function requestRatingFiltersDtoBuilder(?string $ratingOrder, ?int $rating, ?string $publicationOrder): RequestRatingFiltersDto
-    {
-        $this->logger->debug("ProductService::requestRatingFiltersDtoBuilder ENTER");
-
-        $filterRatingOrder = null;
-        $filterRating = null;
-        $filterPublicationOrder = null;
-
-        if ($rating !== null && $rating >= 1 && $rating <= 5) {
-            $filterRating = $rating;
-            $filterRatingOrder = CommentSortFilterCode::RATING_AVERAGE_EQUAL;
-        } else {
-            if ($ratingOrder !== null) {
-                $tryFromFilterRatingOrder = CommentSortFilterCode::tryFrom($ratingOrder);
-                $filterRatingOrder = $tryFromFilterRatingOrder == null ? CommentSortFilterCode::RATING_AVERAGE_DESC : $tryFromFilterRatingOrder;
-            } else {
-                $filterRatingOrder = CommentSortFilterCode::RATING_AVERAGE_DESC;
-            }
-        }
-
-        if ($publicationOrder !== null) {
-            $tryFromFilterPublicationOrder = CommentSortFilterCode::tryFrom($publicationOrder);
-            $filterPublicationOrder = $tryFromFilterPublicationOrder == null ? CommentSortFilterCode::POSTED_DESC : $tryFromFilterPublicationOrder;
-        } else {
-            $filterPublicationOrder = null;
-        }
-
-        $dto = new RequestRatingFiltersDto(
-            ratingOrder: $filterRatingOrder,
-            rating: $filterRating,
-            publicationOrder: $filterPublicationOrder
-        );
-
-        $this->logger->debug("ProductService::requestCommentFiltersDtoBuilder EXIT");
-
-        return $dto;
     }
 }
