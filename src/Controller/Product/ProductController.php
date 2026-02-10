@@ -10,6 +10,7 @@ use App\Mapper\Request\ProductRequestMapper;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 final class ProductController extends AbstractController
@@ -17,6 +18,7 @@ final class ProductController extends AbstractController
     public function __construct(
         private readonly ProductService $productService,
         private readonly LoggerInterface $logger,
+        private readonly SerializerInterface $serializer,
         private readonly ProductRequestMapper $productRequestMapper,
         private readonly CommentRequestMapper $commentRequestMapper,
     ) {}
@@ -32,7 +34,7 @@ final class ProductController extends AbstractController
 
             $this->logger->debug("ProductController::getAllProducts EXIT 2");
 
-            return ApiResponse::success($result);
+            return ApiResponse::success($this->serializer->normalize($result));
         } catch (\Exception $e) {
             $this->logger->error("ProductController::getAllProducts ERROR::" . $e->getMessage());
 
@@ -58,7 +60,7 @@ final class ProductController extends AbstractController
             }
             $this->logger->debug("ProductController::getProductById EXIT 2");
 
-            return ApiResponse::success($product);
+            return ApiResponse::success($this->serializer->normalize($product));
         } catch (\Exception $e) {
             $this->logger->error("ProductController::getProductById ERROR::" . $e->getMessage());
             return ApiResponse::error(
@@ -80,7 +82,7 @@ final class ProductController extends AbstractController
 
             $this->logger->debug("ProductController::getProductReviewsByProductVariantPublicId EXIT 2");
 
-            return ApiResponse::success($productsReviewsDto);
+            return ApiResponse::success($this->serializer->normalize($productsReviewsDto));
         } catch (\Exception $e) {
             $this->logger->error("ProductController::getProductReviewsByProductVariantPublicId ERROR::" . $e->getMessage());
             return ApiResponse::error(
