@@ -2,7 +2,7 @@
 
 namespace App\Serializer\Normalizer\Product;
 
-use App\Dto\Product\CategoryDto;
+use App\Dto\Types\CategoryDto;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 class CategoryDtoNormalizer implements NormalizerInterface
