@@ -90,7 +90,7 @@ final class AddressController extends AbstractController
             $addresses = $this->addressService->getAllAddressesInDto($this->getUser());
 
             $this->logger->debug("AddressController::getAllAddress EXIT");
-            return ApiResponse::success($addresses);
+            return ApiResponse::success($this->serializer->normalize($addresses));
         } catch (\Exception $e) {
             $this->logger->error("AddressController::getAllAddress ERROR::" . $e->getMessage());
             return ApiResponse::serverError(
@@ -109,7 +109,7 @@ final class AddressController extends AbstractController
 
             if ($addressDto) {
                 $this->logger->debug("AddressController::getAddress EXIT");
-                return ApiResponse::success($addressDto);
+                return ApiResponse::success($this->serializer->normalize($addressDto));
             }
 
             return ApiResponse::notFound('Address not found.');
