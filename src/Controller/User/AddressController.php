@@ -2,17 +2,16 @@
 
 namespace App\Controller\User;
 
-use App\Dto\Register\RegisterAddressDto;
-use App\Enum\ErrorCode;
+use App\Enum\ApiErrorCode;
 use App\Util\ValidatorUtil;
-use App\Manager\User\AddressManager;
 use Psr\Log\LoggerInterface;
-use App\Response\ErrorResponse;
+use App\Response\ApiResponse;
+use App\Manager\User\AddressManager;
 use App\Service\User\AddressService;
+use App\Dto\Register\RegisterAddressDto;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
@@ -34,6 +33,7 @@ final class AddressController extends AbstractController
             $this->logger->debug("AddressController::addAddress ENTER");
 
             $areUserCanAddAddress = $this->addressManager->canUserAddAddress($this->getUser());
+
             if ($areUserCanAddAddress) {
 
                 $addressDto = $this->serializer->deserialize(
@@ -47,27 +47,19 @@ final class AddressController extends AbstractController
                     $user = $this->getUser();
                     $this->addressService->addAddress($addressDto, $user);
 
-                    $this->logger->debug("AddressController::addAddress EXIT");
-                    return $this->json([
-                        'status' => 'Address registered successfully'
-                    ], Response::HTTP_CREATED);
+                    return ApiResponse::success(null, Response::HTTP_CREATED);
                 }
 
-                return $this->createErrorResponse(
-                    ErrorCode::INVALID_DATA,
-                    'The provided data is invalid.',
-                    "Les données fournies sont invalides. Veuillez vérifier les informations et réessayer.",
-                    $violations
-                );
+                return ApiResponse::conflict('The provided data is invalid.', $violations, "Les données fournies sont invalides. Veuillez vérifier les informations et réessayer.");
             }
-            return $this->createErrorResponse(
-                ErrorCode::ADDRESS_LIMIT_REACHED,
-                'Maximum number of addresses reached.',
-                "Vous avez atteint le nombre maximal d'adresses que vous pouvez ajouter."
-            );
+
+            return ApiResponse::error(ApiErrorCode::ADDRESS_LIMIT_REACHED->getUserMessage(), 'Maximum number of addresses reached.', "Vous avez atteint le nombre maximal d'adresses que vous pouvez ajouter.");
         } catch (\Exception $e) {
-            $this->logger->error("AddressController::addAddress ERROR::" . ErrorCode::HTTP_INTERNAL_SERVER_ERROR->value);
-            return new JsonResponse(['error' => 'Error while adding address'], Response::HTTP_INTERNAL_SERVER_ERROR);
+            $this->logger->error("AddressController::addAddress ERROR::" . $e->getMessage());
+
+            return ApiResponse::serverError(
+                'An error occurred while adding the address. ' . $e->getMessage(),
+            );
         }
     }
 
@@ -80,12 +72,12 @@ final class AddressController extends AbstractController
             $areUserCanAddAddress = $this->addressManager->canUserAddAddress($this->getUser());
 
             $this->logger->debug("AddressController::canUserAddAddress EXIT");
-            return $this->json([
-                'canAddAddress' => $areUserCanAddAddress
-            ], Response::HTTP_OK);
+            return ApiResponse::success(['canAddAddress' => $areUserCanAddAddress]);
         } catch (\Exception $e) {
-            $this->logger->error("AddressController::canUserAddAddress ERROR::" . ErrorCode::HTTP_INTERNAL_SERVER_ERROR->value);
-            return new JsonResponse(['error' => 'Error while checking address addition capability'], Response::HTTP_INTERNAL_SERVER_ERROR);
+            $this->logger->error("AddressController::canUserAddAddress ERROR::" . $e->getMessage());
+            return ApiResponse::serverError(
+                'An error occurred while checking address addition capability. ' . $e->getMessage()
+            );
         }
     }
 
@@ -98,12 +90,12 @@ final class AddressController extends AbstractController
             $addresses = $this->addressService->getAllAddressesInDto($this->getUser());
 
             $this->logger->debug("AddressController::getAllAddress EXIT");
-            return $this->json([
-                'addresses' => $addresses
-            ], Response::HTTP_OK);
+            return ApiResponse::success($addresses);
         } catch (\Exception $e) {
-            $this->logger->error("AddressController::getAllAddress ERROR::" . ErrorCode::HTTP_INTERNAL_SERVER_ERROR->value);
-            return new JsonResponse(['error' => 'Error while getting all addresses'], Response::HTTP_INTERNAL_SERVER_ERROR);
+            $this->logger->error("AddressController::getAllAddress ERROR::" . $e->getMessage());
+            return ApiResponse::serverError(
+                'An error occurred while getting all addresses. ' . $e->getMessage()
+            );
         }
     }
 
@@ -117,19 +109,15 @@ final class AddressController extends AbstractController
 
             if ($addressDto) {
                 $this->logger->debug("AddressController::getAddress EXIT");
-                return $this->json([
-                    'address' => $addressDto
-                ], Response::HTTP_OK);
+                return ApiResponse::success($addressDto);
             }
 
-            return $this->createErrorResponse(
-                ErrorCode::ADDRESS_NOT_FOUND,
-                'Address not found.',
-                "Adresse non trouvée."
-            );
+            return ApiResponse::notFound('Address not found.');
         } catch (\Exception $e) {
-            $this->logger->error("AddressController::getAddress ERROR::" . ErrorCode::HTTP_INTERNAL_SERVER_ERROR->value);
-            return new JsonResponse(['error' => 'Error while getting address'], Response::HTTP_INTERNAL_SERVER_ERROR);
+            $this->logger->error("AddressController::getAddress ERROR::" . $e->getMessage());
+            return ApiResponse::serverError(
+                'An error occurred while getting the address. ' . $e->getMessage()
+            );
         }
     }
 
@@ -154,27 +142,16 @@ final class AddressController extends AbstractController
                     $this->addressService->updateAddress($address, $addressDto, $user);
 
                     $this->logger->debug("AddressController::updateAddress EXIT");
-                    return $this->json([
-                        'status' => 'Address updated successfully'
-                    ], Response::HTTP_OK);
+                    return ApiResponse::success(['status' => 'Address updated successfully']);
                 }
 
-                return $this->createErrorResponse(
-                    ErrorCode::ADDRESS_NOT_FOUND,
-                    'Address not found.',
-                    "Adresse non trouvée."
-                );
+                return ApiResponse::notFound('Address not found.');
             }
 
-            return $this->createErrorResponse(
-                ErrorCode::INVALID_DATA,
-                'The provided data is invalid.',
-                "Les données fournies sont invalides. Veuillez vérifier les informations et réessayer.",
-                $violations
-            );
+            return ApiResponse::conflict('The provided data is invalid.', $violations, "Les données fournies sont invalides. Veuillez vérifier les informations et réessayer.");
         } catch (\Exception $e) {
-            $this->logger->error("AddressController::updateAddress ERROR::" . ErrorCode::HTTP_INTERNAL_SERVER_ERROR->value);
-            return new JsonResponse(['error' => 'Error while updating address'], Response::HTTP_INTERNAL_SERVER_ERROR);
+            $this->logger->error("AddressController::updateAddress ERROR::" . $e->getMessage());
+            return ApiResponse::serverError('Error while updating address');
         }
     }
 
@@ -190,36 +167,21 @@ final class AddressController extends AbstractController
                 if ($countRegisteredAddresses > 1) {
                     $this->addressManager->delete($address);
                     $this->logger->debug("AddressController::removeAddress EXIT 1");
-                    return $this->json([
-                        'status' => 'Address removed successfully'
-                    ], Response::HTTP_OK);
+                    return ApiResponse::success('Address removed successfully');
                 } else {
                     $this->logger->debug("AddressController::removeAddress EXIT 2");
-                    return $this->createErrorResponse(
-                        ErrorCode::ADDRESS_CANNOT_DELETE_DEFAULT,
-                        'At least one address must be kept.',
-                        "Au moins une adresse doit être conservée."
+                    return ApiResponse::error(
+                        ApiErrorCode::ADDRESS_CANNOT_DELETE_DEFAULT->getUserMessage(),
+                        'At least one address must be kept.'
                     );
                 }
             }
 
             $this->logger->debug("AddressController::removeAddress EXIT 3");
-            return $this->createErrorResponse(
-                ErrorCode::ADDRESS_NOT_FOUND,
-                'Address not found.',
-                "Adresse non trouvée."
-            );
+            return ApiResponse::notFound('Address not found.');
         } catch (\Exception $e) {
-            $this->logger->error("AddressController::removeAddress ERROR::" . ErrorCode::HTTP_INTERNAL_SERVER_ERROR->value);
-            return new JsonResponse(['error' => 'Error while removing address'], Response::HTTP_INTERNAL_SERVER_ERROR);
+            $this->logger->error("AddressController::removeAddress ERROR::" . $e->getMessage());
+            return ApiResponse::serverError('Error while removing address');
         }
-    }
-
-
-    private function createErrorResponse(ErrorCode $code, string $message, string $userMessage, array $details = []): JsonResponse
-    {
-        $errorResponse = new ErrorResponse($code->value, $message, $details, $userMessage);
-        $this->logger->debug("AddressController::addAddress ERROR::" . $code->value);
-        return new JsonResponse($errorResponse->toArray(), Response::HTTP_BAD_REQUEST);
     }
 }
