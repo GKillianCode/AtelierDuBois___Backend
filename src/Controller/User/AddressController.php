@@ -9,6 +9,7 @@ use App\Response\ApiResponse;
 use App\Manager\User\AddressManager;
 use App\Service\User\AddressService;
 use App\Dto\Register\RegisterAddressDto;
+use App\Mapper\Request\AddressRequestMapper;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -23,7 +24,7 @@ final class AddressController extends AbstractController
         public readonly ValidatorUtil $validatorUtil,
         public readonly SerializerInterface $serializer,
         private readonly LoggerInterface $logger,
-        private readonly AddressManager $addressManager
+        private readonly AddressManager $addressManager,
     ) {}
 
     #[Route('/api/v1/user/address/add', name: 'address_add', methods: ['POST'])]
@@ -35,25 +36,12 @@ final class AddressController extends AbstractController
             $areUserCanAddAddress = $this->addressManager->canUserAddAddress($this->getUser());
 
             if ($areUserCanAddAddress) {
-
-                $addressDto = $this->serializer->deserialize(
-                    $request->getContent(),
-                    RegisterAddressDto::class,
-                    'json'
-                );
-
-                $violations = $this->validatorUtil->getViolationsAsArray($addressDto, null);
-                if (empty($violations)) {
-                    $user = $this->getUser();
-                    $this->addressService->addAddress($addressDto, $user);
-
-                    return ApiResponse::success(null, Response::HTTP_CREATED);
-                }
-
-                return ApiResponse::conflict('The provided data is invalid.', $violations, "Les données fournies sont invalides. Veuillez vérifier les informations et réessayer.");
+                $this->addressService->addAddress($request, $this->getUser());
+                return ApiResponse::success();
+            } else {
+                return ApiResponse::error(ApiErrorCode::ADDRESS_LIMIT_REACHED->getUserMessage(), 'Maximum number of addresses reached.', "Vous avez atteint le nombre maximal d'adresses que vous pouvez ajouter.");
             }
-
-            return ApiResponse::error(ApiErrorCode::ADDRESS_LIMIT_REACHED->getUserMessage(), 'Maximum number of addresses reached.', "Vous avez atteint le nombre maximal d'adresses que vous pouvez ajouter.");
+            //return ApiResponse::conflict('The provided data is invalid.', null, "Les données fournies sont invalides. Veuillez vérifier les informations et réessayer.");
         } catch (\Exception $e) {
             $this->logger->error("AddressController::addAddress ERROR::" . $e->getMessage());
 
