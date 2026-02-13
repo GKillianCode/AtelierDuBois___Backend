@@ -29,3 +29,7 @@ services:
     App\Serializer\Normalizer\Product\CategoryDtoNormalizer:
         tags:
             - { name: "serializer.normalizer", priority: 100 }
+
+    App\Serializer\Normalizer\User\ResponseAddressDtoNormalizer:
+        tags:
+            - { name: "serializer.normalizer", priority: 100 }
