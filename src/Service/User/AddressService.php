@@ -8,7 +8,9 @@ use Psr\Log\LoggerInterface;
 use App\Mapper\User\AddressMapper;
 use App\Manager\User\AddressManager;
 use App\Dto\Register\RegisterAddressDto;
-use App\Dto\Register\ResponseAddressDto;
+use App\Dto\Response\ResponseAddressDto;
+use App\Mapper\Request\AddressRequestMapper;
+use Symfony\Component\HttpFoundation\Request;
 
 class AddressService
 {
@@ -16,7 +18,8 @@ class AddressService
     public function __construct(
         private readonly LoggerInterface $logger,
         private readonly AddressManager $addressManager,
-        private readonly AddressMapper $addressMapper
+        private readonly AddressMapper $addressMapper,
+        private readonly AddressRequestMapper $addressRequestMapper
     ) {}
 
     /**
@@ -25,10 +28,11 @@ class AddressService
      * @param User $user
      * @return void
      */
-    public function addAddress(RegisterAddressDto $registerAddressDto, User $user): void
+    public function addAddress(Request $request, User $user): void
     {
         $this->logger->debug("AddressService::addAddress ENTER");
 
+        $registerAddressDto = $this->addressRequestMapper->mapAddAddressRequest($request);
         $address = $this->addressMapper->toEntityFromDto($registerAddressDto, $user);
         $address = $this->addressManager->setADefaultAddress($address, $user);
 
@@ -59,10 +63,11 @@ class AddressService
     {
         $this->logger->debug("AddressService::getAddressInDtoByPublicId ENTER");
 
-        $responseAddressDto = $this->addressManager->getAddressByPublicId($user, $publicId);
+        $address = $this->addressManager->getAddressByPublicId($user, $publicId);
 
-        if ($responseAddressDto) {
-            $addressDto = $this->addressMapper->toDtoFromEntity($responseAddressDto);
+        if ($address) {
+            $addressDto = $this->addressMapper->toDtoFromEntity($address);
+
             $this->logger->debug("AddressService::getAddressInDtoByPublicId EXIT 1");
             return $addressDto;
         }
