@@ -7,15 +7,16 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 class ResponseResumeProductDtoNormalizer implements NormalizerInterface
 {
+    public function __construct(
+        private readonly CategoryDtoNormalizer $categoryDtoNormalizer
+    ) {}
+
     public function normalize($object, $format = null, array $context = []): array
     {
         return [
             'title' => $object->title,
             'type' => $object->type->value,
-            'category' => [
-                'name' => $object->category->name,
-                'publicId' => $object->category->publicId->publicId,
-            ],
+            'category' => $this->categoryDtoNormalizer->normalize($object->category, $format, $context),
             'unitPrice' => $object->unitPrice->amount,
             'publicId' => $object->publicId->publicId,
             'imageUrl' => $object->mainImage->imageUrl,
