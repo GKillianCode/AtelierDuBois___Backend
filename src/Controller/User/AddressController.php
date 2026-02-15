@@ -115,28 +115,18 @@ final class AddressController extends AbstractController
         try {
             $this->logger->debug("AddressController::updateAddress ENTER");
 
-            $addressDto = $this->serializer->deserialize(
-                $request->getContent(),
-                RegisterAddressDto::class,
-                'json'
-            );
+            $user = $this->getUser();
+            $address = $this->addressManager->getAddressByPublicId($user, $publicId);
 
-            $violations = $this->validatorUtil->getViolationsAsArray($addressDto, null);
-            if (empty($violations)) {
-                $user = $this->getUser();
-                $address = $this->addressManager->getAddressByPublicId($user, $publicId);
+            if ($address) {
+                $this->addressService->updateAddress($address, $addressDto, $user);
 
-                if ($address) {
-                    $this->addressService->updateAddress($address, $addressDto, $user);
-
-                    $this->logger->debug("AddressController::updateAddress EXIT");
-                    return ApiResponse::success(['status' => 'Address updated successfully']);
-                }
-
+                $this->logger->debug("AddressController::updateAddress EXIT");
+                return ApiResponse::success(['status' => 'Address updated successfully']);
+            } else {
                 return ApiResponse::notFound('Address not found.');
             }
-
-            return ApiResponse::conflict('The provided data is invalid.', $violations, "Les données fournies sont invalides. Veuillez vérifier les informations et réessayer.");
+            //return ApiResponse::conflict('The provided data is invalid.', $violations, "Les données fournies sont invalides. Veuillez vérifier les informations et réessayer.");
         } catch (\Exception $e) {
             $this->logger->error("AddressController::updateAddress ERROR::" . $e->getMessage());
             return ApiResponse::serverError('Error while updating address');
