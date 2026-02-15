@@ -30,6 +30,6 @@ services:
         tags:
             - { name: "serializer.normalizer", priority: 100 }
 
-    App\Serializer\Normalizer\User\ResponseAddressDtoNormalizer:
+    App\Serializer\Normalizer\User\AddressDtoNormalizer:
         tags:
             - { name: "serializer.normalizer", priority: 100 }
