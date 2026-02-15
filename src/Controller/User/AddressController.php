@@ -8,8 +8,6 @@ use Psr\Log\LoggerInterface;
 use App\Response\ApiResponse;
 use App\Manager\User\AddressManager;
 use App\Service\User\AddressService;
-use App\Dto\Register\RegisterAddressDto;
-use App\Mapper\Request\AddressRequestMapper;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -119,7 +117,7 @@ final class AddressController extends AbstractController
             $address = $this->addressManager->getAddressByPublicId($user, $publicId);
 
             if ($address) {
-                $this->addressService->updateAddress($address, $addressDto, $user);
+                $this->addressService->updateAddress($request, $user);
 
                 $this->logger->debug("AddressController::updateAddress EXIT");
                 return ApiResponse::success(['status' => 'Address updated successfully']);
@@ -138,22 +136,8 @@ final class AddressController extends AbstractController
     {
         try {
             $user = $this->getUser();
-            $address = $this->addressManager->getAddressByPublicId($user, $publicId);
-            $countRegisteredAddresses = $this->addressManager->countTheNumberOfAddressesForAUser($user);
 
-            if ($address) {
-                if ($countRegisteredAddresses > 1) {
-                    $this->addressManager->delete($address);
-                    $this->logger->debug("AddressController::removeAddress EXIT 1");
-                    return ApiResponse::success('Address removed successfully');
-                } else {
-                    $this->logger->debug("AddressController::removeAddress EXIT 2");
-                    return ApiResponse::error(
-                        ApiErrorCode::ADDRESS_CANNOT_DELETE_DEFAULT->getUserMessage(),
-                        'At least one address must be kept.'
-                    );
-                }
-            }
+            $this->addressService->deleteAddress($user, $publicId);
 
             $this->logger->debug("AddressController::removeAddress EXIT 3");
             return ApiResponse::notFound('Address not found.');
