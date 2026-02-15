@@ -2,6 +2,7 @@
 
 namespace App\Mapper\Request;
 
+use App\Dto\User\AddressDto;
 use App\Dto\Types\PublicIdDto;
 use App\Dto\Register\RegisterAddressDto;
 use Symfony\Component\HttpFoundation\Request;
@@ -15,20 +16,20 @@ class AddressRequestMapper
         private ValidatorInterface $validator
     ) {}
 
-    public function mapAddAddressRequest(Request $request): RegisterAddressDto
+    public function mapAddAddressRequest(Request $request): AddressDto
     {
         $addressData = $this->extractJsonData($request);
         $this->validateParameters($addressData, false);
 
-        return $this->createRegisterAddressDto($addressData, false);
+        return $this->createAddressDto($addressData, false);
     }
 
-    public function mapUpdateAddressRequest(Request $request): RegisterAddressDto
+    public function mapUpdateAddressRequest(Request $request): AddressDto
     {
         $addressData = $this->extractJsonData($request);
         $this->validateParameters($addressData, true);
 
-        return $this->createRegisterAddressDto($addressData, true);
+        return $this->createAddressDto($addressData, true);
     }
 
     private function extractJsonData(Request $request): array
@@ -112,11 +113,11 @@ class AddressRequestMapper
         }
     }
 
-    private function createRegisterAddressDto(array $addressData, bool $isPublicIdRequired): RegisterAddressDto
+    private function createAddressDto(array $addressData, bool $isPublicIdRequired): AddressDto
     {
         $publicId = $isPublicIdRequired ? new PublicIdDto($addressData['publicId']) : null;
 
-        return new RegisterAddressDto(
+        return new AddressDto(
             publicId: $publicId,
             street: $addressData['street'] ?? null,
             city: $addressData['city'] ?? null,

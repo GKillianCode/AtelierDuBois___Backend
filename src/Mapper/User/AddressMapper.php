@@ -4,6 +4,7 @@ namespace App\Mapper\User;
 
 use App\Util\UuidUtil;
 use App\Entity\User\User;
+use App\Dto\User\AddressDto;
 use App\Entity\User\Address;
 use Psr\Log\LoggerInterface;
 use App\Dto\Types\PublicIdDto;
@@ -17,7 +18,7 @@ class AddressMapper
         private readonly UuidUtil $uuidUtil,
     ) {}
 
-    public function toEntityFromDto(RegisterAddressDto $registerAddressDto, User $user)
+    public function toEntityFromDto(AddressDto $addressDto, User $user): Address
     {
         $this->logger->debug("AddressMapper::toEntityFromDto ENTER");
 
@@ -26,21 +27,21 @@ class AddressMapper
         $address = new Address();
         $address->setUserId($user)
             ->setPublicId($newUuidBase62)
-            ->setStreet($registerAddressDto->street)
-            ->setZipcode($registerAddressDto->zipcode)
-            ->setCity($registerAddressDto->city)
-            ->setIsProfessionnal($registerAddressDto->isProfessionnal)
-            ->setIsDefault($registerAddressDto->isDefault);
+            ->setStreet($addressDto->getStreet())
+            ->setZipcode($addressDto->getZipcode())
+            ->setCity($addressDto->getCity())
+            ->setIsProfessionnal($addressDto->isProfessionnal())
+            ->setIsDefault($addressDto->isDefault());
 
         $this->logger->debug("AddressMapper::toEntityFromDto EXIT");
         return $address;
     }
 
-    public function toDtoFromEntity(Address $address): ResponseAddressDto
+    public function toDtoFromEntity(Address $address): AddressDto
     {
         $this->logger->debug("AddressMapper::toDtoFromEntity ENTER");
 
-        $responseAddressDto = new ResponseAddressDto(
+        $addressDto = new AddressDto(
             publicId: new PublicIdDto($address->getPublicId()),
             street: $address->getStreet(),
             city: $address->getCity(),
@@ -50,6 +51,6 @@ class AddressMapper
         );
 
         $this->logger->debug("AddressMapper::toDtoFromEntity EXIT");
-        return $responseAddressDto;
+        return $addressDto;
     }
 }

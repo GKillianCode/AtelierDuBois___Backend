@@ -3,12 +3,11 @@
 namespace App\Service\User;
 
 use App\Entity\User\User;
+use App\Dto\User\AddressDto;
 use App\Entity\User\Address;
 use Psr\Log\LoggerInterface;
 use App\Mapper\User\AddressMapper;
 use App\Manager\User\AddressManager;
-use App\Dto\Register\RegisterAddressDto;
-use App\Dto\Response\ResponseAddressDto;
 use App\Mapper\Request\AddressRequestMapper;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -24,7 +23,7 @@ class AddressService
 
     /**
      * Add a new address for the user based on the provided AddressDto.
-     * @param RegisterAddressDto $addressDto
+     * @param Request $request
      * @param User $user
      * @return void
      */
@@ -32,11 +31,11 @@ class AddressService
     {
         $this->logger->debug("AddressService::addAddress ENTER");
 
-        $registerAddressDto = $this->addressRequestMapper->mapAddAddressRequest($request);
-        $address = $this->addressMapper->toEntityFromDto($registerAddressDto, $user);
+        $addressDto = $this->addressRequestMapper->mapAddAddressRequest($request);
+        $address = $this->addressMapper->toEntityFromDto($addressDto, $user);
         $address = $this->addressManager->setADefaultAddress($address, $user);
 
-        if ($registerAddressDto->isDefault)
+        if ($addressDto->isDefault())
             $this->addressManager->unsetAllDefaultAddresses($user);
 
         $this->addressManager->validateAndSave($address);
@@ -59,7 +58,7 @@ class AddressService
         return $addressesDto;
     }
 
-    public function getAddressInDtoByPublicId(User $user, string $publicId): ?ResponseAddressDto
+    public function getAddressInDtoByPublicId(User $user, string $publicId): ?AddressDto
     {
         $this->logger->debug("AddressService::getAddressInDtoByPublicId ENTER");
 
@@ -76,14 +75,15 @@ class AddressService
         return null;
     }
 
-    public function updateAddress(Address $address, RegisterAddressDto $registerAddressUpdateDto, User $user): void
+    public function updateAddress(Request $request, User $user): void
     {
         $this->logger->debug("AddressService::updateAddress ENTER");
 
-        $address = $this->addressMapper->toEntityFromDto($registerAddressUpdateDto, $user);
+        $addressDto = $this->addressRequestMapper->mapUpdateAddressRequest($request);
+        $address = $this->addressMapper->toEntityFromDto($addressDto, $user);
         $address = $this->addressManager->setADefaultAddress($address, $user);
 
-        if ($registerAddressUpdateDto->isDefault)
+        if ($addressDto->isDefault())
             $this->addressManager->unsetAllDefaultAddresses($user);
 
         $this->addressManager->validateAndSave($address);
