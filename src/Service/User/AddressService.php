@@ -4,7 +4,6 @@ namespace App\Service\User;
 
 use App\Entity\User\User;
 use App\Dto\User\AddressDto;
-use App\Entity\User\Address;
 use Psr\Log\LoggerInterface;
 use App\Mapper\User\AddressMapper;
 use App\Manager\User\AddressManager;
@@ -75,13 +74,25 @@ class AddressService
         return null;
     }
 
-    public function updateAddress(Request $request, User $user): void
+    public function updateAddress(Request $request, User $user, string $publicId): void
     {
         $this->logger->debug("AddressService::updateAddress ENTER");
 
-        $addressDto = $this->addressRequestMapper->mapUpdateAddressRequest($request);
-        $address = $this->addressMapper->toEntityFromDto($addressDto, $user);
+        $addressDto = $this->addressRequestMapper->mapUpdateAddressRequest($request, $publicId);
+        $address = $this->addressManager->getAddressByPublicId($user, $publicId);
+
+        if (!$address) {
+            throw new \InvalidArgumentException('Address not found for the given publicId.');
+        }
+
+        $address->setStreet($addressDto->getStreet())
+            ->setZipcode($addressDto->getZipcode())
+            ->setCity($addressDto->getCity())
+            ->setIsProfessionnal($addressDto->isProfessionnal())
+            ->setIsDefault($addressDto->isDefault());
+
         $address = $this->addressManager->setADefaultAddress($address, $user);
+
 
         if ($addressDto->isDefault())
             $this->addressManager->unsetAllDefaultAddresses($user);
@@ -89,5 +100,22 @@ class AddressService
         $this->addressManager->validateAndSave($address);
 
         $this->logger->debug("AddressService::updateAddress EXIT");
+    }
+
+    public function deleteAddress(User $user, string $AddressPublicId): void
+    {
+        $address = $this->addressManager->getAddressByPublicId($user, $AddressPublicId);
+        $countRegisteredAddresses = $this->addressManager->countTheNumberOfAddressesForAUser($user);
+
+        if (!$address) {
+            throw new \InvalidArgumentException('Address not found for the given publicId.');
+        }
+
+        if (!$countRegisteredAddresses > 1) {
+            throw new \LogicException('At least one address must be kept.');
+        }
+
+        $this->addressManager->delete($address);
+        $this->logger->debug("AddressController::removeAddress EXIT 1");
     }
 }
