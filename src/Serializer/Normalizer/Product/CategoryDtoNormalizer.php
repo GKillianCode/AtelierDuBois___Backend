@@ -10,8 +10,8 @@ class CategoryDtoNormalizer implements NormalizerInterface
     public function normalize($object, $format = null, array $context = []): array
     {
         return [
-            'name' => $object->name,
-            'publicId' => $object->publicId->publicId,
+            'name' => $object->getName(),
+            'publicId' => $object->getPublicId()->getPublicId(),
         ];
     }
 

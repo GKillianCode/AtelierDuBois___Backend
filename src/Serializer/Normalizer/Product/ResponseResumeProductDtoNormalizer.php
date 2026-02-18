@@ -14,13 +14,13 @@ class ResponseResumeProductDtoNormalizer implements NormalizerInterface
     public function normalize($object, $format = null, array $context = []): array
     {
         return [
-            'title' => $object->title,
-            'type' => $object->type->value,
-            'category' => $this->categoryDtoNormalizer->normalize($object->category, $format, $context),
-            'unitPrice' => $object->unitPrice->amount,
-            'publicId' => $object->publicId->publicId,
-            'imageUrl' => $object->mainImage->imageUrl,
-            'averageRating' => $object->averageRating,
+            'title' => $object->getTitle(),
+            'type' => $object->getType()->value,
+            'category' => $this->categoryDtoNormalizer->normalize($object->getCategory(), $format, $context),
+            'unitPrice' => $object->getUnitPrice() ? $object->getUnitPrice()->getAmount() : null,
+            'publicId' => $object->getPublicId()->getPublicId(),
+            'imageUrl' => $object->getMainImage()->getImageUrl(),
+            'averageRating' => $object->getAverageRating(),
         ];
     }
 
