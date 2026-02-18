@@ -12,6 +12,7 @@ use App\Dto\Response\ResponseProductDto;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use App\Dto\Response\ResponseResumeProductDto;
 use App\Dto\Response\ResponseResumeProductVariantDto;
+use App\Entity\Product\Product;
 
 class ProductVariantMapper
 {
@@ -78,8 +79,13 @@ class ProductVariantMapper
             responseResumeProductDto: $this->productMapper->toDtoFromEntity($mainProductVariant, $defaultImage),
             description: $mainProductVariant->getProductId()->getDescription(),
             stock: $mainProductVariant->getStock(),
+            wood: $mainProductVariant->getWoodId()->getName(),
+            weightInGrams: $mainProductVariant->getProductId()->getWeightInGrams(),
+            lengthInCentimeters: $mainProductVariant->getProductId()->getLengthInCentimeters(),
+            widthInCentimeters: $mainProductVariant->getProductId()->getWidthInCentimeters(),
+            heightInCentimeters: $mainProductVariant->getProductId()->getHeightInCentimeters(),
             imageUrls: array_map(
-                fn($image) => $this->imageMapper->toDtoFromEntity($image)->imageUrl,
+                fn($image) => $this->imageMapper->toDtoFromEntity($image)->getImageUrl(),
                 $mainProductVariant->getImages()->toArray()
             ),
             responseResumeProductVariantDto: $otherProductVariants
@@ -116,8 +122,8 @@ class ProductVariantMapper
             $variant = new ResponseResumeProductVariantDto(
                 publicId: new PublicIdDto($productVariant->getPublicId()),
                 wood: $productVariant->getWoodId()->getName(),
-                unitPrice: $productVariant->getPrice(),
-                imageUrl: $imageDto->imageUrl,
+                unitPrice: $productVariant->getPrice() ? new PriceDto($productVariant->getPrice()) : null,
+                imageUrl: $imageDto->getImageUrl(),
             );
 
             $variants[] = $variant;
