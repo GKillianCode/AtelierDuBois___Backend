@@ -86,7 +86,7 @@ class ProductRepository extends ServiceEntityRepository
             return [];
         }
 
-        $productIds = array_map(fn(ResponseResumeProductDto $p) => $p->id, $products);
+        $productIds = array_map(fn(ResponseResumeProductDto $p) => $p->getId(), $products);
 
         $results = $this->createQueryBuilder('p')
             ->select('p.id as productId', 'AVG(pr.rating) as avgRating')
