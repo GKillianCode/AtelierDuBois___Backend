@@ -43,8 +43,8 @@ class ProductService
         $ratings = $this->productRepository->getAverageRatingsForProducts($productsDto);
 
         foreach ($productsDto as $productDto) {
-            $rating = $ratings[$productDto->id] ?? null;
-            $productDto->averageRating = isset($rating) ? (int) round($rating) : null;
+            $rating = $ratings[$productDto->getId()] ?? null;
+            $productDto->setAverageRating(isset($rating) ? (int) round($rating) : null);
         }
 
         $paginationDataDto = $this->paginationUtil->getMetaPaginationData($paginator, $getAllProductsRequestDto->getLimit(), $getAllProductsRequestDto->getPage());
