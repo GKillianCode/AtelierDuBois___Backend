@@ -13,6 +13,7 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
 
 class AddressManager
 {
+    use ValidateAndSaveTrait;
     public function __construct(
         private readonly AddressRepository $addressRepository,
         private readonly EntityManagerInterface $entityManager,
@@ -24,14 +25,13 @@ class AddressManager
 
     public function create(Address $address): void
     {
-        $this->entityManager->persist($address);
-        $this->entityManager->flush();
+        $this->validateAndSave($address);
     }
 
     public function update(Address $address): void
     {
         $address->setUpdatedAt(new \DateTimeImmutable());
-        $this->entityManager->flush();
+        $this->validateAndSave($address);
     }
 
     public function delete(Address $address): void
@@ -39,8 +39,6 @@ class AddressManager
         $this->entityManager->remove($address);
         $this->entityManager->flush();
     }
-
-    use ValidateAndSaveTrait;
 
     /**
      * Check if the user can add a new address based on the maximum allowed addresses.
