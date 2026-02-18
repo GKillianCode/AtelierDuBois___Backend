@@ -15,19 +15,24 @@ class ResponseProductDtoNormalizer implements NormalizerInterface
     public function normalize($object, $format = null, array $context = []): array
     {
         $normalizedVariants = [];
-        foreach ($object->responseResumeProductVariantDto as $variant) {
+        foreach ($object->getResponseResumeProductVariantDto() as $variant) {
             $normalizedVariants[] = $this->responseResumeProductVariantDtoNormalizer->normalize($variant, $format, $context);
         }
 
         return [
-            'title' => $object->responseResumeProductDto->title,
-            'description' => $object->description,
-            'type' => $object->responseResumeProductDto->type->value,
-            'category' => $this->responseResumeProductDtoNormalizer->normalize($object->responseResumeProductDto, $format, $context)['category'],
-            'unitPrice' => $object->responseResumeProductDto->unitPrice->amount,
-            'publicId' => $object->responseResumeProductDto->publicId->publicId,
-            'stock' => $object->stock,
-            'imageUrls' => $object->imageUrls,
+            'title' => $object->getResponseResumeProductDto()->getTitle(),
+            'description' => $object->getDescription(),
+            'type' => $object->getResponseResumeProductDto()->getType()->value,
+            'category' => $this->responseResumeProductDtoNormalizer->normalize($object->getResponseResumeProductDto(), $format, $context)['category'],
+            'unitPrice' => $object->getResponseResumeProductDto()->getUnitPrice()->getAmount(),
+            'publicId' => $object->getResponseResumeProductDto()->getPublicId()->getPublicId(),
+            'stock' => $object->getStock(),
+            'wood' => $object->getWood(),
+            'weightInGrams' => $object->getWeightInGrams(),
+            'lengthInCentimeters' => $object->getLengthInCentimeters(),
+            'widthInCentimeters' => $object->getWidthInCentimeters(),
+            'heightInCentimeters' => $object->getHeightInCentimeters(),
+            'imageUrls' => $object->getImageUrls(),
             'productCollection' => $normalizedVariants,
         ];
     }
