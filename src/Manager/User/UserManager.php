@@ -2,14 +2,15 @@
 
 namespace App\Manager\User;
 
-use App\Enum\UserType;
+use App\Dto\Request\RegisterUserDto;
 use App\Entity\User\User;
-use App\Util\ValidatorUtil;
-use Psr\Log\LoggerInterface;
-use App\Dto\Register\RegisterUserDto;
-use App\Trait\ValidateAndSaveTrait;
+use App\Enum\UserType;
 use App\Repository\User\UserRepository;
+use App\Trait\ValidateAndSaveTrait;
+use App\Util\UuidUtil;
+use App\Util\ValidatorUtil;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 
 class UserManager
 {
@@ -17,28 +18,29 @@ class UserManager
         private readonly LoggerInterface $logger,
         private readonly EntityManagerInterface $entityManager,
         private readonly UserRepository $userRepository,
-        private readonly ValidatorUtil $validatorUtil
+        private readonly ValidatorUtil $validatorUtil,
+        private readonly UuidUtil $uuidUtil
     ) {}
 
-    public function create(RegisterUserDto $registerUserDto): User
+    public function create(RegisterUserDto $registerUserDto): void
     {
-        $this->logger->debug("UserService::registerUser ENTER");
+        $this->logger->debug("UserManager::registerUser ENTER");
         $user = new User();
-        $user->setUserType(UserType::CUSTOMER);
-        $user->setFirstname($registerUserDto->firstname);
-        $user->setLastname($registerUserDto->lastname);
-        $user->setEmail($registerUserDto->email);
-        $user->setPlainPassword($registerUserDto->password);
+        $user->setUuid($this->uuidUtil->generateUuid())
+            ->setUserType(UserType::CUSTOMER)
+            ->setFirstname($registerUserDto->getFirstname())
+            ->setLastname($registerUserDto->getLastname())
+            ->setEmail($registerUserDto->getEmail())
+            ->setPlainPassword($registerUserDto->getPassword());
 
-        $this->logger->debug("UserService::registerUser EXIT");
-
-        return $user;
+        $this->validateAndSave($user);
+        $this->logger->debug("UserManager::registerUser EXIT");
     }
 
     public function update(User $user): void
     {
         $user->setUpdatedAt(new \DateTimeImmutable());
-        $this->entityManager->flush();
+        $this->validateAndSave($user);
     }
 
     public function delete(User $user): void
