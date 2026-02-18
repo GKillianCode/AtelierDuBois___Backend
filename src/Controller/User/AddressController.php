@@ -116,8 +116,9 @@ final class AddressController extends AbstractController
             $user = $this->getUser();
             $address = $this->addressManager->getAddressByPublicId($user, $publicId);
 
+
             if ($address) {
-                $this->addressService->updateAddress($request, $user);
+                $this->addressService->updateAddress($request, $user, $publicId);
 
                 $this->logger->debug("AddressController::updateAddress EXIT");
                 return ApiResponse::success(['status' => 'Address updated successfully']);
