@@ -15,6 +15,18 @@ class UuidUtil
     ) {}
 
     /**
+     * Generate a new UUID in standard format
+     * @return string
+     */
+    public function generateUuid(): string
+    {
+        $this->logger->debug("UuidUtil::generateUuid ENTER");
+        $uuidBase62 = Uuid::uuid4();
+        $this->logger->debug("UuidUtil::generateUuid EXIT");
+        return $uuidBase62;
+    }
+
+    /**
      * Generate a new UUID in base 62 format
      * @return string
      */
