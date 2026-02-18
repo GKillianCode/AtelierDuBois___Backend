@@ -10,10 +10,9 @@ class ResponseResumeProductVariantDtoNormalizer implements NormalizerInterface
     public function normalize($object, $format = null, array $context = []): array
     {
         return [
-            'publicId' => $object->publicId->publicId,
-            'unitPrice' => $object->unitPrice,
-            'wood' => $object->wood,
-            'imageUrl' => $object->imageUrl,
+            'publicId' => $object->getPublicId()->getPublicId(),
+            'wood' => $object->getWood(),
+            'imageUrl' => $object->getImageUrl(),
         ];
     }
 
