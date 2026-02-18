@@ -24,15 +24,15 @@ class AddressRequestMapper
         return $this->createAddressDto($addressData, false);
     }
 
-    public function mapUpdateAddressRequest(Request $request): AddressDto
+    public function mapUpdateAddressRequest(Request $request, string $publicId): AddressDto
     {
-        $addressData = $this->extractJsonData($request);
+        $addressData = $this->extractJsonData($request, $publicId);
         $this->validateParameters($addressData, true);
 
         return $this->createAddressDto($addressData, true);
     }
 
-    private function extractJsonData(Request $request): array
+    private function extractJsonData(Request $request, ?string $publicId = null): array
     {
         $data = json_decode($request->getContent(), true);
 
@@ -40,8 +40,9 @@ class AddressRequestMapper
             throw new BadRequestHttpException('Invalid JSON data: ' . json_last_error_msg());
         }
 
+
         $addressData = [
-            'publicId' => $data['publicId'] ?? null,
+            'publicId' => $publicId,
             'street' => $data['street'] ?? null,
             'city' => $data['city'] ?? null,
             'zipcode' => $data['zipcode'] ?? null,
@@ -60,16 +61,16 @@ class AddressRequestMapper
                 new Assert\NotBlank(['message' => 'PublicId is required for updates']),
                 new Assert\Type('string'),
                 new Assert\Regex([
-                    'pattern' => '/^[0-9A-Za-z]{20}$/',
-                    'message' => 'PublicId must be a valid UUID base62 format (20 characters)'
+                    'pattern' => '/^[0-9A-Za-z]{22}$/',
+                    'message' => 'PublicId must be a valid UUID base62 format (22 characters)'
                 ])
             ]
             : [
                 new Assert\Optional([
                     new Assert\Type('string'),
                     new Assert\Regex([
-                        'pattern' => '/^[0-9A-Za-z]{20}$/',
-                        'message' => 'PublicId must be a valid UUID base62 format (20 characters)'
+                        'pattern' => '/^[0-9A-Za-z]{22}$/',
+                        'message' => 'PublicId must be a valid UUID base62 format (22 characters)'
                     ])
                 ])
             ];
@@ -101,6 +102,7 @@ class AddressRequestMapper
                 new Assert\Type('bool')
             ],
         ]);
+
 
         $violations = $this->validator->validate($data, $constraints);
 
