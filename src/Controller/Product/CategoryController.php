@@ -14,8 +14,8 @@ final class CategoryController extends AbstractController
 {
     public function __construct(
         private readonly CategoryService $categoryService,
-        public readonly LoggerInterface $logger,
-        public readonly SerializerInterface $serializer,
+        private readonly LoggerInterface $logger,
+        private readonly SerializerInterface $serializer,
     ) {}
 
     #[Route('/api/public/v1/category/all', name: 'app_product_category', methods: ['GET'])]

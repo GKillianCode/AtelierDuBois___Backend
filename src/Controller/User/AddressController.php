@@ -3,7 +3,6 @@
 namespace App\Controller\User;
 
 use App\Enum\ApiErrorCode;
-use App\Util\ValidatorUtil;
 use Psr\Log\LoggerInterface;
 use App\Response\ApiResponse;
 use App\Manager\User\AddressManager;
@@ -18,9 +17,8 @@ final class AddressController extends AbstractController
 {
 
     public function __construct(
-        public readonly AddressService $addressService,
-        public readonly ValidatorUtil $validatorUtil,
-        public readonly SerializerInterface $serializer,
+        private readonly AddressService $addressService,
+        private readonly SerializerInterface $serializer,
         private readonly LoggerInterface $logger,
         private readonly AddressManager $addressManager,
     ) {}
