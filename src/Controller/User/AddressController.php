@@ -141,7 +141,7 @@ final class AddressController extends AbstractController
             $this->addressService->deleteAddress($user, $publicId);
 
             $this->logger->debug("AddressController::removeAddress EXIT 3");
-            return ApiResponse::notFound('Address not found.');
+            return ApiResponse::success('Address removed successfully.');
         } catch (\Exception $e) {
             $this->logger->error("AddressController::removeAddress ERROR::" . $e->getMessage());
             return ApiResponse::serverError('Error while removing address');
