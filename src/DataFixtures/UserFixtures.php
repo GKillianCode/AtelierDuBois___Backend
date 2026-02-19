@@ -88,42 +88,42 @@ class UserFixtures extends Fixture
                 'zipcode' => '75001',
                 'city' => 'Paris',
                 'isDefault' => true,
-                'isProfessionnal' => false,
+                'isProfessional' => false,
             ],
             [
                 'street' => '45 Avenue des Champs-Élysées',
                 'zipcode' => '75008',
                 'city' => 'Paris',
                 'isDefault' => false,
-                'isProfessionnal' => true,
+                'isProfessional' => true,
             ],
             [
                 'street' => '78 Boulevard Saint-Michel',
                 'zipcode' => '69001',
                 'city' => 'Lyon',
                 'isDefault' => true,
-                'isProfessionnal' => false,
+                'isProfessional' => false,
             ],
             [
                 'street' => '12 Place Bellecour',
                 'zipcode' => '69002',
                 'city' => 'Lyon',
                 'isDefault' => false,
-                'isProfessionnal' => false,
+                'isProfessional' => false,
             ],
             [
                 'street' => '67 Rue de la Canebière',
                 'zipcode' => '13001',
                 'city' => 'Marseille',
                 'isDefault' => true,
-                'isProfessionnal' => false,
+                'isProfessional' => false,
             ],
             [
                 'street' => '34 Avenue Jean Médecin',
                 'zipcode' => '06000',
                 'city' => 'Nice',
                 'isDefault' => true,
-                'isProfessionnal' => false,
+                'isProfessional' => false,
             ],
         ];
 
@@ -139,7 +139,7 @@ class UserFixtures extends Fixture
                     ->setZipcode($addressData['zipcode'])
                     ->setCity($addressData['city'])
                     ->setIsDefault($i === 0)
-                    ->setIsProfessionnal($addressData['isProfessionnal'])
+                    ->setIsProfessional($addressData['isProfessional'])
                     ->setUserId($user);
 
                 $manager->persist($address);

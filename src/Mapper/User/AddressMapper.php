@@ -26,7 +26,7 @@ class AddressMapper
             ->setStreet($addressDto->getStreet())
             ->setZipcode($addressDto->getZipcode())
             ->setCity($addressDto->getCity())
-            ->setIsProfessionnal($addressDto->isProfessionnal())
+            ->setIsProfessional($addressDto->isProfessional())
             ->setIsDefault($addressDto->isDefault());
 
         $this->logger->debug("AddressMapper::toEntityFromDto EXIT");
@@ -42,7 +42,7 @@ class AddressMapper
             street: $address->getStreet(),
             city: $address->getCity(),
             zipcode: $address->getZipcode(),
-            isProfessionnal: $address->isProfessionnal(),
+            isProfessional: $address->isProfessional(),
             isDefault: $address->isDefault()
         );
 

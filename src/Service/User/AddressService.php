@@ -88,7 +88,7 @@ class AddressService
         $address->setStreet($addressDto->getStreet())
             ->setZipcode($addressDto->getZipcode())
             ->setCity($addressDto->getCity())
-            ->setIsProfessionnal($addressDto->isProfessionnal())
+            ->setIsProfessional($addressDto->isProfessional())
             ->setIsDefault($addressDto->isDefault());
 
         $address = $this->addressManager->setADefaultAddress($address, $user);
@@ -116,6 +116,6 @@ class AddressService
         }
 
         $this->addressManager->delete($address);
-        $this->logger->debug("AddressController::removeAddress EXIT 1");
+        $this->logger->debug("AddressService::deleteAddress EXIT 1");
     }
 }

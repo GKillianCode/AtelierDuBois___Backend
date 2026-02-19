@@ -21,7 +21,7 @@ class Address
     private ?bool $isDefault = null;
 
     #[ORM\Column]
-    private ?bool $isProfessionnal = null;
+    private ?bool $isProfessional = null;
 
     #[ORM\Column(length: 255)]
     private ?string $street = null;
@@ -73,14 +73,14 @@ class Address
         return $this;
     }
 
-    public function isProfessionnal(): ?bool
+    public function isProfessional(): ?bool
     {
-        return $this->isProfessionnal;
+        return $this->isProfessional;
     }
 
-    public function setIsProfessionnal(bool $isProfessionnal): static
+    public function setIsProfessional(bool $isProfessional): static
     {
-        $this->isProfessionnal = $isProfessionnal;
+        $this->isProfessional = $isProfessional;
 
         return $this;
     }

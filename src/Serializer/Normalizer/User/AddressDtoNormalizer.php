@@ -14,7 +14,7 @@ class AddressDtoNormalizer implements NormalizerInterface
             'street' => $object->getStreet(),
             'city' => $object->getCity(),
             'zipcode' => $object->getZipcode(),
-            'isProfessionnal' => $object->isProfessionnal(),
+            'isProfessional' => $object->isProfessional(),
             'isDefault' => $object->isDefault(),
         ];
     }

@@ -11,7 +11,7 @@ class AddressDto
         private readonly string $street,
         private readonly string $city,
         private readonly string $zipcode,
-        private readonly bool $isProfessionnal,
+        private readonly bool $isProfessional,
         private readonly bool $isDefault
     ) {}
 
@@ -35,9 +35,9 @@ class AddressDto
         return $this->zipcode;
     }
 
-    public function isProfessionnal(): bool
+    public function isProfessional(): bool
     {
-        return $this->isProfessionnal;
+        return $this->isProfessional;
     }
 
     public function isDefault(): bool

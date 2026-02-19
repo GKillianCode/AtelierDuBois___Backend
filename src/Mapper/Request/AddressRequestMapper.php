@@ -4,7 +4,6 @@ namespace App\Mapper\Request;
 
 use App\Dto\User\AddressDto;
 use App\Dto\Types\PublicIdDto;
-use App\Dto\Register\RegisterAddressDto;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -46,7 +45,7 @@ class AddressRequestMapper
             'street' => $data['street'] ?? null,
             'city' => $data['city'] ?? null,
             'zipcode' => $data['zipcode'] ?? null,
-            'isProfessionnal' => $data['isProfessionnal'] ?? null,
+            'isProfessional' => $data['isProfessional'] ?? null,
             'isDefault' => $data['isDefault'] ?? null
         ];
 
@@ -95,7 +94,7 @@ class AddressRequestMapper
                     'message' => 'Le code postal ne doit contenir que des lettres majuscules, des chiffres et des espaces.'
                 ])
             ],
-            'isProfessionnal' => [
+            'isProfessional' => [
                 new Assert\Type('bool')
             ],
             'isDefault' => [
@@ -124,7 +123,7 @@ class AddressRequestMapper
             street: $addressData['street'] ?? null,
             city: $addressData['city'] ?? null,
             zipcode: $addressData['zipcode'] ?? null,
-            isProfessionnal: $addressData['isProfessionnal'] ?? null,
+            isProfessional: $addressData['isProfessional'] ?? null,
             isDefault: $addressData['isDefault'] ?? null
         );
     }
