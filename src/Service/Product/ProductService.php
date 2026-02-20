@@ -14,6 +14,7 @@ use App\Dto\Request\Filter\GetAllProductsRequestDto;
 use App\Repository\Product\ProductVariantRepository;
 use App\Dto\Request\Filter\GetProductReviewsRequestDto;
 use App\Dto\Product\RequestFilter\RequestRatingFiltersDto;
+use App\Exception\NotFoundException;
 
 class ProductService
 {
@@ -72,7 +73,7 @@ class ProductService
 
         $productVariant = $this->productManager->getProductVariantByPublicId($getProductReviewsRequestDto->getProductVariantPublicId());
         if (!$productVariant) {
-            throw new Exception("Product variant not found for public ID: " . $getProductReviewsRequestDto->getProductVariantPublicId());
+            throw new NotFoundException('ProductVariant', $getProductReviewsRequestDto->getProductVariantPublicId());
         }
 
         $result = $this->productReviewManager->getReviewsByVariantId($getProductReviewsRequestDto);
@@ -94,22 +95,20 @@ class ProductService
         $productVariant = $this->productManager->getProductVariantByPublicId($publicId);
 
         if (!$productVariant) {
-            $this->logger->debug("ProductManager::findVariantWithDetails EXIT - Variant not found", ['publicId' => $publicId]);
-            return null;
+            throw new NotFoundException('ProductVariant', $publicId);
         }
 
         $productId = $productVariant->getProductId()->getId();
         $productsVariants = $this->productVariantRepository->getAllMinimalProductVariant($productId);
 
-        if ($productVariant && $productsVariants) {
-            $this->logger->debug("ProductManager::findVariantWithDetails EXIT - Success", ['publicId' => $publicId]);
-
-            $otherProductsVariantsDto = $this->productVariantMapper->mapVariantsToOtherVariantDtos($productsVariants);
-            $responseProductDto = $this->productVariantMapper->variantToDto($productVariant, $otherProductsVariantsDto);
-            return $responseProductDto;
+        if (!$productsVariants) {
+            $this->logger->debug("ProductManager::findVariantWithDetails EXIT - No data found", ['publicId' => $publicId]);
+            throw new NotFoundException('ProductVariant', $publicId);
         }
 
-        $this->logger->debug("ProductManager::findVariantWithDetails EXIT - No data found", ['publicId' => $publicId]);
-        return null;
+        $otherProductsVariantsDto = $this->productVariantMapper->mapVariantsToOtherVariantDtos($productsVariants);
+        $responseProductDto = $this->productVariantMapper->variantToDto($productVariant, $otherProductsVariantsDto);
+        $this->logger->debug("ProductManager::findVariantWithDetails EXIT - Success", ['publicId' => $publicId]);
+        return $responseProductDto;
     }
 }

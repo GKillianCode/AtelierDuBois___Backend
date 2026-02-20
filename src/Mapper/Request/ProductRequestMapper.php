@@ -2,13 +2,13 @@
 
 namespace App\Mapper\Request;
 
-use App\Dto\Types\PublicIdDto;
-use Symfony\Component\HttpFoundation\Request;
-use App\Enum\SortFilter\ProductSortFilterCode;
 use App\Dto\Request\Filter\GetAllProductsRequestDto;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
+use App\Dto\Types\PublicIdDto;
+use App\Enum\SortFilter\ProductSortFilterCode;
+use Symfony\Component\HttpFoundation\Exception\BadRequestException;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Validator\Constraints as Assert;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class ProductRequestMapper
 {
@@ -82,7 +82,7 @@ class ProductRequestMapper
             foreach ($violations as $violation) {
                 $errors[] = $violation->getPropertyPath() . ': ' . $violation->getMessage();
             }
-            throw new BadRequestHttpException('Validation failed: ' . implode(', ', $errors));
+            throw new BadRequestException('Validation failed: ' . implode(', ', $errors));
         }
 
         $this->validateEnumValues($request);
@@ -92,12 +92,12 @@ class ProductRequestMapper
     {
         $filterValue = $request->query->get('filter');
         if ($filterValue && !ProductSortFilterCode::tryFrom($filterValue)) {
-            throw new BadRequestHttpException("Invalid filter value: {$filterValue}");
+            throw new BadRequestException("Invalid filter value: {$filterValue}");
         }
 
         $productTypeValue = $request->query->get('productType');
         if ($productTypeValue && !ProductSortFilterCode::tryFrom($productTypeValue)) {
-            throw new BadRequestHttpException("Invalid productType value: {$productTypeValue}");
+            throw new BadRequestException("Invalid productType value: {$productTypeValue}");
         }
     }
 }
