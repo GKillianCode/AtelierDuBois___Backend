@@ -2,10 +2,12 @@
 
 namespace App\Controller\User;
 
+use App\Dto\OpenApiModel\AddressOAModel;
 use App\Enum\ApiErrorCode;
 use App\Manager\User\AddressManager;
 use App\Response\ApiResponse;
 use App\Service\User\AddressService;
+use Nelmio\ApiDocBundle\Attribute\Model;
 use OpenApi\Attributes as OA;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -13,7 +15,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Serializer\SerializerInterface;
 
-#[OA\Tag(name: 'Addresses')]
+#[OA\Tag(name: 'Users/Addresses')]
 final class AddressController extends AbstractController
 {
     public function __construct(
@@ -23,6 +25,19 @@ final class AddressController extends AbstractController
     ) {}
 
     #[Route('/api/v1/user/address/add', name: 'address_add', methods: ['POST'])]
+    #[OA\Post(
+        summary: 'Add an address for the authenticated user',
+        requestBody: new OA\RequestBody(
+            required: true,
+            description: 'Data for the new address',
+            content: new OA\JsonContent(ref: new Model(type: AddressOAModel::class))
+        ),
+        security: [['bearerAuth' => []]]
+    )]
+    #[OA\Response(
+        response: Response::HTTP_OK,
+        description: 'Address added successfully',
+    )]
     public function addAddress(Request $request): Response
     {
         $areUserCanAddAddress = $this->addressManager->canUserAddAddress($this->getUser());
@@ -36,6 +51,17 @@ final class AddressController extends AbstractController
     }
 
     #[Route('/api/v1/user/address/can-add', name: 'address_can_add', methods: ['GET'])]
+    #[OA\Get(
+        summary: 'Check if the authenticated user can add an address',
+        security: [['bearerAuth' => []]]
+    )]
+    #[OA\Response(
+        response: Response::HTTP_OK,
+        description: 'Address added successfully',
+        content: new OA\JsonContent(
+            type: 'boolean'
+        )
+    )]
     public function canUserAddAddress(): Response
     {
         $areUserCanAddAddress = $this->addressManager->canUserAddAddress($this->getUser());
@@ -44,6 +70,18 @@ final class AddressController extends AbstractController
 
 
     #[Route('/api/v1/user/address/all', name: 'address_get_all', methods: ['GET'])]
+    #[OA\Get(
+        summary: 'Get all addresses for the authenticated user',
+        security: [['bearerAuth' => []]]
+    )]
+    #[OA\Response(
+        response: Response::HTTP_OK,
+        description: 'Addresses retrieved successfully',
+        content: new OA\JsonContent(
+            type: 'array',
+            items: new OA\Items(ref: new Model(type: AddressOAModel::class))
+        )
+    )]
     public function getAllAddress(): Response
     {
         $addresses = $this->addressService->getAllAddressesInDto($this->getUser());
@@ -51,6 +89,15 @@ final class AddressController extends AbstractController
     }
 
     #[Route('/api/v1/user/address/{publicId}', name: 'address_get', methods: ['GET'])]
+    #[OA\Get(
+        summary: 'Get a specific address by public ID for the authenticated user',
+        security: [['bearerAuth' => []]],
+    )]
+    #[OA\Response(
+        response: Response::HTTP_OK,
+        description: 'Address retrieved successfully',
+        content: new OA\JsonContent(ref: new Model(type: AddressOAModel::class))
+    )]
     public function getAddress(string $publicId): Response
     {
         $addressDto = $this->addressService->getAddressInDtoByPublicId($this->getUser(), $publicId);
@@ -63,6 +110,14 @@ final class AddressController extends AbstractController
     }
 
     #[Route('/api/v1/user/address/{publicId}/update', name: 'address_update', methods: ['PUT'])]
+    #[OA\Put(
+        summary: 'Update a specific address by public ID for the authenticated user',
+        security: [['bearerAuth' => []]]
+    )]
+    #[OA\Response(
+        response: Response::HTTP_OK,
+        description: 'Address updated successfully'
+    )]
     public function updateAddress(string $publicId, Request $request): Response
     {
         $user = $this->getUser();
@@ -77,6 +132,14 @@ final class AddressController extends AbstractController
     }
 
     #[Route('/api/v1/user/address/{publicId}/remove', name: 'address_remove', methods: ['DELETE'])]
+    #[OA\Delete(
+        summary: 'Remove a specific address by public ID for the authenticated user',
+        security: [['bearerAuth' => []]]
+    )]
+    #[OA\Response(
+        response: Response::HTTP_OK,
+        description: 'Address removed successfully'
+    )]
     public function removeAddress(string $publicId): Response
     {
         $user = $this->getUser();
