@@ -29,8 +29,8 @@ class StrongPassword extends Constraint
         ?array $groups = null,
         mixed $payload = null
     ) {
-        // Si $options est un array, on l'utilise pour définir les propriétés
-        if (is_array($options)) {
+
+        if (\is_array($options)) {
             foreach ($options as $key => $value) {
                 if (property_exists($this, $key)) {
                     $this->$key = $value;

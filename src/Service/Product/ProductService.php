@@ -36,26 +36,33 @@ class ProductService
      */
     public function getPaginatedProducts(GetAllProductsRequestDto $getAllProductsRequestDto): array
     {
-        $this->logger->debug("ProductService::getPaginatedProducts ENTER");
+        try {
+            $paginator = $this->productRepository->paginateProducts($getAllProductsRequestDto);
 
-        $paginator = $this->productRepository->paginateProducts($getAllProductsRequestDto);
+            $productsDto = $this->productVariantMapper->mapProductsToShortDtos($paginator);
+            $ratings = $this->productRepository->getAverageRatingsForProducts($productsDto);
 
-        $productsDto = $this->productVariantMapper->mapProductsToShortDtos($paginator);
-        $ratings = $this->productRepository->getAverageRatingsForProducts($productsDto);
+            foreach ($productsDto as $productDto) {
+                $rating = $ratings[$productDto->getId()] ?? null;
+                $productDto->setAverageRating(isset($rating) ? (int) round($rating) : null);
+            }
 
-        foreach ($productsDto as $productDto) {
-            $rating = $ratings[$productDto->getId()] ?? null;
-            $productDto->setAverageRating(isset($rating) ? (int) round($rating) : null);
+            $paginationDataDto = $this->paginationUtil->getMetaPaginationData($paginator, $getAllProductsRequestDto->getLimit(), $getAllProductsRequestDto->getPage());
+
+            return [
+                'products' => $productsDto,
+                'pagination' => $paginationDataDto
+            ];
+        } catch (\Throwable $e) {
+            $this->logger->error(
+                'Error retrieving paginated products',
+                [
+                    'exception' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]
+            );
+            throw $e;
         }
-
-        $paginationDataDto = $this->paginationUtil->getMetaPaginationData($paginator, $getAllProductsRequestDto->getLimit(), $getAllProductsRequestDto->getPage());
-
-        $this->logger->debug("ProductService::getPaginatedProducts EXIT");
-
-        return [
-            'products' => $productsDto,
-            'pagination' => $paginationDataDto
-        ];
     }
 
     /**
@@ -69,17 +76,29 @@ class ProductService
      */
     public function getProductVariantReviews(GetProductReviewsRequestDto $getProductReviewsRequestDto): array
     {
-        $this->logger->debug("ProductService::getProductVariantReviews ENTER", ['publicId' => $getProductReviewsRequestDto->getProductVariantPublicId(), 'page' => $getProductReviewsRequestDto->getPage(), 'limit' => $getProductReviewsRequestDto->getLimit()]);
+        try {
+            $productVariant = $this->productManager->getProductVariantByPublicId($getProductReviewsRequestDto->getProductVariantPublicId());
 
-        $productVariant = $this->productManager->getProductVariantByPublicId($getProductReviewsRequestDto->getProductVariantPublicId());
-        if (!$productVariant) {
-            throw new NotFoundException('ProductVariant', $getProductReviewsRequestDto->getProductVariantPublicId());
+            if (!$productVariant) {
+                throw new NotFoundException('ProductVariant', $getProductReviewsRequestDto->getProductVariantPublicId());
+            }
+
+            $result = $this->productReviewManager->getReviewsByVariantId($getProductReviewsRequestDto);
+
+            return $result;
+        } catch (NotFoundException $e) {
+            throw $e;
+        } catch (\Throwable $e) {
+            $this->logger->error(
+                'Error retrieving product variant reviews',
+                [
+                    'exception' => $e->getMessage(),
+                    'publicId' => $getProductReviewsRequestDto->getProductVariantPublicId(),
+                    'trace' => $e->getTraceAsString()
+                ]
+            );
+            throw $e;
         }
-
-        $result = $this->productReviewManager->getReviewsByVariantId($getProductReviewsRequestDto);
-
-        $this->logger->debug("ProductService::getProductVariantReviews EXIT");
-        return $result;
     }
 
     /**
@@ -90,25 +109,36 @@ class ProductService
      */
     public function findVariantWithDetails(string $publicId): ResponseProductDto|null
     {
-        $this->logger->debug("ProductManager::findVariantWithDetails ENTER", ['publicId' => $publicId]);
+        try {
+            $productVariant = $this->productManager->getProductVariantByPublicId($publicId);
 
-        $productVariant = $this->productManager->getProductVariantByPublicId($publicId);
+            if (!$productVariant) {
+                throw new NotFoundException('ProductVariant', $publicId);
+            }
 
-        if (!$productVariant) {
-            throw new NotFoundException('ProductVariant', $publicId);
+            $productId = $productVariant->getProductId()->getId();
+            $productsVariants = $this->productVariantRepository->getAllMinimalProductVariant($productId);
+
+            if (!$productsVariants) {
+                throw new NotFoundException('ProductVariant', $publicId);
+            }
+
+            $otherProductsVariantsDto = $this->productVariantMapper->mapVariantsToOtherVariantDtos($productsVariants);
+            $responseProductDto = $this->productVariantMapper->variantToDto($productVariant, $otherProductsVariantsDto);
+
+            return $responseProductDto;
+        } catch (NotFoundException $e) {
+            throw $e;
+        } catch (\Throwable $e) {
+            $this->logger->error(
+                'Error finding variant with details',
+                [
+                    'exception' => $e->getMessage(),
+                    'publicId' => $publicId,
+                    'trace' => $e->getTraceAsString()
+                ]
+            );
+            throw $e;
         }
-
-        $productId = $productVariant->getProductId()->getId();
-        $productsVariants = $this->productVariantRepository->getAllMinimalProductVariant($productId);
-
-        if (!$productsVariants) {
-            $this->logger->debug("ProductManager::findVariantWithDetails EXIT - No data found", ['publicId' => $publicId]);
-            throw new NotFoundException('ProductVariant', $publicId);
-        }
-
-        $otherProductsVariantsDto = $this->productVariantMapper->mapVariantsToOtherVariantDtos($productsVariants);
-        $responseProductDto = $this->productVariantMapper->variantToDto($productVariant, $otherProductsVariantsDto);
-        $this->logger->debug("ProductManager::findVariantWithDetails EXIT - Success", ['publicId' => $publicId]);
-        return $responseProductDto;
     }
 }

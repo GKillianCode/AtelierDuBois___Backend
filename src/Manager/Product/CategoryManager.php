@@ -18,32 +18,43 @@ class CategoryManager
         private readonly ValidatorUtil $validatorUtil
     ) {}
 
-    public function create(): void
-    {
-        $this->logger->debug("CategoryManager::create ENTER");
-
-        $this->logger->debug("CategoryManager::create EXIT");
-    }
-
     public function update(Category $category): void
     {
-        $category->setUpdatedAt(new \DateTimeImmutable());
-        $this->entityManager->flush();
+        try {
+            $category->setUpdatedAt(new \DateTimeImmutable());
+            $this->entityManager->flush();
+        } catch (\Throwable $e) {
+            $this->logger->error(
+                'Error updating category',
+                [
+                    'exception' => $e->getMessage(),
+                    'categoryId' => $category->getId()
+                ]
+            );
+        }
     }
 
     public function delete(Category $category): void
     {
-        $this->entityManager->remove($category);
-        $this->entityManager->flush();
+        try {
+            $this->entityManager->remove($category);
+            $this->entityManager->flush();
+        } catch (\Throwable $e) {
+            $this->logger->error(
+                'Error deleting category',
+                [
+                    'exception' => $e->getMessage(),
+                    'categoryId' => $category->getId()
+                ]
+            );
+        }
     }
 
     use ValidateAndSaveTrait;
 
     public function getAllCategories(): array
     {
-        $this->logger->debug("CategoryService::getAllCategoriesInCategoryDto ENTER");
         $categories = $this->categoryRepository->findAll();
-        $this->logger->debug("CategoryService::getAllCategoriesInCategoryDto EXIT");
         return $categories;
     }
 }

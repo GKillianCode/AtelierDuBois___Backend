@@ -30,8 +30,18 @@ class ProductManager
      */
     public function update(Product $product): void
     {
-        $product->setUpdatedAt(new \DateTimeImmutable());
-        $this->entityManager->flush();
+        try {
+            $product->setUpdatedAt(new \DateTimeImmutable());
+            $this->entityManager->flush();
+        } catch (\Throwable $e) {
+            $this->logger->error(
+                'Error updating product',
+                [
+                    'exception' => $e->getMessage(),
+                    'productId' => $product->getId()
+                ]
+            );
+        }
     }
 
     /**
@@ -42,8 +52,18 @@ class ProductManager
      */
     public function delete(Product $product): void
     {
-        $this->entityManager->remove($product);
-        $this->entityManager->flush();
+        try {
+            $this->entityManager->remove($product);
+            $this->entityManager->flush();
+        } catch (\Throwable $e) {
+            $this->logger->error(
+                'Error deleting product',
+                [
+                    'exception' => $e->getMessage(),
+                    'productId' => $product->getId()
+                ]
+            );
+        }
     }
 
     use ValidateAndSaveTrait;
