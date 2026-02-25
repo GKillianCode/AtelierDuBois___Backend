@@ -4,10 +4,10 @@ namespace App\Mapper\Request;
 
 use App\Dto\Request\RegisterUserDto;
 use App\Validator\Constraints\Password\StrongPassword;
+use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class RegisterUserRequestMapper
 {
@@ -28,7 +28,7 @@ class RegisterUserRequestMapper
         $data = json_decode($request->getContent(), true);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new BadRequestHttpException('Invalid JSON data: ' . json_last_error_msg());
+            throw new BadRequestException('Invalid JSON data: ' . json_last_error_msg());
         }
 
 
@@ -110,7 +110,7 @@ class RegisterUserRequestMapper
             foreach ($violations as $violation) {
                 $errors[] = $violation->getPropertyPath() . ': ' . $violation->getMessage();
             }
-            throw new BadRequestHttpException('Validation failed: ' . implode(', ', $errors));
+            throw new BadRequestException('Validation failed: ' . implode(', ', $errors));
         }
     }
 

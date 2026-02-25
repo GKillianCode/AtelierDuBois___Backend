@@ -18,18 +18,36 @@ class WoodManager
         private readonly ValidatorUtil $validatorUtil
     ) {}
 
-    public function create(): void {}
-
     public function update(Wood $wood): void
     {
-        $wood->setUpdatedAt(new \DateTimeImmutable());
-        $this->entityManager->flush();
+        try {
+            $wood->setUpdatedAt(new \DateTimeImmutable());
+            $this->entityManager->flush();
+        } catch (\Throwable $e) {
+            $this->logger->error(
+                'Error updating wood',
+                [
+                    'exception' => $e->getMessage(),
+                    'woodId' => $wood->getId()
+                ]
+            );
+        }
     }
 
     public function delete(Wood $wood): void
     {
-        $this->entityManager->remove($wood);
-        $this->entityManager->flush();
+        try {
+            $this->entityManager->remove($wood);
+            $this->entityManager->flush();
+        } catch (\Throwable $e) {
+            $this->logger->error(
+                'Error deleting wood',
+                [
+                    'exception' => $e->getMessage(),
+                    'woodId' => $wood->getId()
+                ]
+            );
+        }
     }
 
     use ValidateAndSaveTrait;

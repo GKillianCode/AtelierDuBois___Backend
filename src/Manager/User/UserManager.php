@@ -24,37 +24,64 @@ class UserManager
 
     public function create(RegisterUserDto $registerUserDto): void
     {
-        $this->logger->debug("UserManager::registerUser ENTER");
-        $user = new User();
-        $user->setUuid($this->uuidUtil->generateUuid())
-            ->setUserType(UserType::CUSTOMER)
-            ->setFirstname($registerUserDto->getFirstname())
-            ->setLastname($registerUserDto->getLastname())
-            ->setEmail($registerUserDto->getEmail())
-            ->setPlainPassword($registerUserDto->getPassword());
+        try {
+            $user = new User();
+            $user->setUuid($this->uuidUtil->generateUuid())
+                ->setUserType(UserType::CUSTOMER)
+                ->setFirstname($registerUserDto->getFirstname())
+                ->setLastname($registerUserDto->getLastname())
+                ->setEmail($registerUserDto->getEmail())
+                ->setPlainPassword($registerUserDto->getPassword());
 
-        $this->validateAndSave($user);
-        $this->logger->debug("UserManager::registerUser EXIT");
+            $this->validateAndSave($user);
+        } catch (\Throwable $e) {
+            $this->logger->error(
+                'Error creating user',
+                [
+                    'exception' => $e->getMessage(),
+                    'email' => $registerUserDto->getEmail()
+                ]
+            );
+        }
     }
 
     public function update(User $user): void
     {
-        $user->setUpdatedAt(new \DateTimeImmutable());
-        $this->validateAndSave($user);
+        try {
+            $user->setUpdatedAt(new \DateTimeImmutable());
+            $this->validateAndSave($user);
+        } catch (\Throwable $e) {
+            $this->logger->error(
+                'Error updating user',
+                [
+                    'exception' => $e->getMessage(),
+                    'userId' => $user->getId()
+                ]
+            );
+        }
     }
 
     public function delete(User $user): void
     {
-        $this->entityManager->remove($user);
-        $this->entityManager->flush();
+        try {
+            $this->entityManager->remove($user);
+            $this->entityManager->flush();
+        } catch (\Throwable $e) {
+            $this->logger->error(
+                'Error deleting user',
+                [
+                    'exception' => $e->getMessage(),
+                    'userId' => $user->getId()
+                ]
+            );
+        }
     }
 
     public function emailExists(string $email): bool
     {
-        $this->logger->debug("UserManager::emailExists ENTER");
         $user = $this->userRepository->findOneBy(['email' => $email]);
         $userExists = $user === null ? false : true;
-        $this->logger->debug("UserManager::emailExists EXIT");
+
         return $userExists;
     }
 

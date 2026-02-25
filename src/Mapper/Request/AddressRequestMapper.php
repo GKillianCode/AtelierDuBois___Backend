@@ -4,10 +4,10 @@ namespace App\Mapper\Request;
 
 use App\Dto\User\AddressDto;
 use App\Dto\Types\PublicIdDto;
+use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 class AddressRequestMapper
 {
@@ -36,7 +36,7 @@ class AddressRequestMapper
         $data = json_decode($request->getContent(), true);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new BadRequestHttpException('Invalid JSON data: ' . json_last_error_msg());
+            throw new BadRequestException('Invalid JSON data: ' . json_last_error_msg());
         }
 
 
@@ -110,7 +110,8 @@ class AddressRequestMapper
             foreach ($violations as $violation) {
                 $errors[] = $violation->getPropertyPath() . ': ' . $violation->getMessage();
             }
-            throw new BadRequestHttpException('Validation failed: ' . implode(', ', $errors));
+
+            throw new BadRequestException('Validation failed: ' . implode(', ', $errors));
         }
     }
 

@@ -25,19 +25,49 @@ class AddressManager
 
     public function create(Address $address): void
     {
-        $this->validateAndSave($address);
+        try {
+            $this->validateAndSave($address);
+        } catch (\Throwable $e) {
+            $this->logger->error(
+                'Error creating address',
+                [
+                    'exception' => $e->getMessage(),
+                    'userId' => $address->getUserId()->getId()
+                ]
+            );
+        }
     }
 
     public function update(Address $address): void
     {
-        $address->setUpdatedAt(new \DateTimeImmutable());
-        $this->validateAndSave($address);
+        try {
+            $address->setUpdatedAt(new \DateTimeImmutable());
+            $this->validateAndSave($address);
+        } catch (\Throwable $e) {
+            $this->logger->error(
+                'Error updating address',
+                [
+                    'exception' => $e->getMessage(),
+                    'userId' => $address->getUserId()->getId()
+                ]
+            );
+        }
     }
 
     public function delete(Address $address): void
     {
-        $this->entityManager->remove($address);
-        $this->entityManager->flush();
+        try {
+            $this->entityManager->remove($address);
+            $this->entityManager->flush();
+        } catch (\Throwable $e) {
+            $this->logger->error(
+                'Error deleting address',
+                [
+                    'exception' => $e->getMessage(),
+                    'userId' => $address->getUserId()->getId()
+                ]
+            );
+        }
     }
 
     /**
@@ -47,72 +77,55 @@ class AddressManager
      */
     public function canUserAddAddress(User $user): bool
     {
-        $this->logger->debug("AddressManager::canAddAddress ENTER");
         $canAdd = $this->countTheNumberOfAddressesForAUser($user) < $this->userMaxAddresses;
-        $this->logger->debug("AddressManager::canAddAddress EXIT");
         return $canAdd;
     }
 
     public function countTheNumberOfAddressesForAUser(User $user): int
     {
-        $this->logger->debug("AddressManager::countTheNumberOfAddressesForAUser ENTER");
         $count = $this->addressRepository->count(['userId' => $user]);
-        $this->logger->debug("AddressManager::countTheNumberOfAddressesForAUser EXIT");
         return $count;
     }
 
     public function setADefaultAddress(Address $address, User $user): Address
     {
-        $this->logger->debug("AddressManager::setADefaultAddress ENTER");
-
         $countExistingAddresses = $this->countTheNumberOfAddressesForAUser($user);
         if ($countExistingAddresses === 0 || $address->isDefault()) {
             $address->setIsDefault(true);
         }
-
-        $this->logger->debug("AddressManager::setADefaultAddress EXIT");
 
         return $address;
     }
 
     public function unsetAllDefaultAddresses(User $user): void
     {
-        $this->logger->debug("AddressManager::unsetAllDefaultAddresses ENTER");
         $this->addressRepository->unsetAllDefaultAddresses($user);
-        $this->logger->debug("AddressManager::unsetAllDefaultAddresses EXIT");
     }
 
     public function getAddressByPublicId(User $user, string $publicId): ?Address
     {
-        $this->logger->debug("AddressManager::getAddressByPublicId ENTER");
-
         $address = $this->addressRepository->findOneBy([
             'userId' => $user,
             'publicId' => $publicId
         ]);
 
-        $this->logger->debug("AddressManager::getAddressByPublicId EXIT");
         return $address;
     }
 
     public function getDefaultAddressForUser(User $user): ?Address
     {
-        $this->logger->debug("AddressManager::getDefaultAddressForUser ENTER");
-
         $address = $this->addressRepository->findOneBy([
             'userId' => $user,
             'isDefault' => true
         ]);
 
-        $this->logger->debug("AddressManager::getDefaultAddressForUser EXIT");
         return $address;
     }
 
     public function getAllAddresses(User $user): array
     {
-        $this->logger->debug("AddressManager::getAllAddresses ENTER");
         $addresses = $user->getAddresses()->toArray();
-        $this->logger->debug("AddressManager::getAllAddresses EXIT");
+
         return $addresses;
     }
 }

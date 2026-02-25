@@ -3,6 +3,7 @@
 namespace App\Service\User;
 
 use App\Dto\Request\RegisterUserDto;
+use App\Exception\ConflictException;
 use App\Manager\User\UserManager;
 use App\Repository\User\UserRepository;
 use App\Util\ValidatorUtil;
@@ -25,7 +26,7 @@ class UserService
 
         if ($this->checkEmailExists($registerUserDto->getEmail())) {
             $this->logger->debug("UserService::registerUser EXIT 1");
-            throw new \Exception('User already exists.');
+            throw new ConflictException("Email already exists");
         }
 
         $this->userManager->create($registerUserDto);

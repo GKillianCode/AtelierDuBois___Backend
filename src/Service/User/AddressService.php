@@ -4,6 +4,8 @@ namespace App\Service\User;
 
 use App\Entity\User\User;
 use App\Dto\User\AddressDto;
+use App\Exception\ConflictException;
+use App\Exception\NotFoundException;
 use Psr\Log\LoggerInterface;
 use App\Mapper\User\AddressMapper;
 use App\Manager\User\AddressManager;
@@ -82,7 +84,7 @@ class AddressService
         $address = $this->addressManager->getAddressByPublicId($user, $publicId);
 
         if (!$address) {
-            throw new \InvalidArgumentException('Address not found for the given publicId.');
+            throw new NotFoundException('Address', $publicId);
         }
 
         $address->setStreet($addressDto->getStreet())
@@ -108,11 +110,11 @@ class AddressService
         $countRegisteredAddresses = $this->addressManager->countTheNumberOfAddressesForAUser($user);
 
         if (!$address) {
-            throw new \InvalidArgumentException('Address not found for the given publicId.');
+            throw new NotFoundException('Address', $AddressPublicId);
         }
 
         if (!$countRegisteredAddresses > 1) {
-            throw new \LogicException('At least one address must be kept.');
+            throw new ConflictException('At least one address must be kept.');
         }
 
         $this->addressManager->delete($address);
