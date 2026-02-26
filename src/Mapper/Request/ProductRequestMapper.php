@@ -40,18 +40,18 @@ class ProductRequestMapper
             'page' => [
                 new Assert\Optional([
                     new Assert\Type('numeric'),
-                    new Assert\Range(['min' => 1, 'max' => 100000])
+                    new Assert\Range(min: 1, max: 100000)
                 ])
             ],
             'limit' => [
                 new Assert\Optional([
-                    new Assert\Choice(['choices' => [20, 50, 100], 'message' => 'Limit must be 20, 50 or 100'])
+                    new Assert\Choice(choices: [20, 50, 100], message: 'Limit must be 20, 50 or 100')
                 ])
             ],
             'search' => [
                 new Assert\Optional([
                     new Assert\Type('string'),
-                    new Assert\Length(['max' => 255])
+                    new Assert\Length(max: 255)
                 ])
             ],
             'filter' => [
@@ -67,10 +67,10 @@ class ProductRequestMapper
             'category' => [
                 new Assert\Optional([
                     new Assert\Type('string'),
-                    new Assert\Regex([
-                        'pattern' => '/^[0-9A-Za-z]{22}$/',
-                        'message' => 'Category must be a valid UUID base62 format (22 characters)'
-                    ])
+                    new Assert\Regex(
+                        pattern: '/^[0-9A-Za-z]{22}$/',
+                        message: 'Category must be a valid UUID base62 format (22 characters)'
+                    )
                 ])
             ]
         ]);
