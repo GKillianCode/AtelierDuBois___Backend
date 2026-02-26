@@ -49,43 +49,43 @@ class RegisterUserRequestMapper
             'firstname' => [
                 new Assert\NotBlank(),
                 new Assert\Type('string'),
-                new Assert\Length([
-                    'min' => 2,
-                    'max' => 50,
-                    'minMessage' => 'Le prénom doit contenir au moins {{ limit }} caractères.',
-                    'maxMessage' => 'Le prénom ne peut pas dépasser {{ limit }} caractères.',
-                ]),
-                new Assert\Regex([
-                    'pattern' => '/^[a-zA-ZÀ-ÿ\-\s]+$/',
-                    'message' => 'Le prénom ne peut contenir que des lettres, espaces et tirets.',
-                ]),
+                new Assert\Length(
+                    min: 2,
+                    max: 50,
+                    minMessage: 'Le prénom doit contenir au moins {{ limit }} caractères.',
+                    maxMessage: 'Le prénom ne peut pas dépasser {{ limit }} caractères.',
+                ),
+                new Assert\Regex(
+                    pattern: '/^[a-zA-ZÀ-ÿ\-\s]+$/',
+                    message: 'Le prénom ne peut contenir que des lettres, espaces et tirets.',
+                ),
             ],
             'lastname' => [
                 new Assert\NotBlank(),
                 new Assert\Type('string'),
-                new Assert\Length([
-                    'min' => 2,
-                    'max' => 50,
-                    'minMessage' => 'Le nom doit contenir au moins {{ limit }} caractères.',
-                    'maxMessage' => 'Le nom ne peut pas dépasser {{ limit }} caractères.',
-                ]),
-                new Assert\Regex([
-                    'pattern' => '/^[a-zA-ZÀ-ÿ\-\s]+$/',
-                    'message' => 'Le nom ne peut contenir que des lettres, espaces et tirets.',
-                ]),
+                new Assert\Length(
+                    min: 2,
+                    max: 50,
+                    minMessage: 'Le nom doit contenir au moins {{ limit }} caractères.',
+                    maxMessage: 'Le nom ne peut pas dépasser {{ limit }} caractères.',
+                ),
+                new Assert\Regex(
+                    pattern: '/^[a-zA-ZÀ-ÿ\-\s]+$/',
+                    message: 'Le nom ne peut contenir que des lettres, espaces et tirets.',
+                ),
             ],
             'email' => [
                 new Assert\NotBlank(),
                 new Assert\Type('string'),
-                new Assert\Email([
-                    'message' => 'L\'adresse email {{ value }} n\'est pas valide.',
-                ]),
-                new Assert\Length([
-                    'min' => 8,
-                    'max' => 150,
-                    'minMessage' => 'L\'email doit contenir au moins {{ limit }} caractères.',
-                    'maxMessage' => 'L\'email ne peut pas dépasser {{ limit }} caractères.',
-                ]),
+                new Assert\Email(
+                    message: 'L\'adresse email {{ value }} n\'est pas valide.',
+                ),
+                new Assert\Length(
+                    min: 8,
+                    max: 150,
+                    minMessage: 'L\'email doit contenir au moins {{ limit }} caractères.',
+                    maxMessage: 'L\'email ne peut pas dépasser {{ limit }} caractères.',
+                ),
             ],
             'password' => [
                 new Assert\NotBlank(),
@@ -96,10 +96,10 @@ class RegisterUserRequestMapper
                 new Assert\NotBlank(message: 'La confirmation du mot de passe ne peut pas être vide.'),
                 new Assert\Type('string'),
                 new StrongPassword(),
-                new Assert\EqualTo([
-                    'value' => $data['password'] ?? null,
-                    'message' => 'Les mots de passe ne correspondent pas.',
-                ]),
+                new Assert\EqualTo(
+                    value: $data['password'] ?? null,
+                    message: 'Les mots de passe ne correspondent pas.',
+                ),
             ],
         ]);
 
