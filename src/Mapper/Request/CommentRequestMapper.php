@@ -41,38 +41,38 @@ class CommentRequestMapper
         $constraints = new Assert\Collection([
             'productVariantPublicId' => [
                 new Assert\Type('string'),
-                new Assert\Regex([
-                    'pattern' => '/^[0-9A-Za-z]{20}$/',
-                    'message' => 'Category must be a valid UUID base62 format (20 characters)'
-                ])
+                new Assert\Regex(
+                    pattern: '/^[0-9A-Za-z]{20}$/',
+                    message: 'Category must be a valid UUID base62 format (20 characters)'
+                )
             ],
             'page' => [
                 new Assert\Optional([
                     new Assert\Type('numeric'),
-                    new Assert\Range(['min' => 1, 'max' => 100000])
+                    new Assert\Range(min: 1, max: 100000)
                 ])
             ],
             'limit' => [
                 new Assert\Optional([
-                    new Assert\Choice(['choices' => [20, 50, 100], 'message' => 'Limit must be 20, 50 or 100'])
+                    new Assert\Choice(choices: [20, 50, 100], message: 'Limit must be 20, 50 or 100')
                 ])
             ],
             'ratingOrder' => [
                 new Assert\Optional([
                     new Assert\Type('string'),
-                    new Assert\Length(['max' => 50])
+                    new Assert\Length(max: 50)
                 ])
             ],
             'rating' => [
                 new Assert\Optional([
                     new Assert\Type('numeric'),
-                    new Assert\Range(['min' => 1, 'max' => 5])
+                    new Assert\Range(min: 1, max: 5)
                 ])
             ],
             'publicationOrder' => [
                 new Assert\Optional([
                     new Assert\Type('string'),
-                    new Assert\Length(['max' => 50])
+                    new Assert\Length(max: 50)
                 ])
             ],
         ]);
