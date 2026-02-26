@@ -12,6 +12,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Symfony\Component\HttpKernel\KernelEvents;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException as SecurityAccessDeniedException;
+use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Validator\Exception\ValidationFailedException;
 
 #[AsEventListener(event: KernelEvents::EXCEPTION, priority: 10)]
@@ -33,10 +35,12 @@ final class ApiExceptionListener
         $request   = $event->getRequest();
 
         $response = match (true) {
-            $exception instanceof AppException              => $this->handleApp($exception, $request),
-            $exception instanceof ValidationFailedException => $this->handleValidation($exception, $request),
-            $exception instanceof HttpExceptionInterface    => $this->handleHttp($exception, $request),
-            default                                         => $this->handleUnknown($exception, $request),
+            $exception instanceof AppException                      => $this->handleApp($exception, $request),
+            $exception instanceof ValidationFailedException          => $this->handleValidation($exception, $request),
+            $exception instanceof AuthenticationException            => ApiResponse::unauthorized('Unauthorized'),
+            $exception instanceof SecurityAccessDeniedException      => ApiResponse::unauthorized('Unauthorized'),
+            $exception instanceof HttpExceptionInterface             => $this->handleHttp($exception, $request),
+            default                                                  => $this->handleUnknown($exception, $request),
         };
 
         $event->setResponse($response);
