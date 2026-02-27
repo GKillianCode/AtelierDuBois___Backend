@@ -7,7 +7,6 @@ use Psr\Log\LoggerInterface;
 use App\Mapper\Product\ProductReviewMapper;
 use App\Repository\Product\ProductReviewRepository;
 use App\Dto\Request\Filter\GetProductReviewsRequestDto;
-use App\Dto\Product\RequestFilter\RequestRatingFiltersDto;
 
 class ProductReviewManager
 {
@@ -18,15 +17,6 @@ class ProductReviewManager
         private readonly ProductReviewMapper $productReviewMapper,
     ) {}
 
-    /**
-     * Retrieves paginated product reviews for a given variant
-     *
-     * @param int $variantId The product variant ID
-     * @param int $page The page number
-     * @param int $limit The items per page limit
-     * @param RequestRatingFiltersDto $requestRatingFiltersDto The rating filters
-     * @return array Array containing reviews and pagination data
-     */
     public function getReviewsByVariantId(GetProductReviewsRequestDto $getProductReviewsRequestDto): array
     {
         $this->logger->debug("ProductReviewManager::getReviewsByVariantId ENTER");
@@ -53,13 +43,7 @@ class ProductReviewManager
         ];
     }
 
-    /**
-     * Sanitizes author name by keeping only first letter of last name
-     *
-     * @param string $firstname The author's first name
-     * @param string $lastname The author's last name
-     * @return string The sanitized author name
-     */
+    // Formats as "Firstname L." — exposes only the first initial of the last name for privacy.
     public function sanitizeAuthorName(string $firstname, string $lastname): string
     {
         $lastnameArray = str_split($lastname, 1);

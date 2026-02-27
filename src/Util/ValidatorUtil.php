@@ -13,12 +13,6 @@ class ValidatorUtil
         private readonly LoggerInterface $logger
     ) {}
 
-    /**
-     * Validate an object (entity or DTO) with optional groups
-     * @param object $object
-     * @param array|null $groups
-     * @return ConstraintViolationListInterface
-     */
     public function validate(object $object, ?array $groups = null): ConstraintViolationListInterface
     {
         $this->logger->debug("ValidatorUtil::validate ENTER");
@@ -27,12 +21,6 @@ class ValidatorUtil
         return $constraintes;
     }
 
-    /**
-     * Check if an object has validation violations
-     * @param object $object
-     * @param array|null $groups
-     * @return bool
-     */
     public function hasViolations(object $object, ?array $groups = null): bool
     {
         $this->logger->debug("ValidatorUtil::hasViolations ENTER");
@@ -42,12 +30,6 @@ class ValidatorUtil
         return $asViolations;
     }
 
-    /**
-     * Return violations as a formatted array
-     * @param object $object
-     * @param array|null $groups
-     * @return array
-     */
     public function getViolationsAsArray(object $object, ?array $groups = null): array
     {
         $this->logger->debug("ValidatorUtil::getViolationsAsArray ENTER");

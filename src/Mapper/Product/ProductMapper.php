@@ -19,13 +19,6 @@ class ProductMapper
         private readonly CategoryMapper $categoryMapper
     ) {}
 
-    /**
-     * Converts a ProductVariant and its image to product summary DTO
-     *
-     * @param ProductVariant $productVariant The product variant entity
-     * @param Image $image The product image entity
-     * @return ResponseResumeProductDto The product summary DTO
-     */
     public function toDtoFromEntity(ProductVariant $productVariant, Image $image): ResponseResumeProductDto
     {
         $this->logger->debug("ProductMapper::toDtoFromEntity ENTER");

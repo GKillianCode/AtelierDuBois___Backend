@@ -14,10 +14,6 @@ class UuidUtil
         public readonly LoggerInterface $logger
     ) {}
 
-    /**
-     * Generate a new UUID in standard format
-     * @return string
-     */
     public function generateUuid(): string
     {
         $this->logger->debug("UuidUtil::generateUuid ENTER");
@@ -26,10 +22,6 @@ class UuidUtil
         return $uuidBase62;
     }
 
-    /**
-     * Generate a new UUID in base 62 format
-     * @return string
-     */
     public function generateUuid62(): string
     {
         $this->logger->debug("UuidUtil::generateUuid62 ENTER");
@@ -38,11 +30,6 @@ class UuidUtil
         return $uuidBase62;
     }
 
-    /**
-     * Conversion of a UUID to base 62
-     * @param UuidInterface $uuid
-     * @return string
-     */
     public function uuidToBase62(UuidInterface $uuid): string
     {
         $this->logger->debug("UuidUtil::uuidToBase62 ENTER");
@@ -60,6 +47,8 @@ class UuidUtil
             $base62 = '0';
         }
 
+        // A 128-bit UUID always fits in 22 base-62 characters; pad with leading zeros
+        // so the output length is constant and lexicographic order is preserved.
         $uuidBase62 = str_pad($base62, 22, '0', STR_PAD_LEFT);
         $this->logger->debug("UuidUtil::uuidToBase62 EXIT");
         return $uuidBase62;

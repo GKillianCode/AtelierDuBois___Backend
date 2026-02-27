@@ -13,7 +13,6 @@ use App\Repository\Product\ProductRepository;
 use App\Dto\Request\Filter\GetAllProductsRequestDto;
 use App\Repository\Product\ProductVariantRepository;
 use App\Dto\Request\Filter\GetProductReviewsRequestDto;
-use App\Dto\Product\RequestFilter\RequestRatingFiltersDto;
 use App\Exception\NotFoundException;
 
 class ProductService
@@ -28,12 +27,6 @@ class ProductService
         private readonly ProductReviewManager $productReviewManager,
     ) {}
 
-    /**
-     * Retrieves paginated products according to provided filters
-     *
-     * @param GetAllProductsRequestDto $getAllProductsRequestDto The DTO containing pagination and filter parameters
-     * @return array Array containing products and pagination data
-     */
     public function getPaginatedProducts(GetAllProductsRequestDto $getAllProductsRequestDto): array
     {
         try {
@@ -65,15 +58,6 @@ class ProductService
         }
     }
 
-    /**
-     * Retrieves product reviews for a variant by its public ID
-     *
-     * @param string $publicId The public ID of the product variant
-     * @param int $page The page number
-     * @param int $limit The items per page limit
-     * @param RequestRatingFiltersDto $requestRatingFiltersDto The rating filters
-     * @return array Array containing reviews and pagination data
-     */
     public function getProductVariantReviews(GetProductReviewsRequestDto $getProductReviewsRequestDto): array
     {
         try {
@@ -101,12 +85,6 @@ class ProductService
         }
     }
 
-    /**
-     * Finds a product variant with all its associated details
-     *
-     * @param string $publicId The public ID of the product variant
-     * @return ResponseProductDto|null The detailed product DTO or null if not found
-     */
     public function findVariantWithDetails(string $publicId): ResponseProductDto|null
     {
         try {

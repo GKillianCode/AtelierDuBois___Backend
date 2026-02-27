@@ -23,12 +23,6 @@ class ProductVariantMapper
         private readonly CategoryMapper $categoryMapper
     ) {}
 
-    /**
-     * Converts a Paginator of products to an array of short DTOs
-     *
-     * @param Paginator $paginator The paginator containing products
-     * @return array Array of ResponseResumeProductDto objects
-     */
     public function mapProductsToShortDtos(Paginator $paginator): array
     {
         $this->logger->debug("ProductVariantMapper::mapProductsToShortDtos ENTER");
@@ -61,13 +55,6 @@ class ProductVariantMapper
         return $products;
     }
 
-    /**
-     * Converts a main ProductVariant with its alternative variants to detailed DTO
-     *
-     * @param ProductVariant $mainProductVariant The main product variant
-     * @param array $otherProductVariants Array of other product variants DTOs
-     * @return ResponseProductDto The detailed product DTO
-     */
     public function variantToDto(ProductVariant $mainProductVariant, array $otherProductVariants): ResponseProductDto
     {
         $this->logger->debug("ProductVariantMapper::mapVariantToDetailDto ENTER");
@@ -105,12 +92,6 @@ class ProductVariantMapper
         return null;
     }
 
-    /**
-     * Converts a collection of ProductVariants to alternative variant DTOs
-     *
-     * @param mixed $productsVariants Collection of product variants
-     * @return array Array of ResponseResumeProductVariantDto DTOs
-     */
     public function mapVariantsToOtherVariantDtos($productsVariants): array
     {
         $this->logger->debug("ProductVariantMapper::mapVariantsToOtherVariantDtos ENTER");
@@ -133,13 +114,6 @@ class ProductVariantMapper
         return $variants;
     }
 
-    /**
-     * Converts a ProductVariant and its image to product summary DTO
-     *
-     * @param ProductVariant $productVariant The product variant entity
-     * @param Image $image The product image entity
-     * @return ResponseResumeProductDto The product summary DTO
-     */
     public function toDtoFromProductVariant(ProductVariant $productVariant, Image $image): ResponseResumeProductDto
     {
         $this->logger->debug("ProductMapper::toDtoFromEntity ENTER");

@@ -22,12 +22,6 @@ class AddressService
         private readonly AddressRequestMapper $addressRequestMapper
     ) {}
 
-    /**
-     * Add a new address for the user based on the provided AddressDto.
-     * @param Request $request
-     * @param User $user
-     * @return void
-     */
     public function addAddress(Request $request, User $user): void
     {
         $this->logger->debug("AddressService::addAddress ENTER");

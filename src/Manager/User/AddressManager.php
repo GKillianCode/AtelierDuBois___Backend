@@ -71,11 +71,6 @@ class AddressManager
         }
     }
 
-    /**
-     * Check if the user can add a new address based on the maximum allowed addresses.
-     * @param User $user
-     * @return bool
-     */
     public function canUserAddAddress(User $user): bool
     {
         $canAdd = $this->countTheNumberOfAddressesForAUser($user) < $this->userMaxAddresses;

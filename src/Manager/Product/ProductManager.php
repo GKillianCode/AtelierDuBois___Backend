@@ -22,12 +22,6 @@ class ProductManager
         private readonly ProductReviewManager $productReviewManager,
     ) {}
 
-    /**
-     * Updates an existing product
-     *
-     * @param Product $product The product entity to update
-     * @return void
-     */
     public function update(Product $product): void
     {
         try {
@@ -44,12 +38,6 @@ class ProductManager
         }
     }
 
-    /**
-     * Deletes a product
-     *
-     * @param Product $product The product entity to delete
-     * @return void
-     */
     public function delete(Product $product): void
     {
         try {
@@ -68,12 +56,6 @@ class ProductManager
 
     use ValidateAndSaveTrait;
 
-    /**
-     * Retrieves a product variant by its public ID
-     *
-     * @param string $publicId The public ID of the product variant
-     * @return ProductVariant|null The product variant or null if not found
-     */
     public function getProductVariantByPublicId(string $publicId)
     {
         $productVariant = $this->productVariantRepository->getProductVariantByPublicId($publicId);
