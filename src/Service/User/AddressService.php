@@ -33,6 +33,11 @@ class AddressService
         $this->logger->debug("AddressService::addAddress ENTER");
 
         $addressDto = $this->addressRequestMapper->mapAddAddressRequest($request);
+
+        if ($this->addressManager->checkIfAddressExistsForUser($user, $addressDto)) {
+            throw new ConflictException('Address already exists for the user.');
+        }
+
         $address = $this->addressMapper->toEntityFromDto($addressDto, $user);
         $address = $this->addressManager->setADefaultAddress($address, $user);
 

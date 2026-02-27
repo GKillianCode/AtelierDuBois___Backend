@@ -121,8 +121,8 @@ class AddressRequestMapper
 
         return new AddressDto(
             publicId: $publicId,
-            street: $addressData['street'] ?? null,
-            city: $addressData['city'] ?? null,
+            street: strtolower($addressData['street'] ?? '') ?? null,
+            city: strtolower($addressData['city'] ?? '') ?? null,
             zipcode: $addressData['zipcode'] ?? null,
             isProfessional: $addressData['isProfessional'] ?? null,
             isDefault: $addressData['isDefault'] ?? null

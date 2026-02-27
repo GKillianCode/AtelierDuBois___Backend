@@ -2,6 +2,7 @@
 
 namespace App\Manager\User;
 
+use App\Dto\User\AddressDto;
 use App\Entity\User\User;
 use App\Trait\ValidateAndSaveTrait;
 use App\Util\ValidatorUtil;
@@ -127,5 +128,18 @@ class AddressManager
         $addresses = $user->getAddresses()->toArray();
 
         return $addresses;
+    }
+
+    public function checkIfAddressExistsForUser(User $user, AddressDto $addressDto): bool
+    {
+        $address = $this->addressRepository->findOneBy([
+            'userId' => $user,
+            'street' => $addressDto->getStreet(),
+            'zipcode' => $addressDto->getZipcode(),
+            'city' => $addressDto->getCity(),
+            'isProfessional' => $addressDto->isProfessional(),
+        ]);
+
+        return $address !== null;
     }
 }
