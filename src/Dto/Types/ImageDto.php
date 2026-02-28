@@ -26,6 +26,11 @@ class ImageDto
             pattern: '/\.webp$/i',
             message: 'L\'URL de l\'image doit se terminer par .webp'
         )]
-        public readonly string $imageUrl,
+        private readonly string $imageUrl,
     ) {}
+
+    public function getImageUrl(): string
+    {
+        return $this->imageUrl;
+    }
 }

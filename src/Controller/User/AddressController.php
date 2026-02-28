@@ -2,223 +2,149 @@
 
 namespace App\Controller\User;
 
-use App\Enum\ErrorCode;
-use App\Dto\User\AddressDto;
-use App\Response\ErrorResponse;
-use App\Service\ValidatorService;
+use App\Dto\OpenApiModel\AddressOAModel;
+use App\Enum\ApiErrorCode;
+use App\Manager\User\AddressManager;
+use App\Response\ApiResponse;
 use App\Service\User\AddressService;
-use Psr\Log\LoggerInterface;
+use Nelmio\ApiDocBundle\Attribute\Model;
+use OpenApi\Attributes as OA;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
+#[OA\Tag(name: 'Users/Addresses')]
 final class AddressController extends AbstractController
 {
-
     public function __construct(
-        public readonly AddressService $addressService,
-        public readonly ValidatorService $validatorService,
-        public readonly SerializerInterface $serializer,
-        private readonly LoggerInterface $logger
+        private readonly AddressService $addressService,
+        private readonly SerializerInterface $serializer,
+        private readonly AddressManager $addressManager,
     ) {}
 
     #[Route('/api/v1/user/address/add', name: 'address_add', methods: ['POST'])]
+    #[OA\Post(
+        summary: 'Add an address for the authenticated user',
+        requestBody: new OA\RequestBody(
+            required: true,
+            description: 'Data for the new address',
+            content: new OA\JsonContent(ref: new Model(type: AddressOAModel::class))
+        ),
+        security: [['bearerAuth' => []]]
+    )]
+    #[OA\Response(
+        response: Response::HTTP_OK,
+        description: 'Address added successfully',
+    )]
     public function addAddress(Request $request): Response
     {
-        try {
-            $this->logger->debug("AddressController::addAddress ENTER");
+        $areUserCanAddAddress = $this->addressManager->canUserAddAddress($this->getUser());
 
-            $areUserCanAddAddress = $this->addressService->canAddAddress($this->getUser());
-            if ($areUserCanAddAddress) {
-
-                $addressDto = $this->serializer->deserialize(
-                    $request->getContent(),
-                    AddressDto::class,
-                    'json'
-                );
-
-                $violations = $this->validatorService->getViolationsAsArray($addressDto, null);
-                if (empty($violations)) {
-                    $user = $this->getUser();
-                    $this->addressService->addAddress($addressDto, $user);
-
-                    $this->logger->debug("AddressController::addAddress EXIT");
-                    return $this->json([
-                        'status' => 'Address registered successfully'
-                    ], Response::HTTP_CREATED);
-                }
-
-                return $this->createErrorResponse(
-                    ErrorCode::INVALID_DATA,
-                    'The provided data is invalid.',
-                    "Les données fournies sont invalides. Veuillez vérifier les informations et réessayer.",
-                    $violations
-                );
-            }
-            return $this->createErrorResponse(
-                ErrorCode::ADDRESS_LIMIT_REACHED,
-                'Maximum number of addresses reached.',
-                "Vous avez atteint le nombre maximal d'adresses que vous pouvez ajouter."
-            );
-        } catch (\Exception $e) {
-            $this->logger->error("AddressController::addAddress ERROR::" . ErrorCode::HTTP_INTERNAL_SERVER_ERROR->value);
-            return new JsonResponse(['error' => 'Error while adding address'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        if ($areUserCanAddAddress) {
+            $this->addressService->addAddress($request, $this->getUser());
+            return ApiResponse::success();
+        } else {
+            return ApiResponse::error(ApiErrorCode::ADDRESS_LIMIT_REACHED->getUserMessage(), 'Maximum number of addresses reached.', "Vous avez atteint le nombre maximal d'adresses que vous pouvez ajouter.");
         }
     }
 
     #[Route('/api/v1/user/address/can-add', name: 'address_can_add', methods: ['GET'])]
+    #[OA\Get(
+        summary: 'Check if the authenticated user can add an address',
+        security: [['bearerAuth' => []]]
+    )]
+    #[OA\Response(
+        response: Response::HTTP_OK,
+        description: 'Address added successfully',
+        content: new OA\JsonContent(
+            type: 'boolean'
+        )
+    )]
     public function canUserAddAddress(): Response
     {
-        try {
-            $this->logger->debug("AddressController::canUserAddAddress ENTER");
-
-            $areUserCanAddAddress = $this->addressService->canAddAddress($this->getUser());
-
-            $this->logger->debug("AddressController::canUserAddAddress EXIT");
-            return $this->json([
-                'canAddAddress' => $areUserCanAddAddress
-            ], Response::HTTP_OK);
-        } catch (\Exception $e) {
-            $this->logger->error("AddressController::canUserAddAddress ERROR::" . ErrorCode::HTTP_INTERNAL_SERVER_ERROR->value);
-            return new JsonResponse(['error' => 'Error while checking address addition capability'], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
+        $areUserCanAddAddress = $this->addressManager->canUserAddAddress($this->getUser());
+        return ApiResponse::success(['canAddAddress' => $areUserCanAddAddress]);
     }
 
+
     #[Route('/api/v1/user/address/all', name: 'address_get_all', methods: ['GET'])]
+    #[OA\Get(
+        summary: 'Get all addresses for the authenticated user',
+        security: [['bearerAuth' => []]]
+    )]
+    #[OA\Response(
+        response: Response::HTTP_OK,
+        description: 'Addresses retrieved successfully',
+        content: new OA\JsonContent(
+            type: 'array',
+            items: new OA\Items(ref: new Model(type: AddressOAModel::class))
+        )
+    )]
     public function getAllAddress(): Response
     {
-        try {
-            $this->logger->debug("AddressController::getAllAddress ENTER");
-
-            $addresses = $this->addressService->getAllAddressesInDto($this->getUser());
-
-            $this->logger->debug("AddressController::getAllAddress EXIT");
-            return $this->json([
-                'addresses' => $addresses
-            ], Response::HTTP_OK);
-        } catch (\Exception $e) {
-            $this->logger->error("AddressController::getAllAddress ERROR::" . ErrorCode::HTTP_INTERNAL_SERVER_ERROR->value);
-            return new JsonResponse(['error' => 'Error while getting all addresses'], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
+        $addresses = $this->addressService->getAllAddressesInDto($this->getUser());
+        return ApiResponse::success($this->serializer->normalize($addresses));
     }
 
     #[Route('/api/v1/user/address/{publicId}', name: 'address_get', methods: ['GET'])]
+    #[OA\Get(
+        summary: 'Get a specific address by public ID for the authenticated user',
+        security: [['bearerAuth' => []]],
+    )]
+    #[OA\Response(
+        response: Response::HTTP_OK,
+        description: 'Address retrieved successfully',
+        content: new OA\JsonContent(ref: new Model(type: AddressOAModel::class))
+    )]
     public function getAddress(string $publicId): Response
     {
-        try {
-            $this->logger->debug("AddressController::getAddress ENTER");
+        $addressDto = $this->addressService->getAddressInDtoByPublicId($this->getUser(), $publicId);
 
-            $addressDto = $this->addressService->getAddressInDtoByPublicId($this->getUser(), $publicId);
-
-            if ($addressDto) {
-                $this->logger->debug("AddressController::getAddress EXIT");
-                return $this->json([
-                    'address' => $addressDto
-                ], Response::HTTP_OK);
-            }
-
-            return $this->createErrorResponse(
-                ErrorCode::ADDRESS_NOT_FOUND,
-                'Address not found.',
-                "Adresse non trouvée."
-            );
-        } catch (\Exception $e) {
-            $this->logger->error("AddressController::getAddress ERROR::" . ErrorCode::HTTP_INTERNAL_SERVER_ERROR->value);
-            return new JsonResponse(['error' => 'Error while getting address'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        if ($addressDto) {
+            return ApiResponse::success($this->serializer->normalize($addressDto));
         }
+
+        return ApiResponse::notFound('Address not found.');
     }
 
     #[Route('/api/v1/user/address/{publicId}/update', name: 'address_update', methods: ['PUT'])]
+    #[OA\Put(
+        summary: 'Update a specific address by public ID for the authenticated user',
+        security: [['bearerAuth' => []]]
+    )]
+    #[OA\Response(
+        response: Response::HTTP_OK,
+        description: 'Address updated successfully'
+    )]
     public function updateAddress(string $publicId, Request $request): Response
     {
-        try {
-            $this->logger->debug("AddressController::updateAddress ENTER");
+        $user = $this->getUser();
+        $address = $this->addressManager->getAddressByPublicId($user, $publicId);
 
-            $addressDto = $this->serializer->deserialize(
-                $request->getContent(),
-                AddressDto::class,
-                'json'
-            );
-
-            $violations = $this->validatorService->getViolationsAsArray($addressDto, null);
-            if (empty($violations)) {
-                $user = $this->getUser();
-                $address = $this->addressService->getAddressByPublicId($user, $publicId);
-
-                if ($address) {
-                    $this->addressService->updateAddress($address, $addressDto, $user);
-
-                    $this->logger->debug("AddressController::updateAddress EXIT");
-                    return $this->json([
-                        'status' => 'Address updated successfully'
-                    ], Response::HTTP_OK);
-                }
-
-                return $this->createErrorResponse(
-                    ErrorCode::ADDRESS_NOT_FOUND,
-                    'Address not found.',
-                    "Adresse non trouvée."
-                );
-            }
-
-            return $this->createErrorResponse(
-                ErrorCode::INVALID_DATA,
-                'The provided data is invalid.',
-                "Les données fournies sont invalides. Veuillez vérifier les informations et réessayer.",
-                $violations
-            );
-        } catch (\Exception $e) {
-            $this->logger->error("AddressController::updateAddress ERROR::" . ErrorCode::HTTP_INTERNAL_SERVER_ERROR->value);
-            return new JsonResponse(['error' => 'Error while updating address'], Response::HTTP_INTERNAL_SERVER_ERROR);
+        if ($address) {
+            $this->addressService->updateAddress($request, $user, $publicId);
+            return ApiResponse::success(['status' => 'Address updated successfully']);
+        } else {
+            return ApiResponse::notFound('Address not found.');
         }
     }
 
     #[Route('/api/v1/user/address/{publicId}/remove', name: 'address_remove', methods: ['DELETE'])]
+    #[OA\Delete(
+        summary: 'Remove a specific address by public ID for the authenticated user',
+        security: [['bearerAuth' => []]]
+    )]
+    #[OA\Response(
+        response: Response::HTTP_OK,
+        description: 'Address removed successfully'
+    )]
     public function removeAddress(string $publicId): Response
     {
-        try {
-            $user = $this->getUser();
-            $address = $this->addressService->getAddressByPublicId($user, $publicId);
-            $countRegisteredAddresses = $this->addressService->countUserAddresses($user);
+        $user = $this->getUser();
+        $this->addressService->deleteAddress($user, $publicId);
 
-            if ($address) {
-                if ($countRegisteredAddresses > 1) {
-                    $this->addressService->removeAddressByPublicId($address);
-
-                    $this->logger->debug("AddressController::removeAddress EXIT 1");
-                    return $this->json([
-                        'status' => 'Address removed successfully'
-                    ], Response::HTTP_OK);
-                } else {
-                    $this->logger->debug("AddressController::removeAddress EXIT 2");
-                    return $this->createErrorResponse(
-                        ErrorCode::ADDRESS_CANNOT_DELETE_DEFAULT,
-                        'At least one address must be kept.',
-                        "Au moins une adresse doit être conservée."
-                    );
-                }
-            }
-
-            $this->logger->debug("AddressController::removeAddress EXIT 3");
-            return $this->createErrorResponse(
-                ErrorCode::ADDRESS_NOT_FOUND,
-                'Address not found.',
-                "Adresse non trouvée."
-            );
-        } catch (\Exception $e) {
-            $this->logger->error("AddressController::removeAddress ERROR::" . ErrorCode::HTTP_INTERNAL_SERVER_ERROR->value);
-            return new JsonResponse(['error' => 'Error while removing address'], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
-    }
-
-
-    private function createErrorResponse(ErrorCode $code, string $message, string $userMessage, array $details = []): JsonResponse
-    {
-        $errorResponse = new ErrorResponse($code->value, $message, $details, $userMessage);
-        $this->logger->debug("AddressController::addAddress ERROR::" . $code->value);
-        return new JsonResponse($errorResponse->toArray(), Response::HTTP_BAD_REQUEST);
+        return ApiResponse::success('Address removed successfully.');
     }
 }

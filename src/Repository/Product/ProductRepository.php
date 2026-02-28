@@ -2,14 +2,15 @@
 
 namespace App\Repository\Product;
 
-use App\Enum\SortFilter\ProductSortFilterCode;
 use Psr\Log\LoggerInterface;
 use App\Entity\Product\Product;
 use App\Entity\Product\ProductReview;
-use App\Dto\Product\RequestFilter\RequestProductFiltersDto;
-use App\Dto\Product\ShortProductDto;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\ORM\Tools\Pagination\Paginator;
+use App\Dto\Response\ResponseResumeProductDto;
+use App\Enum\SortFilter\ProductSortFilterCode;
+use App\Dto\Request\Filter\GetAllProductsRequestDto;
+use App\Dto\Product\RequestFilter\RequestProductFiltersDto;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 /**
@@ -27,14 +28,12 @@ class ProductRepository extends ServiceEntityRepository
 
     /**
      * Get a paginated list of products based on filters.
-     * @param int $page
-     * @param int $limit
-     * @param RequestProductFiltersDto $requestProductFiltersDto
+     * @param GetAllProductsRequestDto $getAllProductsRequestDto
      * @return Paginator
      */
-    public function paginateProducts(int $page, int $limit, RequestProductFiltersDto $requestProductFiltersDto): Paginator
+    public function paginateProducts(GetAllProductsRequestDto $getAllProductsRequestDto): Paginator
     {
-        $this->logger->debug("ProductRepository::paginateProducts ENTER with page: $page, limit: $limit, filters: " . json_encode($requestProductFiltersDto));
+        $this->logger->debug("ProductRepository::paginateProducts ENTER");
         $query = $this->createQueryBuilder('p')
             ->select('p', 'pv', 'i', 'c')
             ->leftJoin('p.productVariants', 'pv', 'WITH', 'pv.isDefault = :isDefault')
@@ -42,15 +41,15 @@ class ProductRepository extends ServiceEntityRepository
             ->leftJoin('p.categoryId', 'c')
             ->where('LOWER(p.name) LIKE LOWER(:search)');
 
-        if ($requestProductFiltersDto->categoryPublicId !== null) {
+        if ($getAllProductsRequestDto->getCategoryPublicId() !== null) {
             $query->andWhere('LOWER(c.publicId) = LOWER(:categoryId)')
-                ->setParameter('categoryId', $requestProductFiltersDto->categoryPublicId->publicId);
+                ->setParameter('categoryId', $getAllProductsRequestDto->getCategoryPublicId());
         }
 
-        $query->setParameter('search', '%' . $requestProductFiltersDto->search . '%')
+        $query->setParameter('search', '%' . $getAllProductsRequestDto->getSearch() . '%')
             ->setParameter('isDefault', true);
 
-        match ($requestProductFiltersDto->filter) {
+        match ($getAllProductsRequestDto->getFilter()) {
             ProductSortFilterCode::PRICE_ASC => $query->orderBy('pv.price', 'ASC'),
             ProductSortFilterCode::PRICE_DESC => $query->orderBy('pv.price', 'DESC'),
             ProductSortFilterCode::NAME_ASC => $query->orderBy('p.name', 'ASC'),
@@ -60,14 +59,14 @@ class ProductRepository extends ServiceEntityRepository
             default => $query->orderBy('p.createdAt', 'ASC')
         };
 
-        match ($requestProductFiltersDto->productType) {
+        match ($getAllProductsRequestDto->getProductType()) {
             ProductSortFilterCode::PRODUCTS_WITH_PRICE => $query->andWhere('pv.price IS NOT NULL'),
             ProductSortFilterCode::PRODUCTS_WITHOUT_PRICE => $query->andWhere('pv.price IS NULL'),
             default => null
         };
 
-        $query->setFirstResult(($page - 1) * $limit)
-            ->setMaxResults($limit)
+        $query->setFirstResult(($getAllProductsRequestDto->getPage() - 1) * $getAllProductsRequestDto->getLimit())
+            ->setMaxResults($getAllProductsRequestDto->getLimit())
             ->getQuery()
             ->getResult();
 
@@ -87,7 +86,7 @@ class ProductRepository extends ServiceEntityRepository
             return [];
         }
 
-        $productIds = array_map(fn(ShortProductDto $p) => $p->id, $products);
+        $productIds = array_map(fn(ResponseResumeProductDto $p) => $p->getId(), $products);
 
         $results = $this->createQueryBuilder('p')
             ->select('p.id as productId', 'AVG(pr.rating) as avgRating')

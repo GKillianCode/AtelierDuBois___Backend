@@ -10,6 +10,28 @@ services:
     _defaults:
         autowire: true # Automatically injects dependencies in your services.
         autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+        bind:
+            bool $debug: "%kernel.debug%"
 
     App\:
         resource: "../src/"
+
+    App\Serializer\Normalizer\Product\ResponseResumeProductDtoNormalizer:
+        tags:
+            - { name: "serializer.normalizer", priority: 100 }
+
+    App\Serializer\Normalizer\Product\ResponseResumeProductVariantDtoNormalizer:
+        tags:
+            - { name: "serializer.normalizer", priority: 100 }
+
+    App\Serializer\Normalizer\Product\ResponseProductDtoNormalizer:
+        tags:
+            - { name: "serializer.normalizer", priority: 100 }
+
+    App\Serializer\Normalizer\Product\CategoryDtoNormalizer:
+        tags:
+            - { name: "serializer.normalizer", priority: 100 }
+
+    App\Serializer\Normalizer\User\AddressDtoNormalizer:
+        tags:
+            - { name: "serializer.normalizer", priority: 100 }

@@ -24,6 +24,11 @@ class PublicIdDto
             pattern: '/^[0-9a-zA-Z_-]{22}$/',
             message: 'Le publicId doit être un UUID valide en Base62.'
         )]
-        public readonly string $publicId
+        private readonly string $publicId
     ) {}
+
+    public function getPublicId(): string
+    {
+        return $this->publicId;
+    }
 }

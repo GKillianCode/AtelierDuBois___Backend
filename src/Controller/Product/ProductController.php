@@ -2,132 +2,107 @@
 
 namespace App\Controller\Product;
 
-use App\Enum\ErrorCode;
-use Psr\Log\LoggerInterface;
-use App\Response\ErrorResponse;
-use App\Dto\Types\PublicIdDto;
-use App\Service\ValidatorService;
-use App\Enum\SortFilter\ProductSortFilterCode;
+use App\Dto\OpenApiModel\ProductOAModel;
+use App\Dto\OpenApiModel\ProductResumeOAModel;
+use App\Dto\OpenApiModel\ReviewOAModel;
+use App\Dto\Types\PaginationDataDto;
+use App\Mapper\Request\CommentRequestMapper;
+use App\Mapper\Request\ProductRequestMapper;
+use App\Response\ApiResponse;
 use App\Service\Product\ProductService;
-use App\Dto\Product\RequestFilter\RequestProductFiltersDto;
+use Nelmio\ApiDocBundle\Attribute\Model;
+use OpenApi\Attributes as OA;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Serializer\SerializerInterface;
 
+#[OA\Tag(name: 'Products')]
 final class ProductController extends AbstractController
 {
     public function __construct(
         private readonly ProductService $productService,
-        private readonly ValidatorService $validatorService,
-        private readonly LoggerInterface $logger,
+        private readonly SerializerInterface $serializer,
+        private readonly ProductRequestMapper $productRequestMapper,
+        private readonly CommentRequestMapper $commentRequestMapper,
     ) {}
 
     #[Route('/api/public/v1/product/all', name: 'product_get_all', methods: ['GET'])]
+    #[OA\Get(
+        summary: 'Get all products with pagination and optional filters',
+    )]
+    #[OA\Response(
+        response: Response::HTTP_OK,
+        description: 'Products retrieved successfully',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(
+                    property: 'products',
+                    type: 'array',
+                    items: new OA\Items(ref: new Model(type: ProductResumeOAModel::class))
+                ),
+                new OA\Property(
+                    property: 'pagination',
+                    ref: new Model(type: PaginationDataDto::class)
+                )
+            ],
+            type: 'object'
+        )
+    )]
     public function getAllProducts(Request $request): Response
     {
-        try {
-            $this->logger->debug("ProductController::getAllProducts ENTER");
+        $getAllProductsRequestDto = $this->productRequestMapper->mapGetAllProductsRequest($request);
+        $result = $this->productService->getPaginatedProducts($getAllProductsRequestDto);
 
-            $page = (int) $request->query->get('page', 1);
-            $limit = (int) $request->query->get('limit', 20);
-            $search = $request->query->get('search', '');
-            $filterValue = $request->query->get('filter');
-            $productTypeValue = $request->query->get('productType');
-            $categoryValue = $request->query->get('category');
-
-            $filter = $filterValue !== null
-                ? (ProductSortFilterCode::tryFrom($filterValue) ?? ProductSortFilterCode::CREATED_DESC)
-                : ProductSortFilterCode::CREATED_DESC;
-            $productType = $productTypeValue !== null
-                ? (ProductSortFilterCode::tryFrom($productTypeValue) ?? ProductSortFilterCode::PRODUCTS_ALL)
-                : ProductSortFilterCode::PRODUCTS_ALL;
-
-            $categoryPublicIdDto = $categoryValue !== null
-                ? new PublicIdDto(publicId: $categoryValue)
-                : null;
-
-            if ($categoryPublicIdDto !== null && $this->validatorService->hasViolations($categoryPublicIdDto)) {
-                $this->logger->debug("ProductController::getAllProducts EXIT 1 - Invalid category format");
-                return $this->createErrorResponse(
-                    ErrorCode::INVALID_DATA,
-                    'Invalid category format. Expected 22 characters in base62 format.',
-                    "Format de catégorie invalide.",
-                );
-            }
-
-            $requestFiltersDto = new RequestProductFiltersDto(
-                search: $search,
-                filter: $filter,
-                productType: $productType,
-                categoryPublicId: $categoryPublicIdDto,
-            );
-
-            $result = $this->productService->getAllProducts($page, $limit, $requestFiltersDto);
-
-            $this->logger->debug("ProductController::getAllProducts EXIT 2");
-            return $this->json($result, Response::HTTP_OK);
-        } catch (\Exception $e) {
-            $this->logger->error("ProductController::getAllProducts ERROR::" . $e->getMessage());
-            return $this->json([
-                'error' => 'An error occurred while fetching products. ' . $e->getMessage()
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
+        return ApiResponse::success($this->serializer->normalize($result));
     }
 
     #[Route('/api/public/v1/product/{publicId}', name: 'product_get_by_publicid', methods: ['GET'])]
-    public function getProductById(string $publicId): Response
+    #[OA\Get(
+        summary: 'Get a product by its public ID',
+    )]
+    #[OA\Response(
+        response: Response::HTTP_OK,
+        description: 'Product retrieved successfully',
+        content: new OA\JsonContent(
+            ref: new Model(type: ProductOAModel::class)
+        )
+    )]
+    public function getProductByPublicId(string $publicId): Response
     {
-        try {
-            $this->logger->debug("ProductController::getProductById ENTER with publicId: " . $publicId);
-            $product = $this->productService->getProductVariantByPublicId($publicId);
-            if (!$product) {
-                $this->logger->debug("ProductController::getProductById EXIT 1");
-                return $this->createErrorResponse(
-                    ErrorCode::PRODUCT_NOT_FOUND,
-                    'Product not found.',
-                    "Produit non trouvé."
-                );
-            }
-            $this->logger->debug("ProductController::getProductById EXIT 2");
-            return $this->json($product, Response::HTTP_OK);
-        } catch (\Exception $e) {
-            $this->logger->error("ProductController::getProductById ERROR::" . $e->getMessage());
-            return $this->json([
-                'error' => 'An error occurred while fetching the product. ' . $e->getMessage()
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
+        $product = $this->productService->findVariantWithDetails($publicId);
+
+        return ApiResponse::success($this->serializer->normalize($product));
     }
 
-    #[Route('/api/public/v1/product/{publicId}/reviews', name: 'product_get_all_reviews_by_publicid', methods: ['GET'])]
-    public function getProductReviewsByProductVariantPublicId(Request $request, string $publicId): Response
+    #[Route('/api/public/v1/product/{publicId}/reviews', name: 'product_get_reviews_by_publicid', methods: ['GET'])]
+    #[OA\Get(
+        summary: 'Get reviews for a product variant by its public ID',
+    )]
+    #[OA\Response(
+        response: Response::HTTP_OK,
+        description: 'Reviews retrieved successfully',
+        content: new OA\JsonContent(
+            properties: [
+                new OA\Property(
+                    property: 'reviews',
+                    type: 'array',
+                    items: new OA\Items(ref: new Model(type: ReviewOAModel::class))
+                ),
+                new OA\Property(
+                    property: 'pagination',
+                    ref: new Model(type: PaginationDataDto::class)
+                )
+            ],
+            type: 'object'
+        )
+    )]
+    public function getReviewsByVariant(Request $request, string $publicId): Response
     {
-        try {
-            $this->logger->debug("ProductController::getProductReviewsByProductVariantPublicId ENTER with publicId: " . $publicId);
-            $page = (int) $request->query->get('page', 1);
-            $limit = (int) $request->query->get('limit', 10);
+        $getProductReviewsRequestDto = $this->commentRequestMapper->mapGetAllCommentsRequest($request, $publicId);
+        $productsReviewsDto = $this->productService->getProductVariantReviews($getProductReviewsRequestDto);
 
-            $ratingOrderValue = $request->query->get('ratingOrder');
-            $ratingValue = (int) $request->query->get('rating');
-            $publicationOrderValue = $request->query->get('publicationOrder');
-
-            $requestRatingFiltersDto = $this->productService->requestRatingFiltersDtoBuilder($ratingOrderValue, $ratingValue, $publicationOrderValue);
-            $productsReviewsDto = $this->productService->getProductReviewsByProductVariantPublicId($publicId, $page, $limit, $requestRatingFiltersDto);
-
-            $this->logger->debug("ProductController::getProductReviewsByProductVariantPublicId EXIT 2");
-            return $this->json($productsReviewsDto, Response::HTTP_OK);
-        } catch (\Exception $e) {
-            $this->logger->error("ProductController::getProductReviewsByProductVariantPublicId ERROR::" . $e->getMessage());
-            return $this->json([
-                'error' => 'An error occurred while fetching the product. ' . $e->getMessage()
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    private function createErrorResponse(ErrorCode $code, string $message, string $userMessage, array $details = []): JsonResponse
-    {
-        $errorResponse = new ErrorResponse($code->value, $message, $details, $userMessage);
-        return new JsonResponse($errorResponse->toArray(), Response::HTTP_BAD_REQUEST);
+        return ApiResponse::success($this->serializer->normalize($productsReviewsDto));
     }
 }
