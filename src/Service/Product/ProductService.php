@@ -2,7 +2,6 @@
 
 namespace App\Service\Product;
 
-use Exception;
 use App\Util\PaginationUtil;
 use Psr\Log\LoggerInterface;
 use App\Manager\Product\ProductManager;
