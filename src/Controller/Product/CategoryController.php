@@ -32,7 +32,7 @@ final class CategoryController extends AbstractController
             items: new OA\Items(ref: new Model(type: CategoryOAModel::class))
         )
     )]
-    public function getAllProducts(): Response
+    public function getAllCategories(): Response
     {
         $categoriesDto = $this->categoryService->getAllCategoriesInCategoryDto();
         return ApiResponse::success($this->serializer->normalize($categoriesDto));
