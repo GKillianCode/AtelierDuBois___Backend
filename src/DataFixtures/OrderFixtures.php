@@ -9,7 +9,7 @@ use App\Entity\Shipment\Carrier;
 use App\Enum\ShipmentStatusCode;
 use App\Entity\Shipment\OrderStatus;
 use App\Entity\Order\OrderProduct;
-use App\Service\Shipment\ShipmentService;
+use App\Util\ShipmentUtil;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
@@ -19,7 +19,7 @@ class OrderFixtures extends Fixture implements DependentFixtureInterface
     public const ORDER_STATUS_REFERENCE = 'order_status';
 
     public function __construct(
-        private readonly ShipmentService $shipmentService,
+        private readonly ShipmentUtil $shipmentUtil,
     ) {}
 
     /**
@@ -90,6 +90,7 @@ class OrderFixtures extends Fixture implements DependentFixtureInterface
 
                 $order = new Order();
                 $order->setUserId($user)
+                    ->setOrderNumber($this->shipmentUtil->generateNewOrderNumber())
                     ->setUpdatedAt($currentDate);
 
                 $daysToAdd = mt_rand(1, 7);
@@ -121,15 +122,8 @@ class OrderFixtures extends Fixture implements DependentFixtureInterface
                 $order->setTotalPrice($totalPrice);
                 $manager->persist($order);
                 $manager->flush();
-
-                $this->createShipment($order);
             }
         }
-    }
-
-    private function createShipment(Order $order): void
-    {
-        $this->shipmentService->createShipmentsForOrder($order);
     }
 
     private function createCarrier(ObjectManager $manager): void

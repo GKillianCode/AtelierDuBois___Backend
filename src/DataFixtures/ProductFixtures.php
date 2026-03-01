@@ -8,6 +8,7 @@ use App\Entity\Product\Product;
 use App\Entity\Product\Category;
 use App\Entity\Product\ProductReview;
 use App\Entity\Product\ProductVariant;
+use App\Util\UuidUtil;
 use Doctrine\Persistence\ObjectManager;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
@@ -18,6 +19,10 @@ class ProductFixtures extends Fixture implements DependentFixtureInterface
     public const CATEGORY_REFERENCE = 'category';
     public const PRODUCT_REFERENCE = 'product';
     public const PRODUCT_VARIANT_REFERENCE = 'product_variant';
+
+    public function __construct(
+        private readonly UuidUtil $uuidUtil,
+    ) {}
 
     /**
      * Creates sample products, categories, wood types, variants, images and reviews
@@ -61,44 +66,20 @@ class ProductFixtures extends Fixture implements DependentFixtureInterface
     private function createCategories(ObjectManager $manager): void
     {
         $categories = [
-            [
-                'publicId' => 'Vw3Ln9Qb5Pe2Sa0HxF1AAA',
-                'name' => 'Décoration',
-            ],
-            [
-                'publicId' => 'Vw3Ln9Qb5Pe2Sa0HxF1BAA',
-                'name' => 'Cuisine',
-            ],
-            [
-                'publicId' => 'Vw3Ln9Qb5Pe2Sa0HxF1CAA',
-                'name' => 'Rangement et organisation',
-            ],
-            [
-                'publicId' => 'Vw3Ln9Qb5Pe2Sa0HxF1DAA',
-                'name' => 'Entrée',
-            ],
-            [
-                'publicId' => 'Vw3Ln9Qb5Pe2Sa0HxF1EAA',
-                'name' => 'Bureau',
-            ],
-            [
-                'publicId' => 'Vw3Ln9Qb5Pe2Sa0HxF1FAA',
-                'name' => 'Salle de bain',
-            ],
-            [
-                'publicId' => 'Vw3Ln9Qb5Pe2Sa0HxF1GAA',
-                'name' => 'Accessoires',
-            ],
-            [
-                'publicId' => 'Vw3Ln9Qb5Pe2Sa0HxF1HAA',
-                'name' => 'Salon',
-            ]
+            'Décoration',
+            'Cuisine',
+            'Rangement et organisation',
+            'Entrée',
+            'Bureau',
+            'Salle de bain',
+            'Accessoires',
+            'Salon',
         ];
 
-        foreach ($categories as $index => $c) {
+        foreach ($categories as $index => $name) {
             $category = new Category();
-            $category->setName($c['name'])
-                ->setPublicId($c['publicId']);
+            $category->setName($name)
+                ->setPublicId($this->uuidUtil->generateUuid62());
             $manager->persist($category);
             $this->addReference(self::CATEGORY_REFERENCE . '_' . $index, $category);
         }
@@ -278,174 +259,27 @@ class ProductFixtures extends Fixture implements DependentFixtureInterface
     private function createProductVariants(ObjectManager $manager): void
     {
         $productVariants = [
-            [
-                'product' => 0,
-                'wood' => 0,
-                'publicId' => '7Qf3sG9Lk2PzW81cNhA5',
-                'isDefault' => true,
-                'price' => 950,
-                'stock' => 20,
-            ],
-            [
-                'product' => 0,
-                'wood' => 1,
-                'publicId' => '3Dz7LmJ1qR8TbP0fVwKe',
-                'isDefault' => false,
-                'price' => 650,
-                'stock' => 35,
-            ],
-            [
-                'product' => 0,
-                'wood' => 6,
-                'publicId' => 'Zp1Kx8Fr2M5tQ0AeLu93',
-                'isDefault' => false,
-                'price' => 850,
-                'stock' => 22,
-            ],
-            [
-                'product' => 1,
-                'wood' => 5,
-                'publicId' => 'aS93FjK72Px1tVQm8LnC',
-                'isDefault' => true,
-                'price' => 1800,
-                'stock' => 15,
-            ],
-            [
-                'product' => 1,
-                'wood' => 4,
-                'publicId' => 'bP0xTn92FrL6cQw1Je78',
-                'isDefault' => false,
-                'price' => 2100,
-                'stock' => 12,
-            ],
-            [
-                'product' => 1,
-                'wood' => 2,
-                'publicId' => 'Lk8Df12BnW9sEe5Qr7Ut',
-                'isDefault' => false,
-                'price' => 1300,
-                'stock' => 25,
-            ],
-            [
-                'product' => 2,
-                'wood' => 0,
-                'publicId' => 'Wm5Qe9L2aK8fTz13SbCd',
-                'isDefault' => true,
-                'price' => 3200,
-                'stock' => 10,
-            ],
-            [
-                'product' => 2,
-                'wood' => 1,
-                'publicId' => 'Nv4HsX7kP0wAa93LuQFe',
-                'isDefault' => false,
-                'price' => 2100,
-                'stock' => 18,
-            ],
-            [
-                'product' => 2,
-                'wood' => 7,
-                'publicId' => 'Rt7YpM2LfQ6bEw04JxSa',
-                'isDefault' => false,
-                'price' => 3500,
-                'stock' => 8,
-            ],
-            [
-                'product' => 3,
-                'wood' => 0,
-                'publicId' => 'Fq8R9aW1zLk0TpXm3Be7',
-                'isDefault' => true,
-                'price' => 18900,
-                'stock' => 5,
-            ],
-            [
-                'product' => 3,
-                'wood' => 6,
-                'publicId' => 'Gp2Bd7QxC1eT8Lv4Mf90',
-                'isDefault' => false,
-                'price' => 16500,
-                'stock' => 6,
-            ],
-            [
-                'product' => 3,
-                'wood' => 4,
-                'publicId' => 'Kx1Uw93RzJm8Fq2Hs7Pa',
-                'isDefault' => false,
-                'price' => 12500,
-                'stock' => 4,
-            ],
-            [
-                'product' => 4,
-                'wood' => 0,
-                'publicId' => 'Qe9P1sMb4Lk7Tw2DaVxH',
-                'isDefault' => true,
-                'price' => 18900,
-                'stock' => 7,
-            ],
-            [
-                'product' => 4,
-                'wood' => 2,
-                'publicId' => 'Mn4Vx8Qf1R0aKe9LpTzC',
-                'isDefault' => false,
-                'price' => 9900,
-                'stock' => 10,
-            ],
-            [
-                'product' => 4,
-                'wood' => 5,
-                'publicId' => 'Ts3Bf6Wn9Dp2Lm0QeAaX',
-                'isDefault' => false,
-                'price' => 11800,
-                'stock' => 8,
-            ],
-            [
-                'product' => 5,
-                'wood' => 7,
-                'publicId' => 'Uq4Kp1Mn8Ls0Tb3VwR9e',
-                'isDefault' => true,
-                'price' => 2500,
-                'stock' => 18,
-            ],
-            [
-                'product' => 5,
-                'wood' => 0,
-                'publicId' => 'Hp6Vd2Sa1Wx7Lm9Qe0Fb',
-                'isDefault' => false,
-                'price' => 2700,
-                'stock' => 15,
-            ],
-            [
-                'product' => 5,
-                'wood' => 3,
-                'publicId' => 'Dx0Lw8Bn4Jp3Rk6Se2Mf',
-                'isDefault' => false,
-                'price' => 3400,
-                'stock' => 10,
-            ],
-            [
-                'product' => 6,
-                'wood' => 6,
-                'publicId' => 'Lp7Xw3Qa0Fn9Sg4Me1Tr',
-                'isDefault' => true,
-                'price' => 4800,
-                'stock' => 14,
-            ],
-            [
-                'product' => 6,
-                'wood' => 7,
-                'publicId' => 'Cg2Mv8Lt1Qp5Rw0DbSx9',
-                'isDefault' => false,
-                'price' => 5200,
-                'stock' => 12,
-            ],
-            [
-                'product' => 6,
-                'wood' => 5,
-                'publicId' => 'Sf8Pa0Km3Xe9Wt1HbQ4L',
-                'isDefault' => false,
-                'price' => 5400,
-                'stock' => 10,
-            ],
+            ['product' => 0, 'wood' => 0, 'isDefault' => true,  'price' => 950,   'stock' => 20],
+            ['product' => 0, 'wood' => 1, 'isDefault' => false, 'price' => 650,   'stock' => 35],
+            ['product' => 0, 'wood' => 6, 'isDefault' => false, 'price' => 850,   'stock' => 22],
+            ['product' => 1, 'wood' => 5, 'isDefault' => true,  'price' => 1800,  'stock' => 15],
+            ['product' => 1, 'wood' => 4, 'isDefault' => false, 'price' => 2100,  'stock' => 12],
+            ['product' => 1, 'wood' => 2, 'isDefault' => false, 'price' => 1300,  'stock' => 25],
+            ['product' => 2, 'wood' => 0, 'isDefault' => true,  'price' => 3200,  'stock' => 10],
+            ['product' => 2, 'wood' => 1, 'isDefault' => false, 'price' => 2100,  'stock' => 18],
+            ['product' => 2, 'wood' => 7, 'isDefault' => false, 'price' => 3500,  'stock' => 8],
+            ['product' => 3, 'wood' => 0, 'isDefault' => true,  'price' => 18900, 'stock' => 5],
+            ['product' => 3, 'wood' => 6, 'isDefault' => false, 'price' => 16500, 'stock' => 6],
+            ['product' => 3, 'wood' => 4, 'isDefault' => false, 'price' => 12500, 'stock' => 4],
+            ['product' => 4, 'wood' => 0, 'isDefault' => true,  'price' => 18900, 'stock' => 7],
+            ['product' => 4, 'wood' => 2, 'isDefault' => false, 'price' => 9900,  'stock' => 10],
+            ['product' => 4, 'wood' => 5, 'isDefault' => false, 'price' => 11800, 'stock' => 8],
+            ['product' => 5, 'wood' => 7, 'isDefault' => true,  'price' => 2500,  'stock' => 18],
+            ['product' => 5, 'wood' => 0, 'isDefault' => false, 'price' => 2700,  'stock' => 15],
+            ['product' => 5, 'wood' => 3, 'isDefault' => false, 'price' => 3400,  'stock' => 10],
+            ['product' => 6, 'wood' => 6, 'isDefault' => true,  'price' => 4800,  'stock' => 14],
+            ['product' => 6, 'wood' => 7, 'isDefault' => false, 'price' => 5200,  'stock' => 12],
+            ['product' => 6, 'wood' => 5, 'isDefault' => false, 'price' => 5400,  'stock' => 10],
         ];
 
         foreach ($productVariants as $index => $pv) {
@@ -462,7 +296,7 @@ class ProductFixtures extends Fixture implements DependentFixtureInterface
             $productVariant = new ProductVariant();
             $productVariant->setProductId($products[$pv['product']])
                 ->setWoodId($woods[$pv['wood']])
-                ->setPublicId($pv['publicId'])
+                ->setPublicId($this->uuidUtil->generateUuid62())
                 ->setIsDefault($pv['isDefault'])
                 ->setPrice($pv['price'])
                 ->setStock($pv['stock']);
@@ -481,10 +315,11 @@ class ProductFixtures extends Fixture implements DependentFixtureInterface
         foreach ($productVariants as $variant) {
             $imageCount = mt_rand(2, 4);
 
+            $folderName = $this->uuidUtil->generateUuid62();
             for ($i = 0; $i < $imageCount; $i++) {
                 $image = new Image();
-                $image->setFolderName("Vw3Ln9Qb5Pe2Sa0HxF7A")
-                    ->setImageName("Vw3Ln9Qb5Pe2Sa0HxF7B{$i}")
+                $image->setFolderName($folderName)
+                    ->setImageName($this->uuidUtil->generateUuid62())
                     ->setFormat("webp")
                     ->setIsDefault($i === 0)
                     ->setProductVariantId($variant);
