@@ -3,7 +3,7 @@
 namespace App\Manager\Product;
 
 use App\Entity\Product\Image;
-use App\Exception\ForbiddenException;
+use App\Exception\NotFoundException;
 use App\Repository\Product\ImageRepository;
 
 class ImageManager
@@ -12,12 +12,12 @@ class ImageManager
         private readonly ImageRepository $imageRepository,
     ) {}
 
-    public function getDefaultImageByProductId(int $productId): ?Image
+    public function getDefaultImageForVariant(int $variantId): Image
     {
-        $image = $this->imageRepository->findOneBy(['productVariantId' => $productId, 'isDefault' => true]);
+        $image = $this->imageRepository->findOneBy(['productVariantId' => $variantId, 'isDefault' => true]);
 
         if (!$image) {
-            throw new ForbiddenException('No default image found for this product');
+            throw new NotFoundException('Image', $variantId);
         }
 
         return $image;
