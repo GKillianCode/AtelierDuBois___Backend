@@ -32,6 +32,9 @@ class Order
     #[ORM\OneToMany(targetEntity: Shipment::class, mappedBy: 'orderId')]
     private Collection $shipments;
 
+    #[ORM\Column(length: 17)]
+    private ?string $orderNumber = null;
+
     use TimestampableTrait;
 
     public function __construct()
@@ -96,6 +99,18 @@ class Order
                 $shipment->setOrderId(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getOrderNumber(): ?string
+    {
+        return $this->orderNumber;
+    }
+
+    public function setOrderNumber(string $orderNumber): static
+    {
+        $this->orderNumber = $orderNumber;
 
         return $this;
     }
