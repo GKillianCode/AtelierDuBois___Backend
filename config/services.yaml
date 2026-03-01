@@ -35,3 +35,11 @@ services:
     App\Serializer\Normalizer\User\AddressDtoNormalizer:
         tags:
             - { name: "serializer.normalizer", priority: 100 }
+
+    App\Serializer\Normalizer\Shipment\ResponseShipmentItemDtoNormalizer:
+        tags:
+            - { name: "serializer.normalizer", priority: 100 }
+
+    App\Serializer\Normalizer\Shipment\ResponseShipmentsPreviewDtoNormalizer:
+        tags:
+            - { name: "serializer.normalizer", priority: 100 }
