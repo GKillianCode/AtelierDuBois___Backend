@@ -1,0 +1,35 @@
+<?php
+
+namespace App\Dto\Response;
+
+use App\Dto\Types\ImageDto;
+
+class ResponseShipmentItemDto
+{
+    public function __construct(
+        private string $publicId,
+        private string $name,
+        private int $quantity,
+        private ImageDto $mainImage,
+    ) {}
+
+    public function getPublicId()
+    {
+        return $this->publicId;
+    }
+
+    public function getQuantity()
+    {
+        return $this->quantity;
+    }
+
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    public function getMainImage(): ImageDto
+    {
+        return $this->mainImage;
+    }
+}
