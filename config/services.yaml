@@ -40,6 +40,13 @@ services:
         tags:
             - { name: "serializer.normalizer", priority: 100 }
 
+    #App\Serializer\Normalizer\Shipment\ResponseShipmentsPreviewArrayNormalizer:
+    #    tags:
+    #        - { name: "serializer.normalizer", priority: 100 }
+
     App\Serializer\Normalizer\Shipment\ResponseShipmentsPreviewDtoNormalizer:
+        tags:
+            - { name: "serializer.normalizer", priority: 100 }
+    App\Serializer\Normalizer\Shipment\ResponseShipmentsHistoryDtoNormalizer:
         tags:
             - { name: "serializer.normalizer", priority: 100 }
