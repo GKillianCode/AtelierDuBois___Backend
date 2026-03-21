@@ -62,4 +62,24 @@ final class OrderController extends AbstractController
 
         return ApiResponse::success($this->serializer->normalize($shipmentPreview));
     }
+
+    #[Route('/api/v1/order/purchase', name: 'app_order_purchase', methods: ['POST'])]
+    #[OA\Post(
+        summary: 'Purchase order',
+    )]
+    #[OA\Response(
+        response: Response::HTTP_OK,
+        description: 'Order purchased successfully',
+        content: new OA\JsonContent(
+            ref: new Model(type: ResponseShipmentsPreviewAOModel::class)
+        )
+    )]
+    public function purchaseOrder(Request $request): Response
+    {
+        $user = $this->getUser();
+        $orderDto = $this->orderRequestMapper->mapOrderRequest($request);
+        $this->shipmentService->purchaseOrder($orderDto, $user);
+
+        return ApiResponse::success();
+    }
 }
