@@ -24,7 +24,7 @@ class Order
     private ?User $userId = null;
 
     #[ORM\Column]
-    private ?int $total_price = null;
+    private ?int $totalPrice = null;
 
     /**
      * @var Collection<int, Shipment>
@@ -63,12 +63,12 @@ class Order
 
     public function getTotalPrice(): ?int
     {
-        return $this->total_price;
+        return $this->totalPrice;
     }
 
-    public function setTotalPrice(int $total_price): static
+    public function setTotalPrice(int $totalPrice): static
     {
-        $this->total_price = $total_price;
+        $this->totalPrice = $totalPrice;
 
         return $this;
     }
