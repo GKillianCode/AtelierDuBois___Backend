@@ -53,7 +53,7 @@ class ShipmentHistoryRequestMapper
                     new Assert\Type('string'),
                     new Assert\Length(max: 255),
                     new Assert\Regex(
-                        pattern: '/^[A-Za-z0-9 \-]*$/',
+                        pattern: '/^[\p{L}0-9 \-]*$/u',
                         message: 'Search must only contain letters, numbers, spaces and hyphens'
                     )
                 ])
