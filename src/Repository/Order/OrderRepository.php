@@ -42,6 +42,7 @@ class OrderRepository extends ServiceEntityRepository
     {
         $page = $getShipmentHistoryRequestDto->getPage();
         $limit = $getShipmentHistoryRequestDto->getLimit();
+        $search = transliterator_transliterate('Any-Latin; Latin-ASCII; Lower()', $getShipmentHistoryRequestDto->getSearch() ?? '');
 
         $orderBy = match ($getShipmentHistoryRequestDto->getFilter()) {
             ShipmentHistorySortFilterCode::PRICE_ASC    => 'tOrder.totalPrice ASC',
@@ -55,13 +56,19 @@ class OrderRepository extends ServiceEntityRepository
             SELECT tOrder
             FROM App\Entity\Order\Order tOrder
             INNER JOIN tOrder.shipments s
+            INNER JOIN s.shipmentItems si
+            INNER JOIN si.orderProductId op
+            INNER JOIN op.productVariantId pv
+            INNER JOIN pv.productId p
             WHERE tOrder.userId = :userId
+            AND (UNACCENT(LOWER(p.name)) LIKE :search)
             ORDER BY {$orderBy}
         ";
 
         $query = $this->getEntityManager()
             ->createQuery($dql)
             ->setParameter('userId', $user->getId())
+            ->setParameter('search', '%' . $search . '%')
             ->setFirstResult(($page - 1) * $limit)
             ->setMaxResults($limit);
 
