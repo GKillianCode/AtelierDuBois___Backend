@@ -2,33 +2,29 @@
 
 namespace App\Repository\Order;
 
-use App\Entity\User\User;
+use App\Dto\Request\Filter\GetShipmentHistoryRequestDto;
 use App\Entity\Order\Order;
-use Doctrine\Persistence\ManagerRegistry;
-use Doctrine\ORM\Tools\Pagination\Paginator;
+use App\Entity\User\User;
+use App\Enum\SortFilter\ShipmentHistorySortFilterCode;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Psr\Log\LoggerInterface;
+use Doctrine\ORM\Tools\Pagination\Paginator;
+use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * @extends ServiceEntityRepository<Order>
  */
 class OrderRepository extends ServiceEntityRepository
 {
-    private LoggerInterface $logger;
 
-    public function __construct(ManagerRegistry $registry, LoggerInterface $logger)
+    public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Order::class);
-        $this->logger = $logger;
     }
 
     public function paginateOrders(int $page, int $limit, User $user): Paginator
     {
-        $this->logger->debug("OrderRepository::paginateOrders ENTER with page: $page, limit: $limit");
-
         $query = $this->createQueryBuilder('tOrder')
-            ->select('tOrder', 'tUser')
-            ->leftJoin('tOrder.userId', 'tUser')
+            ->select('tOrder')
             ->where('tOrder.userId = :userId')
             ->setParameter('userId', $user->getId());
 
@@ -39,7 +35,35 @@ class OrderRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
 
-        $this->logger->debug("OrderRepository::paginateOrders EXIT");
+        return new Paginator($query, true);
+    }
+
+    public function paginateHistoryOrders(GetShipmentHistoryRequestDto $getShipmentHistoryRequestDto, User $user): Paginator
+    {
+        $page = $getShipmentHistoryRequestDto->getPage();
+        $limit = $getShipmentHistoryRequestDto->getLimit();
+
+        $orderBy = match ($getShipmentHistoryRequestDto->getFilter()) {
+            ShipmentHistorySortFilterCode::PRICE_ASC    => 'tOrder.totalPrice ASC',
+            ShipmentHistorySortFilterCode::PRICE_DESC   => 'tOrder.totalPrice DESC',
+            ShipmentHistorySortFilterCode::ORDERED_ASC  => 's.createdAt ASC',
+            ShipmentHistorySortFilterCode::ORDERED_DESC => 's.createdAt DESC',
+            default                                     => 's.createdAt ASC',
+        };
+
+        $dql = "
+            SELECT tOrder
+            FROM App\Entity\Order\Order tOrder
+            INNER JOIN tOrder.shipments s
+            WHERE tOrder.userId = :userId
+            ORDER BY {$orderBy}
+        ";
+
+        $query = $this->getEntityManager()
+            ->createQuery($dql)
+            ->setParameter('userId', $user->getId())
+            ->setFirstResult(($page - 1) * $limit)
+            ->setMaxResults($limit);
 
         return new Paginator($query, true);
     }
