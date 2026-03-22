@@ -207,11 +207,22 @@ class ShipmentManager
         $orders = $this->orderRepository->paginateHistoryOrders($getShipmentHistoryRequestDto, $user);
 
         $shipmentHistory = [];
+        $rawSearch = $getShipmentHistoryRequestDto->getSearch() ?? '';
+        $normalizedSearch = transliterator_transliterate('Any-Latin; Latin-ASCII; Lower()', $rawSearch);
 
         foreach ($orders as $order) {
             $shipmentItems = [];
             foreach ($order->getShipments() as $shipment) {
                 foreach ($shipment->getShipmentItems() as $shipmentItem) {
+                    $name = $shipmentItem->getOrderProductId()->getProductVariantId()->getProductId()->getName();
+
+                    if ($rawSearch !== '' && !str_contains(
+                        transliterator_transliterate('Any-Latin; Latin-ASCII; Lower()', $name),
+                        $normalizedSearch
+                    )) {
+                        continue;
+                    }
+
                     $shipmentItems[] = new ResponseShipmentItemDto(
                         publicId: $shipmentItem->getOrderProductId()->getProductVariantId()->getPublicId(),
                         name: $shipmentItem->getOrderProductId()->getProductVariantId()->getProductId()->getName(),
@@ -223,13 +234,16 @@ class ShipmentManager
                 }
             }
 
-            if ($getShipmentHistoryRequestDto->getFilter() === ShipmentHistorySortFilterCode::NAME_ASC || $getShipmentHistoryRequestDto->getFilter() === ShipmentHistorySortFilterCode::NAME_DESC) {
+            if ($getShipmentHistoryRequestDto->getFilterName() === ShipmentHistorySortFilterCode::NAME_ASC || $getShipmentHistoryRequestDto->getFilterName() === ShipmentHistorySortFilterCode::NAME_DESC) {
                 usort($shipmentItems, fn($a, $b) => strcmp(
                     $a->getName(),
                     $b->getName()
-                ) * ($getShipmentHistoryRequestDto->getFilter() === ShipmentHistorySortFilterCode::NAME_ASC ? 1 : -1));
+                ) * ($getShipmentHistoryRequestDto->getFilterName() === ShipmentHistorySortFilterCode::NAME_ASC ? 1 : -1));
             }
 
+            if (empty($shipmentItems)) {
+                continue;
+            }
             $shipmentHistory[] = new ResponseShipmentsHistoryDto(
                 shipments: $shipmentItems,
                 totalPriceInCents: new PriceDto($order->getTotalPrice()),
