@@ -21,6 +21,7 @@ class ShipmentHistoryRequestMapper
         $this->validateParameters($request);
 
         $filterValue = $request->query->get('filter');
+        $filterNameValue = $request->query->get('filterName');
         $categoryPublicIdValue = $request->query->get('category');
 
         return new GetShipmentHistoryRequestDto(
@@ -28,6 +29,7 @@ class ShipmentHistoryRequestMapper
             limit: min(100, max(1, (int) $request->query->get('limit', 20))),
             search: trim($request->query->get('search', '')),
             filter: $filterValue ? ShipmentHistorySortFilterCode::tryFrom($filterValue) : ShipmentHistorySortFilterCode::ORDERED_DESC,
+            filterName: $filterNameValue ? ShipmentHistorySortFilterCode::tryFrom($filterNameValue) : ShipmentHistorySortFilterCode::NAME_ASC,
             categoryPublicId: $categoryPublicIdValue ? new PublicIdDto($categoryPublicIdValue) : null,
         );
     }
@@ -66,6 +68,16 @@ class ShipmentHistoryRequestMapper
                     )
                 ])
             ],
+            'filterName' => [
+                new Assert\Optional([
+                    new Assert\Type('string'),
+                    new Assert\Length(max: 50),
+                    new Assert\Regex(
+                        pattern: '/^[A-Z_]*$/',
+                        message: 'Filter must only contain uppercase letters and underscores'
+                    )
+                ])
+            ],
             'category' => [
                 new Assert\Optional([
                     new Assert\Type('string'),
@@ -95,6 +107,11 @@ class ShipmentHistoryRequestMapper
         $filterValue = $request->query->get('filter');
         if ($filterValue && !ShipmentHistorySortFilterCode::tryFrom($filterValue)) {
             throw new BadRequestException("Invalid filter value: {$filterValue}");
+        }
+
+        $filterNameValue = $request->query->get('filterName');
+        if ($filterNameValue && $filterNameValue !== ShipmentHistorySortFilterCode::NAME_ASC->value && $filterNameValue !== ShipmentHistorySortFilterCode::NAME_DESC->value) {
+            throw new BadRequestException("Invalid filterName value: {$filterNameValue}");
         }
     }
 }
