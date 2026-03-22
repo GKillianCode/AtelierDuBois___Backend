@@ -13,7 +13,7 @@ class GetShipmentHistoryRequestDto
         private string $search,
         private ShipmentHistorySortFilterCode $filter,
         private ShipmentHistorySortFilterCode $filterName,
-        private ?PublicIdDto $categoryPublicId,
+        private int $year,
     ) {}
 
     public function getPage(): int
@@ -41,8 +41,8 @@ class GetShipmentHistoryRequestDto
         return $this->filterName;
     }
 
-    public function getCategoryPublicId(): ?PublicIdDto
+    public function getYear(): int
     {
-        return $this->categoryPublicId;
+        return $this->year;
     }
 }
