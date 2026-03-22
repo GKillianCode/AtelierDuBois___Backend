@@ -53,6 +53,10 @@ class OrderRepository extends ServiceEntityRepository
             default                                     => 's.createdAt ASC',
         };
 
+        $yearCondition = $year !== null
+            ? 'AND s.createdAt >= :yearStart AND s.createdAt < :yearEnd'
+            : '';
+
         $dql = "
             SELECT tOrder
             FROM App\Entity\Order\Order tOrder
@@ -63,8 +67,7 @@ class OrderRepository extends ServiceEntityRepository
             INNER JOIN pv.productId p
             WHERE tOrder.userId = :userId
             AND (UNACCENT(LOWER(p.name)) LIKE :search)
-            AND s.createdAt >= :yearStart
-            AND s.createdAt < :yearEnd
+            {$yearCondition}
             ORDER BY {$orderBy}
         ";
 
@@ -72,10 +75,13 @@ class OrderRepository extends ServiceEntityRepository
             ->createQuery($dql)
             ->setParameter('userId', $user->getId())
             ->setParameter('search', '%' . $search . '%')
-            ->setParameter('yearStart', new \DateTimeImmutable($year . '-01-01'))
-            ->setParameter('yearEnd', new \DateTimeImmutable(($year + 1) . '-01-01'))
             ->setFirstResult(($page - 1) * $limit)
             ->setMaxResults($limit);
+
+        if ($year !== null) {
+            $query->setParameter('yearStart', new \DateTimeImmutable($year . '-01-01'))
+                ->setParameter('yearEnd', new \DateTimeImmutable(($year + 1) . '-01-01'));
+        }
 
         return new Paginator($query, true);
     }
