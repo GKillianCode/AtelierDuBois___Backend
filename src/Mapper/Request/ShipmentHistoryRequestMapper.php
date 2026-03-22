@@ -3,7 +3,6 @@
 namespace App\Mapper\Request;
 
 use App\Dto\Request\Filter\GetShipmentHistoryRequestDto;
-use App\Dto\Types\PublicIdDto;
 use App\Enum\SortFilter\ShipmentHistorySortFilterCode;
 use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\Request;
@@ -22,7 +21,7 @@ class ShipmentHistoryRequestMapper
 
         $filterValue = $request->query->get('filter');
         $filterNameValue = $request->query->get('filterName');
-        $categoryPublicIdValue = $request->query->get('category');
+        $yearRaw = $request->query->get('year');
 
         return new GetShipmentHistoryRequestDto(
             page: (int) $request->query->get('page', 1),
@@ -30,7 +29,7 @@ class ShipmentHistoryRequestMapper
             search: trim($request->query->get('search', '')),
             filter: $filterValue ? ShipmentHistorySortFilterCode::tryFrom($filterValue) : ShipmentHistorySortFilterCode::ORDERED_DESC,
             filterName: $filterNameValue ? ShipmentHistorySortFilterCode::tryFrom($filterNameValue) : ShipmentHistorySortFilterCode::NAME_ASC,
-            categoryPublicId: $categoryPublicIdValue ? new PublicIdDto($categoryPublicIdValue) : null,
+            year: $yearRaw,
         );
     }
 
@@ -78,15 +77,15 @@ class ShipmentHistoryRequestMapper
                     )
                 ])
             ],
-            'category' => [
+            'year' => [
                 new Assert\Optional([
-                    new Assert\Type('string'),
+                    new Assert\Type('numeric'),
                     new Assert\Regex(
-                        pattern: '/^[0-9A-Za-z]{22}$/',
-                        message: 'Category must be a valid UUID base62 format (22 characters)'
+                        pattern: '/^(20\d{2}|2100)$/',
+                        message: 'Year must be between 2000 and 2100'
                     )
                 ])
-            ]
+            ],
         ]);
 
         $violations = $this->validator->validate($request->query->all(), $constraints);
