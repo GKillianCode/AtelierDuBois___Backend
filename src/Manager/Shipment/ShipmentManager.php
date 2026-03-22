@@ -223,6 +223,13 @@ class ShipmentManager
                 }
             }
 
+            if ($getShipmentHistoryRequestDto->getFilter() === ShipmentHistorySortFilterCode::NAME_ASC || $getShipmentHistoryRequestDto->getFilter() === ShipmentHistorySortFilterCode::NAME_DESC) {
+                usort($shipmentItems, fn($a, $b) => strcmp(
+                    $a->getName(),
+                    $b->getName()
+                ) * ($getShipmentHistoryRequestDto->getFilter() === ShipmentHistorySortFilterCode::NAME_ASC ? 1 : -1));
+            }
+
             $shipmentHistory[] = new ResponseShipmentsHistoryDto(
                 shipments: $shipmentItems,
                 totalPriceInCents: new PriceDto($order->getTotalPrice()),
