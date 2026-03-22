@@ -12,6 +12,7 @@ class GetShipmentHistoryRequestDto
         private int $limit,
         private string $search,
         private ShipmentHistorySortFilterCode $filter,
+        private ShipmentHistorySortFilterCode $filterName,
         private ?PublicIdDto $categoryPublicId,
     ) {}
 
@@ -33,6 +34,11 @@ class GetShipmentHistoryRequestDto
     public function getFilter(): ShipmentHistorySortFilterCode
     {
         return $this->filter;
+    }
+
+    public function getFilterName(): ShipmentHistorySortFilterCode
+    {
+        return $this->filterName;
     }
 
     public function getCategoryPublicId(): ?PublicIdDto
