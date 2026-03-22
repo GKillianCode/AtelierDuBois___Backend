@@ -77,7 +77,7 @@ class ProductRequestMapper
 
         $violations = $this->validator->validate($request->query->all(), $constraints);
 
-        if (count($violations) > 0) {
+        if (\count($violations) > 0) {
             $errors = [];
             foreach ($violations as $violation) {
                 $errors[] = $violation->getPropertyPath() . ': ' . $violation->getMessage();
