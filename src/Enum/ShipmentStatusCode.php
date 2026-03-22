@@ -4,15 +4,15 @@ namespace App\Enum;
 
 enum ShipmentStatusCode: string
 {
-    case PENDING = 'PENDING'; // En attente de traitement
-    case IN_TRANSIT = 'IN_TRANSIT'; // En transit
-    case OUT_FOR_DELIVERY = 'OUT_FOR_DELIVERY'; // En cours de livraison
-    case DELIVERED = 'DELIVERED'; // Livré
-    case FAILED_ATTEMPT = 'FAILED_ATTEMPT'; // Tentative de livraison échouée
-    case RETURNED = 'RETURNED'; // Retourné
-    case CANCELED = 'CANCELED'; // Annulé
-    case LOST = 'LOST'; // Perdu
-    case DAMAGED = 'DAMAGED'; // Endommagé
+    case PENDING = 'PENDING';
+    case IN_TRANSIT = 'IN_TRANSIT';
+    case OUT_FOR_DELIVERY = 'OUT_FOR_DELIVERY';
+    case DELIVERED = 'DELIVERED';
+    case FAILED_ATTEMPT = 'FAILED_ATTEMPT';
+    case RETURNED = 'RETURNED';
+    case CANCELED = 'CANCELED';
+    case LOST = 'LOST';
+    case DAMAGED = 'DAMAGED';
 
     public function getLabel(): string
     {
