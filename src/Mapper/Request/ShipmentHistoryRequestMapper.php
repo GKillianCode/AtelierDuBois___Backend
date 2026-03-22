@@ -29,7 +29,7 @@ class ShipmentHistoryRequestMapper
             search: trim($request->query->get('search', '')),
             filter: $filterValue ? ShipmentHistorySortFilterCode::tryFrom($filterValue) : ShipmentHistorySortFilterCode::ORDERED_DESC,
             filterName: $filterNameValue ? ShipmentHistorySortFilterCode::tryFrom($filterNameValue) : ShipmentHistorySortFilterCode::NAME_ASC,
-            year: $yearRaw,
+            year: $yearRaw !== null ? (int) $yearRaw : null,
         );
     }
 
