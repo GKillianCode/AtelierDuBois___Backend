@@ -2,7 +2,6 @@
 
 namespace App\Dto\Request\Filter;
 
-use App\Dto\Types\PublicIdDto;
 use App\Enum\SortFilter\ShipmentHistorySortFilterCode;
 
 class GetShipmentHistoryRequestDto
@@ -13,7 +12,7 @@ class GetShipmentHistoryRequestDto
         private string $search,
         private ShipmentHistorySortFilterCode $filter,
         private ShipmentHistorySortFilterCode $filterName,
-        private int $year,
+        private ?int $year,
     ) {}
 
     public function getPage(): int
@@ -41,7 +40,7 @@ class GetShipmentHistoryRequestDto
         return $this->filterName;
     }
 
-    public function getYear(): int
+    public function getYear(): ?int
     {
         return $this->year;
     }
