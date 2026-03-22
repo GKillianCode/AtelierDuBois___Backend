@@ -43,6 +43,7 @@ class OrderRepository extends ServiceEntityRepository
         $page = $getShipmentHistoryRequestDto->getPage();
         $limit = $getShipmentHistoryRequestDto->getLimit();
         $search = transliterator_transliterate('Any-Latin; Latin-ASCII; Lower()', $getShipmentHistoryRequestDto->getSearch() ?? '');
+        $year = $getShipmentHistoryRequestDto->getYear();
 
         $orderBy = match ($getShipmentHistoryRequestDto->getFilter()) {
             ShipmentHistorySortFilterCode::PRICE_ASC    => 'tOrder.totalPrice ASC',
@@ -62,6 +63,8 @@ class OrderRepository extends ServiceEntityRepository
             INNER JOIN pv.productId p
             WHERE tOrder.userId = :userId
             AND (UNACCENT(LOWER(p.name)) LIKE :search)
+            AND s.createdAt >= :yearStart
+            AND s.createdAt < :yearEnd
             ORDER BY {$orderBy}
         ";
 
@@ -69,6 +72,8 @@ class OrderRepository extends ServiceEntityRepository
             ->createQuery($dql)
             ->setParameter('userId', $user->getId())
             ->setParameter('search', '%' . $search . '%')
+            ->setParameter('yearStart', new \DateTimeImmutable($year . '-01-01'))
+            ->setParameter('yearEnd', new \DateTimeImmutable(($year + 1) . '-01-01'))
             ->setFirstResult(($page - 1) * $limit)
             ->setMaxResults($limit);
 
