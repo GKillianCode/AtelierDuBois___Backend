@@ -5,6 +5,7 @@ namespace App\DataFixtures;
 use App\Dto\Order\OrderItemDto;
 use App\Entity\Shipment\Carrier;
 use App\Entity\Shipment\OrderStatus;
+use App\Enum\CarrierCode;
 use App\Enum\ShipmentStatusCode;
 use App\Enum\UserType;
 use App\Service\Shipment\ShipmentService;
@@ -35,6 +36,7 @@ class OrderFixtures extends Fixture implements DependentFixtureInterface
     {
         $carrier = new Carrier();
         $carrier->setName('Internal');
+        $carrier->setTechnicalName(CarrierCode::INTERN);
         $manager->persist($carrier);
     }
 
