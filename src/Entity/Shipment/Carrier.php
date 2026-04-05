@@ -2,9 +2,10 @@
 
 namespace App\Entity\Shipment;
 
-use Doctrine\ORM\Mapping as ORM;
-use App\Trait\TimestampableTrait;
+use App\Enum\CarrierCode;
 use App\Repository\Shipment\CarrierRepository;
+use App\Trait\TimestampableTrait;
+use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: CarrierRepository::class)]
 class Carrier
@@ -19,6 +20,9 @@ class Carrier
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $trackingUrlTemplate = null;
+
+    #[ORM\Column(type: 'string', length: 50, unique: true, enumType: CarrierCode::class)]
+    private CarrierCode $technicalName;
 
     use TimestampableTrait;
 
@@ -53,6 +57,18 @@ class Carrier
     public function setTrackingUrlTemplate(?string $trackingUrlTemplate): static
     {
         $this->trackingUrlTemplate = $trackingUrlTemplate;
+
+        return $this;
+    }
+
+    public function getTechnicalName(): CarrierCode
+    {
+        return $this->technicalName;
+    }
+
+    public function setTechnicalName(CarrierCode $technicalName): static
+    {
+        $this->technicalName = $technicalName;
 
         return $this;
     }
