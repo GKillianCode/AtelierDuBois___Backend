@@ -8,7 +8,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
-class PaginationUtilsTest extends TestCase
+class PaginationUtilTest extends TestCase
 {
     private LoggerInterface&MockObject $logger;
     private PaginationUtil $sut;

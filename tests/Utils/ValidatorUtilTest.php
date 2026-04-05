@@ -10,7 +10,7 @@ use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\Length;
 use Symfony\Component\Validator\Validation;
 
-class ValidatorUtilsTest extends TestCase
+class ValidatorUtilTest extends TestCase
 {
     private LoggerInterface&MockObject $logger;
     private ValidatorUtil $sut;
