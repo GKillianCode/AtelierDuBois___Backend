@@ -155,9 +155,14 @@ class ShipmentManager
                 return;
             }
 
-            $shipmentStatusCode = $this->shipmentStatusManager->getShipmentStatusByCode(
-                ShipmentStatusCode::getFirstStatus()->value
-            );
+            try {
+                $shipmentStatusCode = $this->shipmentStatusManager->getShipmentStatusByCode(
+                    ShipmentStatusCode::getFirstStatus()->value
+                );
+            } catch (NotFoundException $e) {
+                $this->logger->error('Shipment status code not found', ['code' => ShipmentStatusCode::getFirstStatus()->value]);
+                throw $e;
+            }
 
             foreach ($resolvedItems as ['item' => $item, 'variant' => $productVariant]) {
                 $maxStackSize = $productVariant->getProductId()->getMaxStackSize();
