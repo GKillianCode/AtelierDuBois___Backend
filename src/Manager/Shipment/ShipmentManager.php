@@ -2,7 +2,6 @@
 
 namespace App\Manager\Shipment;
 
-use App\Carrier\CarrierBase;
 use App\Dto\Order\OrderItemDto;
 use App\Dto\Request\Filter\GetShipmentHistoryRequestDto;
 use App\Dto\Response\ResponseOrderItemDto;
@@ -16,9 +15,11 @@ use App\Entity\Order\OrderProduct;
 use App\Entity\Shipment\Shipment;
 use App\Entity\Shipment\ShipmentItem;
 use App\Entity\User\User;
+use App\Enum\CarrierCode;
 use App\Enum\ShipmentStatusCode;
 use App\Enum\SortFilter\ShipmentHistorySortFilterCode;
 use App\Exception\NotFoundException;
+use App\Factory\CarrierFactory;
 use App\Manager\Product\ImageManager;
 use App\Manager\Product\ProductManager;
 use App\Manager\User\AddressManager;
@@ -45,9 +46,9 @@ class ShipmentManager
         private readonly ShipmentStatusManager $shipmentStatusManager,
         private readonly ShipmentUtil $shipmentUtil,
         private readonly ValidatorUtil $validatorUtil,
-        private readonly CarrierBase $carrierBase,
         private readonly ShipmentRepository $shipmentRepository,
         private readonly OrderRepository $orderRepository,
+        private readonly CarrierFactory $carrierFactory,
     ) {}
 
     /**
@@ -154,7 +155,12 @@ class ShipmentManager
                 return;
             }
 
-            $shipmentStatusCode = $this->shipmentStatusManager->getShipmentStatusByCode(ShipmentStatusCode::PENDING->value);
+            try {
+                $shipmentStatusCode = $this->shipmentRepository->findOneBy(['code' => ShipmentStatusCode::getFirstStatus()->value]);
+            } catch (\Throwable $e) {
+                $this->logger->error('Initial shipment status not found', ['statusCode' => ShipmentStatusCode::getFirstStatus()->value]);
+                throw new NotFoundException("shipment status", ShipmentStatusCode::getFirstStatus()->value);
+            }
 
             foreach ($resolvedItems as ['item' => $item, 'variant' => $productVariant]) {
                 $maxStackSize = $productVariant->getProductId()->getMaxStackSize();
@@ -172,7 +178,9 @@ class ShipmentManager
                     $quantityInBox = min($item->getQuantity() - ($i * $maxStackSize), $maxStackSize);
 
                     // Each box gets its own tracking number; carrier entity is shared
-                    $carrier = $this->carrierBase->createCarrierShipment();
+                    $carrier = $this->carrierFactory->getHandler(CarrierCode::INTERN);
+                    $carrier->createCarrierShipment(CarrierCode::INTERN)->getCarrier();
+
                     $shipment = new Shipment();
                     $shipment->setDeliveryAddressId($defaultUserAddress)
                         ->setBillingAddressId($defaultUserAddress)
