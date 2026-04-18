@@ -22,15 +22,14 @@ class ProductReviewManager
         $this->logger->debug("ProductReviewManager::getReviewsByVariantId ENTER");
 
         $paginator = $this->productReviewRepository->paginateProductReviews($getProductReviewsRequestDto);
-
         $reviewsDto = [];
 
         foreach ($paginator as $review) {
             $user = $review->getUserId();
-            if ($user) {
-                $author = $this->sanitizeAuthorName($user->getFirstName(), $user->getLastName());
-                $reviewsDto[] = $this->productReviewMapper->toDtoFromEntity($review, $author);
-            }
+            $author = $user
+                ? $this->sanitizeAuthorName($user->getFirstName(), $user->getLastName())
+                : 'Utilisateur supprimé';
+            $reviewsDto[] = $this->productReviewMapper->toDtoFromEntity($review, $author);
         }
 
         $paginationDataDto = $this->paginationUtil->getMetaPaginationData($paginator, $getProductReviewsRequestDto->getLimit(), $getProductReviewsRequestDto->getPage());
