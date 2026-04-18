@@ -2,12 +2,13 @@
 
 namespace App\Dto\Request\Filter;
 
+use App\Dto\Types\PublicIdDto;
 use App\Enum\SortFilter\CommentSortFilterCode;
 
 class GetProductReviewsRequestDto
 {
     public function __construct(
-        private string $productVariantPublicId,
+        private PublicIdDto $productVariantPublicId,
         private int $page,
         private int $limit,
         private ?CommentSortFilterCode $ratingOrder,
@@ -15,7 +16,7 @@ class GetProductReviewsRequestDto
         private ?CommentSortFilterCode $publicationOrder,
     ) {}
 
-    public function getProductVariantPublicId(): string
+    public function getProductVariantPublicId(): PublicIdDto
     {
         return $this->productVariantPublicId;
     }
