@@ -2,6 +2,7 @@
 
 namespace App\Mapper\Request;
 
+use App\Dto\Types\PublicIdDto;
 use Symfony\Component\HttpFoundation\Request;
 use App\Enum\SortFilter\ProductSortFilterCode;
 use App\Dto\Request\Filter\GetProductReviewsRequestDto;
@@ -25,7 +26,7 @@ class CommentRequestMapper
         $publicationOrderValue = $request->query->get('publicationOrder');
 
         return new GetProductReviewsRequestDto(
-            productVariantPublicId: $publicId,
+            productVariantPublicId: new PublicIdDto($publicId),
             page: (int) $request->query->get('page', 1),
             limit: min(100, max(1, (int) $request->query->get('limit', 20))),
             ratingOrder: $ratingOrderValue ? CommentSortFilterCode::tryFrom($ratingOrderValue) : CommentSortFilterCode::RATING_AVERAGE_DESC,
@@ -42,8 +43,8 @@ class CommentRequestMapper
             'productVariantPublicId' => [
                 new Assert\Type('string'),
                 new Assert\Regex(
-                    pattern: '/^[0-9A-Za-z]{20}$/',
-                    message: 'Category must be a valid UUID base62 format (20 characters)'
+                    pattern: '/^[0-9A-Za-z]{22}$/',
+                    message: 'Category must be a valid UUID base62 format (22 characters)'
                 )
             ],
             'page' => [
@@ -54,7 +55,8 @@ class CommentRequestMapper
             ],
             'limit' => [
                 new Assert\Optional([
-                    new Assert\Choice(choices: [20, 50, 100], message: 'Limit must be 20, 50 or 100')
+                    new Assert\Type('numeric'),
+                    new Assert\Choice(choices: ['20', '50', '100'], message: 'Limit must be 20, 50 or 100')
                 ])
             ],
             'ratingOrder' => [

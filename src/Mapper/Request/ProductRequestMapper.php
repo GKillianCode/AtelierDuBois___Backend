@@ -45,7 +45,8 @@ class ProductRequestMapper
             ],
             'limit' => [
                 new Assert\Optional([
-                    new Assert\Choice(choices: [20, 50, 100], message: 'Limit must be 20, 50 or 100')
+                    new Assert\Type('numeric'),
+                    new Assert\Choice(choices: ['20', '50', '100'], message: 'Limit must be 20, 50 or 100')
                 ])
             ],
             'search' => [
