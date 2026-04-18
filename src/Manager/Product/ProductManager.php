@@ -6,7 +6,6 @@ use App\Util\ValidatorUtil;
 use Psr\Log\LoggerInterface;
 use App\Entity\Product\Product;
 use App\Trait\ValidateAndSaveTrait;
-use App\Entity\Product\ProductVariant;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Mapper\Product\ProductVariantMapper;
 use App\Repository\Product\ProductVariantRepository;
