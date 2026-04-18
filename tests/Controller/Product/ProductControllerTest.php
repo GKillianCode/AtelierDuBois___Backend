@@ -8,8 +8,8 @@ class ProductControllerTest extends WebTestCase
 {
     // 22 chars → utilisé pour /product/{publicId}
     private const FAKE_PUBLIC_ID = 'aB3dEfGhIjKlMnOpQrStuV';
-    // 20 chars → CommentRequestMapper valide exactement 20 caractères
-    private const REVIEW_PUBLIC_ID = 'aB3dEfGhIjKlMnOpQrsT';
+    // 22 chars → validation UUID base62 requiert exactement 22 caractères
+    private const REVIEW_PUBLIC_ID = 'aB3dEfGhIjKlMnOpQrStuV';
 
     // -------------------------------------------------------------------------
     // GET /api/public/v1/product/all

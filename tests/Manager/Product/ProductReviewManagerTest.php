@@ -5,6 +5,7 @@ namespace App\Tests\Manager\Product;
 use App\Dto\Request\Filter\GetProductReviewsRequestDto;
 use App\Dto\Response\ResponseProductReviewDto;
 use App\Dto\Types\PaginationDataDto;
+use App\Dto\Types\PublicIdDto;
 use App\Entity\Product\ProductReview;
 use App\Entity\User\User;
 use App\Manager\Product\ProductReviewManager;
@@ -45,7 +46,7 @@ class ProductReviewManagerTest extends TestCase
     private function buildDto(string $publicId = 'aB3dEfGhIjKlMnOpQrStuV', int $page = 1, int $limit = 10): GetProductReviewsRequestDto
     {
         return new GetProductReviewsRequestDto(
-            productVariantPublicId: $publicId,
+            productVariantPublicId: new PublicIdDto($publicId),
             page: $page,
             limit: $limit,
             ratingOrder: null,
@@ -148,10 +149,13 @@ class ProductReviewManagerTest extends TestCase
         $this->assertSame('Jean D.', $dto->authorName);
     }
 
-    public function testGetReviewsByVariantIdSkipsReviewWhenUserIsNull(): void
+    public function testGetReviewsByVariantIdUsesAnonymousAuthorWhenUserIsNull(): void
     {
         $review = $this->createMock(ProductReview::class);
         $review->method('getUserId')->willReturn(null);
+        $review->method('getRating')->willReturn(3);
+        $review->method('getComment')->willReturn('Bon produit');
+        $review->method('getCreatedAt')->willReturn(new \DateTime('2025-06-01'));
 
         $paginator = $this->getMockBuilder(Paginator::class)
             ->disableOriginalConstructor()
@@ -164,7 +168,9 @@ class ProductReviewManagerTest extends TestCase
 
         $result = $this->sut->getReviewsByVariantId($this->buildDto());
 
-        $this->assertSame([], $result['reviews']);
+        // The manager does NOT skip anonymous reviews — it maps them with a fallback author label
+        $this->assertCount(1, $result['reviews']);
+        $this->assertSame('Utilisateur supprimé', $result['reviews'][0]->authorName);
     }
 
     public function testGetReviewsByVariantIdPaginationReflectsPageAndLimit(): void
