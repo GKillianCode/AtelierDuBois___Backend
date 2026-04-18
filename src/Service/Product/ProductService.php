@@ -60,10 +60,10 @@ class ProductService
     public function getProductVariantReviews(GetProductReviewsRequestDto $getProductReviewsRequestDto): array
     {
         try {
-            $productVariant = $this->productManager->getProductVariantByPublicId($getProductReviewsRequestDto->getProductVariantPublicId());
+            $productVariant = $this->productManager->getProductVariantByPublicId($getProductReviewsRequestDto->getProductVariantPublicId()->getPublicId());
 
             if (!$productVariant) {
-                throw new NotFoundException('ProductVariant', $getProductReviewsRequestDto->getProductVariantPublicId());
+                throw new NotFoundException('ProductVariant', $getProductReviewsRequestDto->getProductVariantPublicId()->getPublicId());
             }
 
             $result = $this->productReviewManager->getReviewsByVariantId($getProductReviewsRequestDto);
@@ -76,7 +76,7 @@ class ProductService
                 'Error retrieving product variant reviews',
                 [
                     'exception' => $e->getMessage(),
-                    'publicId' => $getProductReviewsRequestDto->getProductVariantPublicId(),
+                    'publicId' => $getProductReviewsRequestDto->getProductVariantPublicId()->getPublicId(),
                     'trace' => $e->getTraceAsString()
                 ]
             );

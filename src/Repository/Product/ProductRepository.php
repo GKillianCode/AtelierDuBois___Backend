@@ -43,7 +43,7 @@ class ProductRepository extends ServiceEntityRepository
 
         if ($getAllProductsRequestDto->getCategoryPublicId() !== null) {
             $query->andWhere('LOWER(c.publicId) = LOWER(:categoryId)')
-                ->setParameter('categoryId', $getAllProductsRequestDto->getCategoryPublicId());
+                ->setParameter('categoryId', $getAllProductsRequestDto->getCategoryPublicId()->getPublicId());
         }
 
         $query->setParameter('search', '%' . $getAllProductsRequestDto->getSearch() . '%')

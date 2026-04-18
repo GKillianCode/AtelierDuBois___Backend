@@ -39,7 +39,7 @@ class ProductReviewRepository extends ServiceEntityRepository
             ->leftJoin('pr.userId', 'u')
             ->addSelect('u')
             ->where('pv.publicId = :publicId')
-            ->setParameter('publicId', $getProductReviewsRequestDto->getProductVariantPublicId());
+            ->setParameter('publicId', $getProductReviewsRequestDto->getProductVariantPublicId()->getPublicId());
 
         switch ($getProductReviewsRequestDto->getRatingOrder()) {
             case CommentSortFilterCode::RATING_AVERAGE_EQUAL:
