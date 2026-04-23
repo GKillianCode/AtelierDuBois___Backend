@@ -4,6 +4,8 @@ namespace App\Service\Shipment;
 
 use App\Dto\Order\OrderItemDto;
 use App\Dto\Request\Filter\GetShipmentHistoryRequestDto;
+use App\Dto\Response\ResponseOrderItemDto;
+use App\Dto\Response\ResponseShipmentsHistoryDto;
 use App\Dto\Response\ResponseShipmentsPreviewDto;
 use App\Entity\User\User;
 use App\Manager\Shipment\ShipmentManager;
@@ -16,6 +18,7 @@ class ShipmentService
 
     /**
      * @param OrderItemDto[] $orderItems
+     * @return ResponseOrderItemDto[]
      */
     public function getBasketPreview(array $orderItems): array
     {
@@ -38,6 +41,7 @@ class ShipmentService
         $this->shipmentManager->buildShipmentPurchase($orderItems, $user);
     }
 
+    /** @return ResponseShipmentsHistoryDto[] */
     public function getShipmentHistory(User $user, GetShipmentHistoryRequestDto $getShipmentHistoryRequestDto): array
     {
         return $this->shipmentManager->buildShipmentHistory($user, $getShipmentHistoryRequestDto);

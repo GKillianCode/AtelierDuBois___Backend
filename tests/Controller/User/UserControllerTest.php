@@ -22,6 +22,7 @@ class UserControllerTest extends WebTestCase
     // Helpers
     // -------------------------------------------------------------------------
 
+    /** @param array<string, mixed> $data */
     private function postJson(\Symfony\Bundle\FrameworkBundle\KernelBrowser $client, string $uri, array $data): void
     {
         $client->request(

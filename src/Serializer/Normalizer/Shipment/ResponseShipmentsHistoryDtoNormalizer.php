@@ -7,7 +7,11 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 class ResponseShipmentsHistoryDtoNormalizer implements NormalizerInterface
 {
-    public function normalize($object, $format = null, array $context = []): array
+    /**
+     * @param array<string, mixed> $context
+     * @return array<string, mixed>
+     */
+    public function normalize(mixed $object, ?string $format = null, array $context = []): array
     {
         return [
             'shipments' => array_map(fn($item) => [
@@ -21,7 +25,10 @@ class ResponseShipmentsHistoryDtoNormalizer implements NormalizerInterface
         ];
     }
 
-    public function supportsNormalization($data, $format = null, array $context = []): bool
+    /**
+     * @param array<string, mixed> $context
+     */
+    public function supportsNormalization(mixed $data, ?string $format = null, array $context = []): bool
     {
         return $data instanceof ResponseShipmentsHistoryDto;
     }

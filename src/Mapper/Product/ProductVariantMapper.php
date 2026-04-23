@@ -23,6 +23,10 @@ class ProductVariantMapper
         private readonly CategoryMapper $categoryMapper
     ) {}
 
+    /**
+     * @param Paginator<Product> $paginator
+     * @return ResponseResumeProductDto[]
+     */
     public function mapProductsToShortDtos(Paginator $paginator): array
     {
         $this->logger->debug("ProductVariantMapper::mapProductsToShortDtos ENTER");
@@ -55,6 +59,7 @@ class ProductVariantMapper
         return $products;
     }
 
+    /** @param ResponseResumeProductVariantDto[] $otherProductVariants */
     public function variantToDto(ProductVariant $mainProductVariant, array $otherProductVariants): ResponseProductDto
     {
         $this->logger->debug("ProductVariantMapper::mapVariantToDetailDto ENTER");
@@ -68,7 +73,7 @@ class ProductVariantMapper
             stock: $mainProductVariant->getStock(),
             wood: $mainProductVariant->getWoodId()->getName(),
             weightInGrams: $mainProductVariant->getProductId()->getWeightInGrams(),
-            lengthInCentimeters: $mainProductVariant->getProductId()->getLengthInCentimeters(),
+            lengthInCentimeters: (int) $mainProductVariant->getProductId()->getLengthInCentimeters(),
             widthInCentimeters: $mainProductVariant->getProductId()->getWidthInCentimeters(),
             heightInCentimeters: $mainProductVariant->getProductId()->getHeightInCentimeters(),
             imageUrls: array_map(
@@ -82,7 +87,10 @@ class ProductVariantMapper
         return $dto;
     }
 
-    private function extractDefaultImage(array $images)
+    /**
+     * @param Image[] $images
+     */
+    private function extractDefaultImage(array $images): ?Image
     {
         foreach ($images as $image) {
             if ($image->isDefault()) {
@@ -92,7 +100,11 @@ class ProductVariantMapper
         return null;
     }
 
-    public function mapVariantsToOtherVariantDtos($productsVariants): array
+    /**
+     * @param ProductVariant[] $productsVariants
+     * @return ResponseResumeProductVariantDto[]
+     */
+    public function mapVariantsToOtherVariantDtos(array $productsVariants): array
     {
         $this->logger->debug("ProductVariantMapper::mapVariantsToOtherVariantDtos ENTER");
 

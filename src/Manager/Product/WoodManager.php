@@ -13,6 +13,7 @@ class WoodManager
 {
     public function __construct(
         private readonly LoggerInterface $logger,
+        /** @phpstan-ignore property.onlyWritten */
         private readonly WoodRepository $woodRepository,
         private readonly EntityManagerInterface $entityManager,
         private readonly ValidatorUtil $validatorUtil

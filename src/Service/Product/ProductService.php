@@ -4,13 +4,17 @@ namespace App\Service\Product;
 
 use App\Util\PaginationUtil;
 use Psr\Log\LoggerInterface;
-use App\Manager\Product\ProductManager;
+use App\Dto\Types\PaginationDataDto;
 use App\Dto\Response\ResponseProductDto;
+use App\Dto\Response\ResponseProductReviewDto;
+use App\Dto\Response\ResponseResumeProductDto;
+use App\Entity\Product\Product;
+use App\Manager\Product\ProductManager;
 use App\Mapper\Product\ProductVariantMapper;
 use App\Manager\Product\ProductReviewManager;
 use App\Repository\Product\ProductRepository;
-use App\Dto\Request\Filter\GetAllProductsRequestDto;
 use App\Repository\Product\ProductVariantRepository;
+use App\Dto\Request\Filter\GetAllProductsRequestDto;
 use App\Dto\Request\Filter\GetProductReviewsRequestDto;
 use App\Exception\NotFoundException;
 
@@ -26,13 +30,18 @@ class ProductService
         private readonly ProductReviewManager $productReviewManager,
     ) {}
 
+    /**
+     * @return array{products: ResponseResumeProductDto[], pagination: PaginationDataDto}
+     */
     public function getPaginatedProducts(GetAllProductsRequestDto $getAllProductsRequestDto): array
     {
         try {
             $paginator = $this->productRepository->paginateProducts($getAllProductsRequestDto);
 
+            /** @var Product[] $products */
+            $products = iterator_to_array($paginator, false);
             $productsDto = $this->productVariantMapper->mapProductsToShortDtos($paginator);
-            $ratings = $this->productRepository->getAverageRatingsForProducts($productsDto);
+            $ratings = $this->productRepository->getAverageRatingsForProducts($products);
 
             foreach ($productsDto as $productDto) {
                 $rating = $ratings[$productDto->getId()] ?? null;
@@ -57,6 +66,9 @@ class ProductService
         }
     }
 
+    /**
+     * @return array{reviews: ResponseProductReviewDto[], pagination: PaginationDataDto}
+     */
     public function getProductVariantReviews(GetProductReviewsRequestDto $getProductReviewsRequestDto): array
     {
         try {

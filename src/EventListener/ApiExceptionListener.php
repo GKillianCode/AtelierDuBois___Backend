@@ -46,6 +46,7 @@ final class ApiExceptionListener
         $event->setResponse($response);
     }
 
+    /** @return array<string, mixed> */
     private function buildContext(\Throwable $e, Request $request): array
     {
         return [

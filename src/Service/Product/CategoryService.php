@@ -2,6 +2,8 @@
 
 namespace App\Service\Product;
 
+use App\Dto\Types\CategoryDto;
+use App\Entity\Product\Category;
 use App\Mapper\Product\CategoryMapper;
 use App\Manager\Product\CategoryManager;
 
@@ -12,6 +14,7 @@ class CategoryService
         private readonly CategoryMapper $categoryMapper,
     ) {}
 
+    /** @return CategoryDto[] */
     public function getAllCategoriesInCategoryDto(): array
     {
         $categories = $this->categoryManager->getAllCategories();
@@ -20,6 +23,10 @@ class CategoryService
         return $categories;
     }
 
+    /**
+     * @param Category[] $categories
+     * @return CategoryDto[]
+     */
     public function categoriesToCategoriesDto(array $categories): array
     {
         $categoriesDto = [];

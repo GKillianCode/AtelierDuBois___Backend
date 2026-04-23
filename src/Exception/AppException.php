@@ -8,6 +8,7 @@ abstract class AppException extends \RuntimeException
         string $message,
         private readonly string $errorCode,
         private readonly int $httpStatusCode,
+        /** @var array<string, mixed> */
         private readonly array $context = [],
         ?\Throwable $previous = null,
     ) {
@@ -22,6 +23,7 @@ abstract class AppException extends \RuntimeException
     {
         return $this->httpStatusCode;
     }
+    /** @return array<string, mixed> */
     public function getContext(): array
     {
         return $this->context;

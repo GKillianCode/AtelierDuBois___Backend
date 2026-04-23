@@ -31,7 +31,8 @@ class ProductVariantRepository extends ServiceEntityRepository
         return $productVariant;
     }
 
-    public function getAllMinimalProductVariant(string $productId): ?array
+    /** @return ProductVariant[]|null */
+    public function getAllMinimalProductVariant(int|null $productId): ?array
     {
         $productVariants = $this->createQueryBuilder('pv')
             ->select('pv', 'p', 'i', 'w')

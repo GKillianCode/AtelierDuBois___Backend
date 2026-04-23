@@ -52,6 +52,7 @@ class CategoryManager
 
     use ValidateAndSaveTrait;
 
+    /** @return Category[] */
     public function getAllCategories(): array
     {
         $categories = $this->categoryRepository->findAll();

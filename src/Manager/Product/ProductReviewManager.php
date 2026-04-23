@@ -4,6 +4,8 @@ namespace App\Manager\Product;
 
 use App\Util\PaginationUtil;
 use Psr\Log\LoggerInterface;
+use App\Dto\Types\PaginationDataDto;
+use App\Dto\Response\ResponseProductReviewDto;
 use App\Mapper\Product\ProductReviewMapper;
 use App\Repository\Product\ProductReviewRepository;
 use App\Dto\Request\Filter\GetProductReviewsRequestDto;
@@ -17,6 +19,9 @@ class ProductReviewManager
         private readonly ProductReviewMapper $productReviewMapper,
     ) {}
 
+    /**
+     * @return array{reviews: ResponseProductReviewDto[], pagination: PaginationDataDto}
+     */
     public function getReviewsByVariantId(GetProductReviewsRequestDto $getProductReviewsRequestDto): array
     {
         $this->logger->debug("ProductReviewManager::getReviewsByVariantId ENTER");

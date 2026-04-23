@@ -12,6 +12,7 @@ class ApiResponse extends JsonResponse
         mixed $data = null,
         ?string $message = null,
         int $statusCode = Response::HTTP_OK,
+        /** @var array<string, string> */
         array $headers = []
     ) {
         $responseData = [
@@ -74,6 +75,7 @@ class ApiResponse extends JsonResponse
         return new self(false, null, $message, Response::HTTP_FORBIDDEN);
     }
 
+    /** @param list<array<string, mixed>> $violations */
     public static function validationError(array $violations, string $message = 'Validation failed'): self
     {
         return new self(false, ['violations' => $violations], $message, Response::HTTP_UNPROCESSABLE_ENTITY);

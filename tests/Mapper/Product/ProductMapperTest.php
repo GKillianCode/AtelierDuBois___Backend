@@ -43,6 +43,7 @@ class ProductMapperTest extends TestCase
         $reflection->setValue($entity, $id);
     }
 
+    /** @return array<string, mixed> */
     private function buildEntityGraph(bool $withStock = true, bool $withPrice = true): array
     {
         $category = new Category();
