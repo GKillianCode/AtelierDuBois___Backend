@@ -39,7 +39,6 @@ class ProductMapperTest extends TestCase
     private function setId(object $entity, int $id): void
     {
         $reflection = new \ReflectionProperty($entity, 'id');
-        $reflection->setAccessible(true);
         $reflection->setValue($entity, $id);
     }
 
