@@ -7,22 +7,24 @@ use App\Dto\Types\PriceDto;
 class ResponseShipmentsHistoryDto
 {
     public function __construct(
+        /** @var ResponseShipmentItemDto[] */
         private array $shipments,
         private PriceDto $totalPriceInCents,
         private int $orderedAt
     ) {}
 
-    public function getShipments()
+    /** @return ResponseShipmentItemDto[] */
+    public function getShipments(): array
     {
         return $this->shipments;
     }
 
-    public function getTotalPriceInCents()
+    public function getTotalPriceInCents(): PriceDto
     {
         return $this->totalPriceInCents;
     }
 
-    public function getOrderedAt()
+    public function getOrderedAt(): int
     {
         return $this->orderedAt;
     }

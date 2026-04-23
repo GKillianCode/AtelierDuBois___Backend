@@ -8,6 +8,6 @@ class ResponseProductReviewDto
         public readonly int $rating,
         public readonly string $comment,
         public readonly string $authorName,
-        public readonly \DateTime $postedAt,
+        public readonly ?\DateTimeInterface $postedAt,
     ) {}
 }

@@ -13,17 +13,17 @@ class ResponseShipmentItemDto
         private ImageDto $mainImage,
     ) {}
 
-    public function getPublicId()
+    public function getPublicId(): string
     {
         return $this->publicId;
     }
 
-    public function getQuantity()
+    public function getQuantity(): int
     {
         return $this->quantity;
     }
 
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }

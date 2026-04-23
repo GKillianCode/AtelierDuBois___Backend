@@ -9,7 +9,7 @@ class ResponseResumeProductVariantDto
 {
     public function __construct(
         private PublicIdDto $publicId,
-        private PriceDto $unitPrice,
+        private ?PriceDto $unitPrice,
         private string $wood,
         private string $imageUrl,
     ) {}
