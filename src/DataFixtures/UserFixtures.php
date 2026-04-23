@@ -151,6 +151,7 @@ class UserFixtures extends Fixture
 
     /**
      * Retrieves all users from database
+     * @return \App\Entity\User\User[]
      */
     private function getUsersFromDatabase(ObjectManager $manager): array
     {
