@@ -77,7 +77,7 @@ class StrongPasswordValidator extends ConstraintValidator
         $personalInfo = [
             strtolower($object->getFirstname() ?? ''),
             strtolower($object->getLastname() ?? ''),
-            strtolower(explode('@', $object->getEmail() ?? '')[0] ?? ''),
+            strtolower(explode('@', $object->getEmail() ?? '')[0]),
         ];
 
         $lowerPassword = strtolower($password);
