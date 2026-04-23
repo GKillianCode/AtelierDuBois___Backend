@@ -12,6 +12,7 @@ use OpenApi\Attributes as OA;
 class ResponseShipmentsPreviewAOModel
 {
     public function __construct(
+        /** @var ResponseShipmentItemOAModel[] */
         #[OA\Property(
             type: 'array',
             items: new OA\Items(ref: new Model(type: ResponseShipmentItemOAModel::class))

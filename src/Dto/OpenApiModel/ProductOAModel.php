@@ -21,12 +21,14 @@ class ProductOAModel
         public string $wood,
         public int $weightInGrams,
         public int $lengthInCentimeters,
+        /** @var string[] */
         public array $imagesUrls,
         public int $averageRating,
         #[OA\Property(
             type: 'array',
             items: new OA\Items(ref: new Model(type: ProductVariantResumeOAModel::class))
         )]
+        /** @var ProductVariantResumeOAModel[] */
         public array $productCollection,
     ) {}
 }
