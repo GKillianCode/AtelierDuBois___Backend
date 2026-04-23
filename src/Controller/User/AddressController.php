@@ -3,6 +3,7 @@
 namespace App\Controller\User;
 
 use App\Dto\OpenApiModel\AddressOAModel;
+use App\Entity\User\User;
 use App\Enum\ApiErrorCode;
 use App\Manager\User\AddressManager;
 use App\Response\ApiResponse;
@@ -13,14 +14,14 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 #[OA\Tag(name: 'Users/Addresses')]
 final class AddressController extends AbstractController
 {
     public function __construct(
         private readonly AddressService $addressService,
-        private readonly SerializerInterface $serializer,
+        private readonly NormalizerInterface $serializer,
         private readonly AddressManager $addressManager,
     ) {}
 
@@ -40,13 +41,15 @@ final class AddressController extends AbstractController
     )]
     public function addAddress(Request $request): Response
     {
-        $areUserCanAddAddress = $this->addressManager->canUserAddAddress($this->getUser());
+        $user = $this->getUser();
+        assert($user instanceof User);
+        $areUserCanAddAddress = $this->addressManager->canUserAddAddress($user);
 
         if ($areUserCanAddAddress) {
-            $this->addressService->addAddress($request, $this->getUser());
+            $this->addressService->addAddress($request, $user);
             return ApiResponse::success();
         } else {
-            return ApiResponse::error(ApiErrorCode::ADDRESS_LIMIT_REACHED->getUserMessage(), 'Maximum number of addresses reached.', "Vous avez atteint le nombre maximal d'adresses que vous pouvez ajouter.");
+            return ApiResponse::error(ApiErrorCode::ADDRESS_LIMIT_REACHED->getUserMessage(), 'Maximum number of addresses reached.');
         }
     }
 
@@ -64,7 +67,9 @@ final class AddressController extends AbstractController
     )]
     public function canUserAddAddress(): Response
     {
-        $areUserCanAddAddress = $this->addressManager->canUserAddAddress($this->getUser());
+        $user = $this->getUser();
+        assert($user instanceof User);
+        $areUserCanAddAddress = $this->addressManager->canUserAddAddress($user);
         return ApiResponse::success(['canAddAddress' => $areUserCanAddAddress]);
     }
 
@@ -84,7 +89,9 @@ final class AddressController extends AbstractController
     )]
     public function getAllAddress(): Response
     {
-        $addresses = $this->addressService->getAllAddressesInDto($this->getUser());
+        $user = $this->getUser();
+        assert($user instanceof User);
+        $addresses = $this->addressService->getAllAddressesInDto($user);
         return ApiResponse::success($this->serializer->normalize($addresses));
     }
 
@@ -100,7 +107,9 @@ final class AddressController extends AbstractController
     )]
     public function getAddress(string $publicId): Response
     {
-        $addressDto = $this->addressService->getAddressInDtoByPublicId($this->getUser(), $publicId);
+        $user = $this->getUser();
+        assert($user instanceof User);
+        $addressDto = $this->addressService->getAddressInDtoByPublicId($user, $publicId);
 
         if ($addressDto) {
             return ApiResponse::success($this->serializer->normalize($addressDto));
@@ -121,6 +130,7 @@ final class AddressController extends AbstractController
     public function updateAddress(string $publicId, Request $request): Response
     {
         $user = $this->getUser();
+        assert($user instanceof User);
         $address = $this->addressManager->getAddressByPublicId($user, $publicId);
 
         if ($address) {
@@ -143,6 +153,7 @@ final class AddressController extends AbstractController
     public function removeAddress(string $publicId): Response
     {
         $user = $this->getUser();
+        assert($user instanceof User);
         $this->addressService->deleteAddress($user, $publicId);
 
         return ApiResponse::success('Address removed successfully.');

@@ -39,10 +39,10 @@ class ProductMapperTest extends TestCase
     private function setId(object $entity, int $id): void
     {
         $reflection = new \ReflectionProperty($entity, 'id');
-        $reflection->setAccessible(true);
         $reflection->setValue($entity, $id);
     }
 
+    /** @return array<string, mixed> */
     private function buildEntityGraph(bool $withStock = true, bool $withPrice = true): array
     {
         $category = new Category();

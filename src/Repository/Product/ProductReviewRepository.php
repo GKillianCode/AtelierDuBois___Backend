@@ -26,10 +26,7 @@ class ProductReviewRepository extends ServiceEntityRepository
 
     /**
      * Get a paginated list of products based on filters.
-     * @param int $page
-     * @param int $limit
-     * @param int $productVariantId
-     * @return Paginator
+     * @return Paginator<ProductReview>
      */
     public function paginateProductReviews(GetProductReviewsRequestDto $getProductReviewsRequestDto): Paginator
     {

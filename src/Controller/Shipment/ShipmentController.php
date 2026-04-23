@@ -2,6 +2,7 @@
 
 namespace App\Controller\Shipment;
 
+use App\Entity\User\User;
 use App\Mapper\Request\ShipmentHistoryRequestMapper;
 use App\Response\ApiResponse;
 use App\Service\Shipment\ShipmentService;
@@ -10,7 +11,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 #[OA\Tag(name: 'Shipments')]
 final class ShipmentController extends AbstractController
@@ -18,7 +19,7 @@ final class ShipmentController extends AbstractController
     public function __construct(
         private readonly ShipmentHistoryRequestMapper $shipmentHistoryRequestMapper,
         private readonly ShipmentService $shipmentService,
-        private readonly SerializerInterface $serializer,
+        private readonly NormalizerInterface $serializer,
     ) {}
 
     #[Route('/api/v1/shipment/history', name: 'shipment_history', methods: ['POST'])]
@@ -37,7 +38,9 @@ final class ShipmentController extends AbstractController
     {
         $getShipmentHistoryRequestDto = $this->shipmentHistoryRequestMapper->mapGetAllShipmentsRequest($request);
 
-        $shipmentHistory = $this->shipmentService->getShipmentHistory($this->getUser(), $getShipmentHistoryRequestDto);
+        $user = $this->getUser();
+        assert($user instanceof User);
+        $shipmentHistory = $this->shipmentService->getShipmentHistory($user, $getShipmentHistoryRequestDto);
         return ApiResponse::success($this->serializer->normalize($shipmentHistory));
     }
 }

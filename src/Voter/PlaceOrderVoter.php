@@ -8,6 +8,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 
+/** @extends Voter<string, mixed> */
 class PlaceOrderVoter extends Voter
 {
     public const CAN_PLACE_ORDER = 'CAN_PLACE_ORDER';

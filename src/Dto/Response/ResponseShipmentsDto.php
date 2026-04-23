@@ -8,21 +8,23 @@ class ResponseShipmentsDto
 {
     public function __construct(
         public string $orderNumber,
+        /** @var ResponseShipmentItemDto[] */
         public array $shipments,
         public PriceDto $totalPriceInCents
     ) {}
 
-    public function getOrderNumber()
+    public function getOrderNumber(): string
     {
         return $this->orderNumber;
     }
 
-    public function getShipments()
+    /** @return ResponseShipmentItemDto[] */
+    public function getShipments(): array
     {
         return $this->shipments;
     }
 
-    public function getTotalPriceInCents()
+    public function getTotalPriceInCents(): PriceDto
     {
         return $this->totalPriceInCents;
     }

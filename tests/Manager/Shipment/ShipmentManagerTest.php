@@ -182,6 +182,7 @@ class ShipmentManagerTest extends TestCase
      * Wraps an array of Orders in a Paginator mock so willReturn() satisfies the declared return type.
      *
      * @param Order[] $items
+     * @return Paginator<Order>
      */
     private function makePaginator(array $items): Paginator
     {

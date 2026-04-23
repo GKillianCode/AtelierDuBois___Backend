@@ -12,6 +12,9 @@ class PaginationUtil
         private readonly LoggerInterface $logger
     ) {}
 
+    /**
+     * @param Paginator<mixed> $paginator
+     */
     public function getMetaPaginationData(Paginator $paginator, int $limit, int $page): PaginationDataDto
     {
         $this->logger->debug("PaginationUtil::getMetaPaginationData ENTER");

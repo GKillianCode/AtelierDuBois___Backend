@@ -118,6 +118,7 @@ class AddressManager
         return $address;
     }
 
+    /** @return Address[] */
     public function getAllAddresses(User $user): array
     {
         $addresses = $user->getAddresses()->toArray();

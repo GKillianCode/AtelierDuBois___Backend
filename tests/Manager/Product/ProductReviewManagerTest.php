@@ -55,7 +55,7 @@ class ProductReviewManagerTest extends TestCase
         );
     }
 
-    /** @return Paginator&MockObject */
+    /** @return Paginator<ProductReview>&MockObject */
     private function buildEmptyPaginator(): Paginator
     {
         $paginator = $this->getMockBuilder(Paginator::class)

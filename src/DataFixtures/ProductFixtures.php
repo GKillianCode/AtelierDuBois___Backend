@@ -436,6 +436,7 @@ class ProductFixtures extends Fixture implements DependentFixtureInterface
 
     /**
      * Retrieves users from database
+     * @return \App\Entity\User\User[]
      */
     private function getUsersFromDatabase(ObjectManager $manager): array
     {

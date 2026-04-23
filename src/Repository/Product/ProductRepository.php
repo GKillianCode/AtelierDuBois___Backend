@@ -29,7 +29,7 @@ class ProductRepository extends ServiceEntityRepository
     /**
      * Get a paginated list of products based on filters.
      * @param GetAllProductsRequestDto $getAllProductsRequestDto
-     * @return Paginator
+     * @return Paginator<Product>
      */
     public function paginateProducts(GetAllProductsRequestDto $getAllProductsRequestDto): Paginator
     {
@@ -86,7 +86,7 @@ class ProductRepository extends ServiceEntityRepository
             return [];
         }
 
-        $productIds = array_map(fn(ResponseResumeProductDto $p) => $p->getId(), $products);
+        $productIds = array_map(fn(Product $p) => $p->getId(), $products);
 
         $results = $this->createQueryBuilder('p')
             ->select('p.id as productId', 'AVG(pr.rating) as avgRating')

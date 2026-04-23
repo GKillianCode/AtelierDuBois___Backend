@@ -46,6 +46,7 @@ class ShipmentManager
         private readonly ShipmentStatusManager $shipmentStatusManager,
         private readonly ShipmentUtil $shipmentUtil,
         private readonly ValidatorUtil $validatorUtil,
+        /** @phpstan-ignore property.onlyWritten */
         private readonly ShipmentRepository $shipmentRepository,
         private readonly OrderRepository $orderRepository,
         private readonly CarrierFactory $carrierFactory,
@@ -212,12 +213,13 @@ class ShipmentManager
         }
     }
 
+    /** @return ResponseShipmentsHistoryDto[] */
     public function buildShipmentHistory(User $user, GetShipmentHistoryRequestDto $getShipmentHistoryRequestDto): array
     {
         $orders = $this->orderRepository->paginateHistoryOrders($getShipmentHistoryRequestDto, $user);
 
         $shipmentHistory = [];
-        $rawSearch = $getShipmentHistoryRequestDto->getSearch() ?? '';
+        $rawSearch = $getShipmentHistoryRequestDto->getSearch();
         $normalizedSearch = transliterator_transliterate('Any-Latin; Latin-ASCII; Lower()', $rawSearch);
 
         foreach ($orders as $order) {

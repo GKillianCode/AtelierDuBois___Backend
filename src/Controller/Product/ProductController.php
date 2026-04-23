@@ -16,14 +16,14 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
-use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 #[OA\Tag(name: 'Products')]
 final class ProductController extends AbstractController
 {
     public function __construct(
         private readonly ProductService $productService,
-        private readonly SerializerInterface $serializer,
+        private readonly NormalizerInterface $serializer,
         private readonly ProductRequestMapper $productRequestMapper,
         private readonly CommentRequestMapper $commentRequestMapper,
     ) {}

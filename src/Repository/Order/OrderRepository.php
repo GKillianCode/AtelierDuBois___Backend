@@ -21,6 +21,7 @@ class OrderRepository extends ServiceEntityRepository
         parent::__construct($registry, Order::class);
     }
 
+    /** @return Paginator<Order> */
     public function paginateOrders(int $page, int $limit, User $user): Paginator
     {
         $query = $this->createQueryBuilder('tOrder')
@@ -38,11 +39,12 @@ class OrderRepository extends ServiceEntityRepository
         return new Paginator($query, true);
     }
 
+    /** @return Paginator<Order> */
     public function paginateHistoryOrders(GetShipmentHistoryRequestDto $getShipmentHistoryRequestDto, User $user): Paginator
     {
         $page = $getShipmentHistoryRequestDto->getPage();
         $limit = $getShipmentHistoryRequestDto->getLimit();
-        $search = transliterator_transliterate('Any-Latin; Latin-ASCII; Lower()', $getShipmentHistoryRequestDto->getSearch() ?? '');
+        $search = transliterator_transliterate('Any-Latin; Latin-ASCII; Lower()', $getShipmentHistoryRequestDto->getSearch());
         $year = $getShipmentHistoryRequestDto->getYear();
 
         $orderBy = match ($getShipmentHistoryRequestDto->getFilter()) {

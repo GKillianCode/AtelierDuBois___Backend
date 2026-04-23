@@ -42,6 +42,7 @@ class AddressService
         $this->logger->debug("AddressService::addAddress EXIT");
     }
 
+    /** @return AddressDto[] */
     public function getAllAddressesInDto(User $user): array
     {
         $this->logger->debug("AddressService::getAllAddresses ENTER");

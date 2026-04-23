@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class ApiResponseTest extends TestCase
 {
+    /** @return array<string, mixed> */
     private function decode(ApiResponse $response): array
     {
         return json_decode($response->getContent(), true, flags: JSON_THROW_ON_ERROR);

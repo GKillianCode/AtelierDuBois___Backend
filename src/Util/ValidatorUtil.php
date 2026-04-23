@@ -13,6 +13,9 @@ class ValidatorUtil
         private readonly LoggerInterface $logger
     ) {}
 
+    /**
+     * @param string[]|null $groups
+     */
     public function validate(object $object, ?array $groups = null): ConstraintViolationListInterface
     {
         $this->logger->debug("ValidatorUtil::validate ENTER");
@@ -21,6 +24,9 @@ class ValidatorUtil
         return $constraintes;
     }
 
+    /**
+     * @param string[]|null $groups
+     */
     public function hasViolations(object $object, ?array $groups = null): bool
     {
         $this->logger->debug("ValidatorUtil::hasViolations ENTER");
@@ -30,6 +36,10 @@ class ValidatorUtil
         return $asViolations;
     }
 
+    /**
+     * @param string[]|null $groups
+     * @return array<int, array<string, string>>
+     */
     public function getViolationsAsArray(object $object, ?array $groups = null): array
     {
         $this->logger->debug("ValidatorUtil::getViolationsAsArray ENTER");

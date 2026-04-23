@@ -15,7 +15,7 @@ class ResponseProductDto
         private readonly int $lengthInCentimeters,
         private readonly int $widthInCentimeters,
         private readonly int $heightInCentimeters,
-        /** @var ImageDto[] */
+        /** @var string[] */
         private readonly array $imageUrls,
         /** @var ResponseResumeProductVariantDto[] */
         private readonly array $responseResumeProductVariantDto,
@@ -62,7 +62,7 @@ class ResponseProductDto
     }
 
     /**
-     * @return ImageDto[]
+     * @return string[]
      */
     public function getImageUrls(): array
     {

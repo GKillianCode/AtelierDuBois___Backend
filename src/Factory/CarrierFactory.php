@@ -4,10 +4,12 @@ namespace App\Factory;
 
 use App\Enum\CarrierCode;
 use App\Exception\ForbiddenException;
+use App\Interface\CarrierInterface;
 
 class CarrierFactory
 {
     public function __construct(
+        /** @var iterable<CarrierInterface> */
         private iterable $handle
     ) {}
 
@@ -19,6 +21,6 @@ class CarrierFactory
             }
         }
 
-        throw new ForbiddenException("No handler found for carrier code: " . $carrierCode);
+        throw new ForbiddenException("No handler found for carrier code: " . $carrierCode->value);
     }
 }

@@ -5,6 +5,7 @@ namespace App\Manager\Product;
 use App\Util\ValidatorUtil;
 use Psr\Log\LoggerInterface;
 use App\Entity\Product\Product;
+use App\Entity\Product\ProductVariant;
 use App\Trait\ValidateAndSaveTrait;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Mapper\Product\ProductVariantMapper;
@@ -17,7 +18,9 @@ class ProductManager
         private readonly EntityManagerInterface $entityManager,
         private readonly ValidatorUtil $validatorUtil,
         private readonly ProductVariantRepository $productVariantRepository,
+        /** @phpstan-ignore property.onlyWritten */
         private readonly ProductVariantMapper $productVariantMapper,
+        /** @phpstan-ignore property.onlyWritten */
         private readonly ProductReviewManager $productReviewManager,
     ) {}
 
@@ -55,7 +58,7 @@ class ProductManager
 
     use ValidateAndSaveTrait;
 
-    public function getProductVariantByPublicId(string $publicId)
+    public function getProductVariantByPublicId(string $publicId): ?ProductVariant
     {
         $productVariant = $this->productVariantRepository->getProductVariantByPublicId($publicId);
         return $productVariant;

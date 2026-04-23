@@ -19,6 +19,7 @@ class PaginationUtilTest extends TestCase
         $this->sut    = new PaginationUtil($this->logger);
     }
 
+    /** @return Paginator<mixed>&MockObject */
     private function paginatorWithCount(int $count): Paginator&MockObject
     {
         $paginator = $this->getMockBuilder(Paginator::class)

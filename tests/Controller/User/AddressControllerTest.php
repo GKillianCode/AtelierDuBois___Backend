@@ -81,11 +81,13 @@ class AddressControllerTest extends WebTestCase
     // Helpers
     // -------------------------------------------------------------------------
 
+    /** @return array<string, string> */
     private function authHeaders(): array
     {
         return ['HTTP_AUTHORIZATION' => 'Bearer ' . self::$jwtToken];
     }
 
+    /** @return array<string, string> */
     private function jsonHeaders(): array
     {
         return ['CONTENT_TYPE' => 'application/json'];

@@ -12,7 +12,11 @@ class ResponseProductDtoNormalizer implements NormalizerInterface
         private readonly ResponseResumeProductVariantDtoNormalizer $responseResumeProductVariantDtoNormalizer
     ) {}
 
-    public function normalize($object, $format = null, array $context = []): array
+    /**
+     * @param array<string, mixed> $context
+     * @return array<string, mixed>
+     */
+    public function normalize(mixed $object, ?string $format = null, array $context = []): array
     {
         $normalizedVariants = [];
         foreach ($object->getResponseResumeProductVariantDto() as $variant) {
@@ -37,7 +41,10 @@ class ResponseProductDtoNormalizer implements NormalizerInterface
         ];
     }
 
-    public function supportsNormalization($data, $format = null, array $context = []): bool
+    /**
+     * @param array<string, mixed> $context
+     */
+    public function supportsNormalization(mixed $data, ?string $format = null, array $context = []): bool
     {
         return $data instanceof ResponseProductDto;
     }

@@ -31,6 +31,7 @@ class AddressRequestMapper
         return $this->createAddressDto($addressData, true);
     }
 
+    /** @return array<string, mixed> */
     private function extractJsonData(Request $request, ?string $publicId = null): array
     {
         $data = json_decode($request->getContent(), true);
@@ -52,6 +53,7 @@ class AddressRequestMapper
         return $addressData;
     }
 
+    /** @param array<string, mixed> $data */
     private function validateParameters(array $data, bool $isPublicIdRequired): void
     {
 
@@ -115,14 +117,15 @@ class AddressRequestMapper
         }
     }
 
+    /** @param array<string, mixed> $addressData */
     private function createAddressDto(array $addressData, bool $isPublicIdRequired): AddressDto
     {
         $publicId = $isPublicIdRequired ? new PublicIdDto($addressData['publicId']) : null;
 
         return new AddressDto(
             publicId: $publicId,
-            street: strtolower($addressData['street'] ?? '') ?? null,
-            city: strtolower($addressData['city'] ?? '') ?? null,
+            street: strtolower($addressData['street'] ?? ''),
+            city: strtolower($addressData['city'] ?? ''),
             zipcode: $addressData['zipcode'] ?? null,
             isProfessional: $addressData['isProfessional'] ?? null,
             isDefault: $addressData['isDefault'] ?? null

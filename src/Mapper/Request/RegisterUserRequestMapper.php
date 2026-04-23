@@ -23,6 +23,7 @@ class RegisterUserRequestMapper
         return $this->createUserDto($userData);
     }
 
+    /** @return array<string, mixed> */
     private function extractJsonData(Request $request): array
     {
         $data = json_decode($request->getContent(), true);
@@ -43,6 +44,7 @@ class RegisterUserRequestMapper
         return $userData;
     }
 
+    /** @param array<string, mixed> $data */
     private function validateParameters(array $data): void
     {
         $constraints = new Assert\Collection([
@@ -114,6 +116,7 @@ class RegisterUserRequestMapper
         }
     }
 
+    /** @param array<string, mixed> $userData */
     private function createUserDto(array $userData): RegisterUserDto
     {
         return new RegisterUserDto(
