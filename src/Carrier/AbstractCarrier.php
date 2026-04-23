@@ -41,11 +41,7 @@ abstract class AbstractCarrier implements CarrierInterface
     {
         $carrierData = $this->carrierRepository->findOneBy(['technicalName' => $carrierCode]);
 
-        try {
-            $this->carrier ??= $carrierData;
-        } catch (\Exception $e) {
-            throw new ForbiddenException("Error retrieving carrier from database: " . $e->getMessage());
-        }
+        $this->carrier ??= $carrierData;
     }
 
     protected function generateTrackingNumber(): void {}
