@@ -2,12 +2,13 @@
 
 namespace App\Entity\Order;
 
-use App\Entity\User\Address;
 use App\Entity\User\User;
-use App\Repository\Order\OrderRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use App\Entity\Shipment\Shipment;
+use App\Trait\TimestampableTrait;
+use App\Repository\Order\OrderRepository;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
 
 #[ORM\Entity(repositoryClass: OrderRepository::class)]
 #[ORM\Table(name: '`order`')]
@@ -18,59 +19,34 @@ class Order
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 50, nullable: true)]
-    private ?string $trackingNumber = null;
-
     #[ORM\ManyToOne(inversedBy: 'orders')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $userId = null;
 
-    #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?Address $deliveryAddressId = null;
-
-    #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?Address $billingAddressId = null;
-
-    #[ORM\ManyToOne]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?OrderStatus $statusId = null;
-
     #[ORM\Column]
-    private ?\DateTimeImmutable $createdAt = null;
-
-    #[ORM\Column]
-    private ?\DateTimeImmutable $updatedAt = null;
+    private ?int $totalPrice = null;
 
     /**
-     * @var Collection<int, OrderProduct>
+     * @var Collection<int, Shipment>
      */
-    #[ORM\OneToMany(targetEntity: OrderProduct::class, mappedBy: 'orderId')]
-    private Collection $orderProducts;
+    #[ORM\OneToMany(targetEntity: Shipment::class, mappedBy: 'orderId')]
+    private Collection $shipments;
+
+    #[ORM\Column(length: 17)]
+    private ?string $orderNumber = null;
+
+    use TimestampableTrait;
 
     public function __construct()
     {
-        $this->orderProducts = new ArrayCollection();
-        $this->createdAt = new \DateTimeImmutable();
-        $this->updatedAt = new \DateTimeImmutable();
+        $this->setCreatedAtValue();
+        $this->setUpdatedAtValue();
+        $this->shipments = new ArrayCollection();
     }
 
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getTrackingNumber(): ?string
-    {
-        return $this->trackingNumber;
-    }
-
-    public function setTrackingNumber(string $trackingNumber): static
-    {
-        $this->trackingNumber = $trackingNumber;
-
-        return $this;
     }
 
     public function getUserId(): ?User
@@ -85,92 +61,56 @@ class Order
         return $this;
     }
 
-    public function getDeliveryAddressId(): ?Address
+    public function getTotalPrice(): ?int
     {
-        return $this->deliveryAddressId;
+        return $this->totalPrice;
     }
 
-    public function setDeliveryAddressId(?Address $deliveryAddressId): static
+    public function setTotalPrice(int $totalPrice): static
     {
-        $this->deliveryAddressId = $deliveryAddressId;
-
-        return $this;
-    }
-
-    public function getBillingAddressId(): ?Address
-    {
-        return $this->billingAddressId;
-    }
-
-    public function setBillingAddressId(?Address $billingAddressId): static
-    {
-        $this->billingAddressId = $billingAddressId;
-
-        return $this;
-    }
-
-    public function getStatusId(): ?OrderStatus
-    {
-        return $this->statusId;
-    }
-
-    public function setStatusId(?OrderStatus $statusId): static
-    {
-        $this->statusId = $statusId;
-
-        return $this;
-    }
-
-    public function getCreatedAt(): ?\DateTimeImmutable
-    {
-        return $this->createdAt;
-    }
-
-    public function setCreatedAt(\DateTimeImmutable $createdAt): static
-    {
-        $this->createdAt = $createdAt;
-
-        return $this;
-    }
-
-    public function getUpdatedAt(): ?\DateTimeImmutable
-    {
-        return $this->updatedAt;
-    }
-
-    public function setUpdatedAt(\DateTimeImmutable $updatedAt): static
-    {
-        $this->updatedAt = $updatedAt;
+        $this->totalPrice = $totalPrice;
 
         return $this;
     }
 
     /**
-     * @return Collection<int, OrderProduct>
+     * @return Collection<int, Shipment>
      */
-    public function getOrderProducts(): Collection
+    public function getShipments(): Collection
     {
-        return $this->orderProducts;
+        return $this->shipments;
     }
 
-    public function addOrderProduct(OrderProduct $orderProduct): static
+    public function addShipment(Shipment $shipment): static
     {
-        if (!$this->orderProducts->contains($orderProduct)) {
-            $this->orderProducts->add($orderProduct);
-            $orderProduct->setOrderId($this);
+        if (!$this->shipments->contains($shipment)) {
+            $this->shipments->add($shipment);
+            $shipment->setOrderId($this);
         }
 
         return $this;
     }
 
-    public function removeOrderProduct(OrderProduct $orderProduct): static
+    public function removeShipment(Shipment $shipment): static
     {
-        if ($this->orderProducts->removeElement($orderProduct)) {
+        if ($this->shipments->removeElement($shipment)) {
             // set the owning side to null (unless already changed)
-            if ($orderProduct->getOrderId() === $this) {
-                $orderProduct->setOrderId(null);
+            if ($shipment->getOrderId() === $this) {
+                $shipment->setOrderId(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getOrderNumber(): ?string
+    {
+        return $this->orderNumber;
+    }
+
+    public function setOrderNumber(string $orderNumber): static
+    {
+        $this->orderNumber = $orderNumber;
 
         return $this;
     }

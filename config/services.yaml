@@ -10,6 +10,47 @@ services:
     _defaults:
         autowire: true # Automatically injects dependencies in your services.
         autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+        bind:
+            bool $debug: "%kernel.debug%"
+
+    _instanceof:
+        App\Interface\CarrierInterface:
+            tags: [app.carrier_handler]
 
     App\:
         resource: "../src/"
+
+    App\Factory\CarrierFactory:
+        arguments:
+            $handle: !tagged_iterator app.carrier_handler
+
+    App\Serializer\Normalizer\Product\ResponseResumeProductDtoNormalizer:
+        tags:
+            - { name: "serializer.normalizer", priority: 100 }
+
+    App\Serializer\Normalizer\Product\ResponseResumeProductVariantDtoNormalizer:
+        tags:
+            - { name: "serializer.normalizer", priority: 100 }
+
+    App\Serializer\Normalizer\Product\ResponseProductDtoNormalizer:
+        tags:
+            - { name: "serializer.normalizer", priority: 100 }
+
+    App\Serializer\Normalizer\Product\CategoryDtoNormalizer:
+        tags:
+            - { name: "serializer.normalizer", priority: 100 }
+
+    App\Serializer\Normalizer\User\AddressDtoNormalizer:
+        tags:
+            - { name: "serializer.normalizer", priority: 100 }
+
+    App\Serializer\Normalizer\Shipment\ResponseShipmentItemDtoNormalizer:
+        tags:
+            - { name: "serializer.normalizer", priority: 100 }
+
+    App\Serializer\Normalizer\Shipment\ResponseShipmentsPreviewDtoNormalizer:
+        tags:
+            - { name: "serializer.normalizer", priority: 100 }
+    App\Serializer\Normalizer\Shipment\ResponseShipmentsHistoryDtoNormalizer:
+        tags:
+            - { name: "serializer.normalizer", priority: 100 }

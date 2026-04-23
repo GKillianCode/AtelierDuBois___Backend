@@ -9,6 +9,12 @@ security:
             entity:
                 class: App\Entity\User\User
                 property: email
+
+    role_hierarchy:
+        ROLE_ADMIN: [ROLE_INTERNAL, ROLE_CUSTOMER]
+        ROLE_INTERNAL: [ROLE_CUSTOMER]
+        ROLE_CUSTOMER: []
+
     firewalls:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
@@ -42,6 +48,7 @@ security:
         - { path: ^/api/register, roles: PUBLIC_ACCESS }
         - { path: ^/api/public, roles: PUBLIC_ACCESS }
         - { path: ^/api/doc, roles: PUBLIC_ACCESS }
+        - { path: ^/api/doc.*, roles: PUBLIC_ACCESS }
         - { path: ^/api, roles: IS_AUTHENTICATED_FULLY }
 
 when@test:

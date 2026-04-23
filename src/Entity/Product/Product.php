@@ -2,11 +2,12 @@
 
 namespace App\Entity\Product;
 
-use App\Repository\Product\ProductRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use App\Trait\TimestampableTrait;
+use Doctrine\Common\Collections\Collection;
+use App\Repository\Product\ProductRepository;
+use Doctrine\Common\Collections\ArrayCollection;
 
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
 class Product
@@ -22,6 +23,21 @@ class Product
     #[ORM\Column(type: Types::TEXT)]
     private ?string $description = null;
 
+    #[ORM\Column]
+    private int $weightInGrams;
+
+    #[ORM\Column(length: 255)]
+    private string $lengthInCentimeters;
+
+    #[ORM\Column]
+    private int $widthInCentimeters;
+
+    #[ORM\Column]
+    private int $heightInCentimeters;
+
+    #[ORM\Column(type: Types::SMALLINT)]
+    private int $maxStackSize;
+
     /**
      * @var Collection<int, ProductVariant>
      */
@@ -31,17 +47,13 @@ class Product
     #[ORM\ManyToOne(inversedBy: 'products')]
     private ?Category $categoryId = null;
 
-    #[ORM\Column]
-    private ?\DateTimeImmutable $createdAt = null;
-
-    #[ORM\Column]
-    private ?\DateTimeImmutable $updatedAt = null;
+    use TimestampableTrait;
 
     public function __construct()
     {
         $this->productVariants = new ArrayCollection();
-        $this->createdAt = new \DateTimeImmutable();
-        $this->updatedAt = new \DateTimeImmutable();
+        $this->setCreatedAtValue();
+        $this->setUpdatedAtValue();
     }
 
     public function getId(): ?int
@@ -69,6 +81,66 @@ class Product
     public function setDescription(string $description): static
     {
         $this->description = $description;
+
+        return $this;
+    }
+
+    public function getWeightInGrams(): ?int
+    {
+        return $this->weightInGrams;
+    }
+
+    public function setWeightInGrams(int $weightInGrams): static
+    {
+        $this->weightInGrams = $weightInGrams;
+
+        return $this;
+    }
+
+    public function getLengthInCentimeters(): ?string
+    {
+        return $this->lengthInCentimeters;
+    }
+
+    public function setLengthInCentimeters(string $lengthInCentimeters): static
+    {
+        $this->lengthInCentimeters = $lengthInCentimeters;
+
+        return $this;
+    }
+
+    public function getWidthInCentimeters(): ?int
+    {
+        return $this->widthInCentimeters;
+    }
+
+    public function setWidthInCentimeters(int $widthInCentimeter): static
+    {
+        $this->widthInCentimeters = $widthInCentimeter;
+
+        return $this;
+    }
+
+    public function getHeightInCentimeters(): ?int
+    {
+        return $this->heightInCentimeters;
+    }
+
+    public function setHeightInCentimeters(int $heightInCentimeters): static
+    {
+        $this->heightInCentimeters = $heightInCentimeters;
+
+        return $this;
+    }
+
+    public function getMaxStackSize(): ?int
+    {
+        return $this->maxStackSize;
+    }
+
+    public function setMaxStackSize(int $maxStackSize): static
+    {
+        $this->maxStackSize = $maxStackSize;
 
         return $this;
     }
@@ -111,30 +183,6 @@ class Product
     public function setCategoryId(?Category $categoryId): static
     {
         $this->categoryId = $categoryId;
-
-        return $this;
-    }
-
-    public function getCreatedAt(): ?\DateTimeImmutable
-    {
-        return $this->createdAt;
-    }
-
-    public function setCreatedAt(\DateTimeImmutable $createdAt): static
-    {
-        $this->createdAt = $createdAt;
-
-        return $this;
-    }
-
-    public function getUpdatedAt(): ?\DateTimeImmutable
-    {
-        return $this->updatedAt;
-    }
-
-    public function setUpdatedAt(\DateTimeImmutable $updatedAt): static
-    {
-        $this->updatedAt = $updatedAt;
 
         return $this;
     }

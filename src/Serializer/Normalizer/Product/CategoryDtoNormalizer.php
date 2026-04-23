@@ -2,20 +2,27 @@
 
 namespace App\Serializer\Normalizer\Product;
 
-use App\Dto\Product\CategoryDto;
+use App\Dto\Types\CategoryDto;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 class CategoryDtoNormalizer implements NormalizerInterface
 {
-    public function normalize($object, $format = null, array $context = []): array
+    /**
+     * @param array<string, mixed> $context
+     * @return array<string, mixed>
+     */
+    public function normalize(mixed $object, ?string $format = null, array $context = []): array
     {
         return [
-            'name' => $object->name,
-            'publicId' => $object->publicId->publicId,
+            'name' => $object->getName(),
+            'publicId' => $object->getPublicId()->getPublicId(),
         ];
     }
 
-    public function supportsNormalization($data, $format = null, array $context = []): bool
+    /**
+     * @param array<string, mixed> $context
+     */
+    public function supportsNormalization(mixed $data, ?string $format = null, array $context = []): bool
     {
         return $data instanceof CategoryDto;
     }

@@ -19,6 +19,11 @@ class PriceDto
             value: 1000000000,
             message: 'Le prix doit être inférieur à {{ compared_value }}.'
         )]
-        public readonly int $amount,
+        private readonly int $amount,
     ) {}
+
+    public function getAmount(): int
+    {
+        return $this->amount;
+    }
 }

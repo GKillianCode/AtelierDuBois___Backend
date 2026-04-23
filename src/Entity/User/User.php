@@ -2,6 +2,7 @@
 
 namespace App\Entity\User;
 
+use App\Enum\UserType;
 use App\Entity\Order\Order;
 use Doctrine\ORM\Mapping as ORM;
 use App\Repository\User\UserRepository;
@@ -40,6 +41,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         new Assert\Regex(pattern: '/^ROLE_[A-Z_]+$/', message: 'Le format du rôle est invalide.', groups: ['registration'])
     ])]
     private array $roles = [];
+
+    #[ORM\Column(length: 20, enumType: UserType::class)]
+    private UserType $userType;
 
     /**
      * @var string The hashed password
@@ -168,6 +172,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setRoles(array $roles): static
     {
         $this->roles = $roles;
+
+        return $this;
+    }
+
+    public function getUserType(): UserType
+    {
+        return $this->userType;
+    }
+
+    public function setUserType(UserType $userType): static
+    {
+        $this->userType = $userType;
 
         return $this;
     }

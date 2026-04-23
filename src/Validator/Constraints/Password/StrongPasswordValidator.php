@@ -19,20 +19,18 @@ class StrongPasswordValidator extends ConstraintValidator
             return;
         }
 
-        if (!is_string($value)) {
+        if (!\is_string($value)) {
             throw new UnexpectedValueException($value, 'string');
         }
 
         $password = $value;
 
-        // Vérifier la longueur minimale
-        if (strlen($password) < $constraint->minLength) {
+        if (\strlen($password) < $constraint->minLength) {
             $this->context->buildViolation($constraint->tooShortMessage)
                 ->setParameter('{{ minLength }}', (string) $constraint->minLength)
                 ->addViolation();
         }
 
-        // Vérifier les majuscules
         $uppercaseCount = preg_match_all('/[A-Z]/', $password);
         if ($uppercaseCount < $constraint->minUppercase) {
             $this->context->buildViolation($constraint->missingUppercaseMessage)
@@ -40,7 +38,6 @@ class StrongPasswordValidator extends ConstraintValidator
                 ->addViolation();
         }
 
-        // Vérifier les minuscules
         $lowercaseCount = preg_match_all('/[a-z]/', $password);
         if ($lowercaseCount < $constraint->minLowercase) {
             $this->context->buildViolation($constraint->missingLowercaseMessage)
@@ -48,7 +45,6 @@ class StrongPasswordValidator extends ConstraintValidator
                 ->addViolation();
         }
 
-        // Vérifier les chiffres
         $numberCount = preg_match_all('/[0-9]/', $password);
         if ($numberCount < $constraint->minNumbers) {
             $this->context->buildViolation($constraint->missingNumbersMessage)
@@ -56,7 +52,6 @@ class StrongPasswordValidator extends ConstraintValidator
                 ->addViolation();
         }
 
-        // Vérifier les caractères spéciaux
         $specialCharsPattern = '/[' . preg_quote($constraint->specialChars, '/') . ']/';
         $specialCharCount = preg_match_all($specialCharsPattern, $password);
         if ($specialCharCount < $constraint->minSpecialChars) {
@@ -65,7 +60,6 @@ class StrongPasswordValidator extends ConstraintValidator
                 ->addViolation();
         }
 
-        // Vérifier les informations personnelles (si l'objet User est disponible)
         if ($constraint->checkPersonalInfo && $this->containsPersonalInfo($password)) {
             $this->context->buildViolation($constraint->containsPersonalInfoMessage)
                 ->addViolation();
@@ -83,7 +77,7 @@ class StrongPasswordValidator extends ConstraintValidator
         $personalInfo = [
             strtolower($object->getFirstname() ?? ''),
             strtolower($object->getLastname() ?? ''),
-            strtolower(explode('@', $object->getEmail() ?? '')[0] ?? ''),
+            strtolower(explode('@', $object->getEmail() ?? '')[0]),
         ];
 
         $lowerPassword = strtolower($password);
