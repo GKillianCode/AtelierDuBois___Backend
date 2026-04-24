@@ -96,6 +96,7 @@ class UserFixtures extends Fixture
                 'city' => 'Paris',
                 'isDefault' => false,
                 'isProfessional' => true,
+                'companyName' => 'Atelier Du Bois SARL',
             ],
             [
                 'street' => '78 Boulevard Saint-Michel',
@@ -141,6 +142,10 @@ class UserFixtures extends Fixture
                     ->setIsDefault($i === 0)
                     ->setIsProfessional($addressData['isProfessional'])
                     ->setUserId($user);
+
+                if ($addressData['isProfessional'] && isset($addressData['companyName'])) {
+                    $address->setCompanyName($addressData['companyName']);
+                }
 
                 $manager->persist($address);
                 $this->addReference(self::ADDRESS_REFERENCE . '_' . $addressIndex, $address);
