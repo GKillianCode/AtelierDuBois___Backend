@@ -116,7 +116,12 @@ class AddressRequestMapper
         ]);
 
 
-        $violations = $this->validator->validate($data, $constraints);
+        $dataToValidate = $data;
+        if (($dataToValidate['isProfessional'] ?? null) === false) {
+            unset($dataToValidate['companyName']);
+        }
+
+        $violations = $this->validator->validate($dataToValidate, $constraints);
 
         if (\count($violations) > 0) {
             $errors = [];
