@@ -47,7 +47,8 @@ class AddressRequestMapper
             'city' => $data['city'] ?? null,
             'zipcode' => $data['zipcode'] ?? null,
             'isProfessional' => $data['isProfessional'] ?? null,
-            'isDefault' => $data['isDefault'] ?? null
+            'isDefault' => $data['isDefault'] ?? null,
+            'companyName' => $data['companyName'] ?? null
         ];
 
         return $addressData;
@@ -102,6 +103,16 @@ class AddressRequestMapper
             'isDefault' => [
                 new Assert\Type('bool')
             ],
+            'companyName' => [
+                new Assert\Optional([
+                    new Assert\Type('string'),
+                    new Assert\Length(['min' => 2, 'max' => 80]),
+                    new Assert\Regex([
+                        'pattern' => '/^[A-Za-z0-9 \'.|+\-*=%!?,]+$/',
+                        'message' => 'Le nom de société ne doit contenir que des lettres, chiffres et les caractères suivants : espace \' . | + - * = % ! ? ,'
+                    ])
+                ])
+            ]
         ]);
 
 
@@ -114,6 +125,10 @@ class AddressRequestMapper
             }
 
             throw new BadRequestException('Validation failed: ' . implode(', ', $errors));
+        }
+
+        if ($data['isProfessional'] === true && empty($data['companyName'])) {
+            throw new BadRequestException('Validation failed: [companyName]: Le nom de société est obligatoire pour une adresse professionnelle.');
         }
     }
 
@@ -128,7 +143,8 @@ class AddressRequestMapper
             city: strtolower($addressData['city'] ?? ''),
             zipcode: $addressData['zipcode'] ?? null,
             isProfessional: $addressData['isProfessional'] ?? null,
-            isDefault: $addressData['isDefault'] ?? null
+            isDefault: $addressData['isDefault'] ?? null,
+            companyName: $addressData['companyName'] ?? null
         );
     }
 }
