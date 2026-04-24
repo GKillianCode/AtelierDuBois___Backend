@@ -14,10 +14,13 @@ class ResponseShipmentsPreviewDtoNormalizer implements NormalizerInterface
     public function normalize(mixed $object, ?string $format = null, array $context = []): array
     {
         return [
-            'publicId' => $object->getPublicId(),
-            'name' => $object->getName(),
-            'quantity' => $object->getQuantity(),
-            'mainImage' => $object->getMainImage()->getImageUrl(),
+            'shipments' => array_map(static fn($item) => [
+                'publicId' => $item->getPublicId(),
+                'name' => $item->getName(),
+                'quantity' => $item->getQuantity(),
+                'mainImage' => $item->getMainImage()->getImageUrl(),
+            ], $object->getShipments()),
+            'totalPriceInCents' => $object->getTotalPriceInCents()->getAmount(),
         ];
     }
 
