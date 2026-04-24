@@ -43,7 +43,8 @@ class AddressMapper
             city: $address->getCity(),
             zipcode: $address->getZipcode(),
             isProfessional: $address->isProfessional(),
-            isDefault: $address->isDefault()
+            isDefault: $address->isDefault(),
+            companyName: $address->getCompanyName()
         );
 
         $this->logger->debug("AddressMapper::toDtoFromEntity EXIT");
