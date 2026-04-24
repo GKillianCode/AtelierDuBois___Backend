@@ -8,11 +8,13 @@ use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class AddressRequestMapper
 {
     public function __construct(
-        private ValidatorInterface $validator
+        private ValidatorInterface $validator,
+        private TranslatorInterface $translator,
     ) {}
 
     public function mapAddAddressRequest(Request $request): AddressDto
@@ -37,7 +39,7 @@ class AddressRequestMapper
         $data = json_decode($request->getContent(), true);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new BadRequestException('Invalid JSON data: ' . json_last_error_msg());
+            throw new BadRequestException($this->translator->trans('error.invalid_json', ['%detail%' => json_last_error_msg()], 'validators'));
         }
 
 
@@ -60,11 +62,11 @@ class AddressRequestMapper
 
         $publicIdConstraints = $isPublicIdRequired
             ? [
-                new Assert\NotBlank(['message' => 'PublicId is required for updates']),
+                new Assert\NotBlank(['message' => 'address.public_id.required']),
                 new Assert\Type('string'),
                 new Assert\Regex([
                     'pattern' => '/^[0-9A-Za-z]{22}$/',
-                    'message' => 'PublicId must be a valid UUID base62 format (22 characters)'
+                    'message' => 'address.public_id.uuid_format'
                 ])
             ]
             : [
@@ -72,7 +74,7 @@ class AddressRequestMapper
                     new Assert\Type('string'),
                     new Assert\Regex([
                         'pattern' => '/^[0-9A-Za-z]{22}$/',
-                        'message' => 'PublicId must be a valid UUID base62 format (22 characters)'
+                        'message' => 'address.public_id.uuid_format'
                     ])
                 ])
             ];
@@ -94,7 +96,7 @@ class AddressRequestMapper
                 new Assert\Type('string'),
                 new Assert\Regex([
                     'pattern' => '/^[A-Z0-9\s]+$/',
-                    'message' => 'Le code postal ne doit contenir que des lettres majuscules, des chiffres et des espaces.'
+                    'message' => 'address.zipcode.regex'
                 ])
             ],
             'isProfessional' => [
@@ -109,7 +111,7 @@ class AddressRequestMapper
                     new Assert\Length(['min' => 2, 'max' => 80]),
                     new Assert\Regex([
                         'pattern' => '/^[A-Za-z0-9 \'.|+\-*=%!?,]+$/',
-                        'message' => 'Le nom de société ne doit contenir que des lettres, chiffres et les caractères suivants : espace \' . | + - * = % ! ? ,'
+                        'message' => 'address.company_name.regex'
                     ])
                 ])
             ]
@@ -129,11 +131,11 @@ class AddressRequestMapper
                 $errors[] = $violation->getPropertyPath() . ': ' . $violation->getMessage();
             }
 
-            throw new BadRequestException('Validation failed: ' . implode(', ', $errors));
+            throw new BadRequestException($this->translator->trans('error.validation_failed', ['%details%' => implode(', ', $errors)], 'validators'));
         }
 
         if ($data['isProfessional'] === true && empty($data['companyName'])) {
-            throw new BadRequestException('Validation failed: [companyName]: Le nom de société est obligatoire pour une adresse professionnelle.');
+            throw new BadRequestException($this->translator->trans('address.company_name.required_professional', [], 'validators'));
         }
     }
 

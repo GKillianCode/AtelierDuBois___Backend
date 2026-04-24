@@ -9,11 +9,13 @@ use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class ProductRequestMapper
 {
     public function __construct(
-        private ValidatorInterface $validator
+        private ValidatorInterface $validator,
+        private TranslatorInterface $translator,
     ) {}
 
     public function mapGetAllProductsRequest(Request $request): GetAllProductsRequestDto
@@ -46,7 +48,7 @@ class ProductRequestMapper
             'limit' => [
                 new Assert\Optional([
                     new Assert\Type('numeric'),
-                    new Assert\Choice(choices: ['20', '50', '100'], message: 'Limit must be 20, 50 or 100')
+                    new Assert\Choice(choices: ['20', '50', '100'], message: 'request.limit.choice')
                 ])
             ],
             'search' => [
@@ -70,7 +72,7 @@ class ProductRequestMapper
                     new Assert\Type('string'),
                     new Assert\Regex(
                         pattern: '/^[0-9A-Za-z]{22}$/',
-                        message: 'Category must be a valid UUID base62 format (22 characters)'
+                        message: 'request.category.uuid_format'
                     )
                 ])
             ]
@@ -83,7 +85,7 @@ class ProductRequestMapper
             foreach ($violations as $violation) {
                 $errors[] = $violation->getPropertyPath() . ': ' . $violation->getMessage();
             }
-            throw new BadRequestException('Validation failed: ' . implode(', ', $errors));
+            throw new BadRequestException($this->translator->trans('error.validation_failed', ['%details%' => implode(', ', $errors)], 'validators'));
         }
 
         $this->validateEnumValues($request);
@@ -93,12 +95,12 @@ class ProductRequestMapper
     {
         $filterValue = $request->query->get('filter');
         if ($filterValue && !ProductSortFilterCode::tryFrom($filterValue)) {
-            throw new BadRequestException("Invalid filter value: {$filterValue}");
+            throw new BadRequestException($this->translator->trans('request.filter.invalid', ['%value%' => $filterValue], 'validators'));
         }
 
         $productTypeValue = $request->query->get('productType');
         if ($productTypeValue && !ProductSortFilterCode::tryFrom($productTypeValue)) {
-            throw new BadRequestException("Invalid productType value: {$productTypeValue}");
+            throw new BadRequestException($this->translator->trans('request.product_type.invalid', ['%value%' => $productTypeValue], 'validators'));
         }
     }
 }

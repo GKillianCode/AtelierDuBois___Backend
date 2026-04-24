@@ -9,20 +9,20 @@ class PublicIdDto
     public function __construct(
         #[Assert\Type(
             type: 'string',
-            message: 'La valeur {{ value }} n\'est pas valide pour le publicId.'
+            message: 'public_id.type'
         )]
         #[Assert\NotBlank(
-            message: 'Le publicId ne doit pas être vide.'
+            message: 'public_id.not_blank'
         )]
         #[Assert\Length(
             min: 22,
             max: 22,
-            minMessage: 'Le publicId doit contenir au minimum {{ limit }} caractères.',
-            maxMessage: 'Le publicId ne doit pas dépasser {{ limit }} caractères.'
+            minMessage: 'public_id.min_length',
+            maxMessage: 'public_id.max_length'
         )]
         #[Assert\Regex(
             pattern: '/^[0-9a-zA-Z_-]{22}$/',
-            message: 'Le publicId doit être un UUID valide en Base62.'
+            message: 'public_id.regex'
         )]
         private readonly string $publicId
     ) {}
