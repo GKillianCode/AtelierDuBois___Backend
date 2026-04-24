@@ -67,6 +67,9 @@ class AddressControllerTest extends WebTestCase
             $em = static::getContainer()->get(EntityManagerInterface::class);
             $user = $em->find(User::class, self::$testUser->getId());
             if ($user) {
+                $em->createQuery('DELETE FROM App\Entity\User\Address a WHERE a.userId = :user')
+                    ->setParameter('user', $user)
+                    ->execute();
                 $em->remove($user);
                 $em->flush();
             }
@@ -310,5 +313,55 @@ class AddressControllerTest extends WebTestCase
         $client->request('GET', '/api/v1/user/address/' . self::FAKE_PUBLIC_ID . '/remove');
 
         $this->assertResponseStatusCodeSame(405);
+    }
+
+    // =========================================================================
+    // AJOUT D'ADRESSE
+    // =========================================================================
+
+    public function testAddAddressReturns200WithValidPayload(): void
+    {
+        $client = $this->createAuthenticatedClient();
+
+        $payload = [
+            'street' => '12 RUE DE LA PAIX',
+            'city' => 'Paris',
+            'zipcode' => '75001',
+            'isProfessional' => false,
+            'isDefault' => true,
+        ];
+
+        $client->request(
+            'POST',
+            '/api/v1/user/address/add',
+            [],
+            [],
+            array_merge($this->authHeaders(), $this->jsonHeaders()),
+            json_encode($payload)
+        );
+
+        $this->assertResponseStatusCodeSame(200);
+        $body = json_decode($client->getResponse()->getContent(), true);
+        $this->assertTrue($body['success']);
+    }
+
+    public function testAddAddressLimitReachedReturns422(): void
+    {
+        $client = $this->createAuthenticatedClient();
+
+        static::getContainer()->set(AddressManager::class, $this->mockAddressManager(canAdd: false));
+
+        $client->request(
+            'POST',
+            '/api/v1/user/address/add',
+            [],
+            [],
+            array_merge($this->authHeaders(), $this->jsonHeaders()),
+            '{}'
+        );
+
+        $this->assertResponseStatusCodeSame(422);
+        $body = json_decode($client->getResponse()->getContent(), true);
+        $this->assertFalse($body['success']);
     }
 }
