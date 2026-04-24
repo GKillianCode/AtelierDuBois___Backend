@@ -1,0 +1,106 @@
+price:
+    type: "The value {{ value }} is not valid for price."
+    greater_than: "Price must be greater than {{ compared_value }}."
+    less_than: "Price must be less than {{ compared_value }}."
+
+image:
+    type: "The value {{ value }} is not valid for the image URL."
+    not_blank: "Image URL must not be blank."
+    url: "Image URL is not a valid URL."
+    max_length: "Image URL must not exceed {{ limit }} characters."
+    regex: "Image URL must end with .webp"
+
+public_id:
+    type: "The value {{ value }} is not valid for the publicId."
+    not_blank: "PublicId must not be blank."
+    min_length: "PublicId must contain at least {{ limit }} characters."
+    max_length: "PublicId must not exceed {{ limit }} characters."
+    regex: "PublicId must be a valid Base62 UUID."
+
+user:
+    email:
+        already_used: "This email address is already in use."
+        not_blank: "Email cannot be blank."
+        invalid: "The email address {{ value }} is not valid."
+        max_length: "Email cannot exceed {{ limit }} characters."
+    uuid:
+        already_used: "This UUID is already in use."
+        not_blank: "UUID cannot be blank."
+        invalid: "UUID must be valid."
+    roles:
+        type: "Roles must be an array."
+        item_type: "Each role must be a string."
+        item_format: "Role format is invalid."
+    password:
+        not_blank: "Password cannot be blank."
+    firstname:
+        not_blank: "First name cannot be blank."
+        min_length: "First name must contain at least {{ limit }} characters."
+        max_length: "First name cannot exceed {{ limit }} characters."
+        regex: "First name can only contain letters, spaces and hyphens."
+    lastname:
+        not_blank: "Last name cannot be blank."
+        min_length: "Last name must contain at least {{ limit }} characters."
+        max_length: "Last name cannot exceed {{ limit }} characters."
+        regex: "Last name can only contain letters, spaces and hyphens."
+    created_at:
+        not_null: "Creation date cannot be null."
+        type: "Creation date must be a valid date."
+    updated_at:
+        not_null: "Update date cannot be null."
+        type: "Update date must be a valid date."
+
+register:
+    lastname:
+        min_length: "Last name must contain at least {{ limit }} characters."
+        max_length: "Last name cannot exceed {{ limit }} characters."
+        regex: "Last name can only contain letters, spaces and hyphens."
+    email:
+        min_length: "Email must contain at least {{ limit }} characters."
+    confirm_password:
+        not_blank: "Password confirmation cannot be blank."
+    passwords_not_match: "Passwords do not match."
+
+request:
+    limit:
+        choice: "Limit must be 20, 50 or 100."
+    category:
+        uuid_format: "Category must be a valid UUID base62 format (22 characters)."
+    search:
+        regex: "Search must only contain letters, numbers, spaces and hyphens."
+    filter:
+        regex: "Filter must only contain uppercase letters and underscores."
+        invalid: "Invalid filter value: %value%."
+    filter_name:
+        invalid: "Invalid filterName value: %value%."
+    product_type:
+        invalid: "Invalid productType value: %value%."
+    year:
+        regex: "Year must be between 2000 and 2100."
+
+error:
+    invalid_json: "Invalid JSON data: %detail%."
+    validation_failed: "Validation failed: %details%."
+
+address:
+    public_id:
+        required: "PublicId is required for updates."
+        uuid_format: "PublicId must be a valid UUID base62 format (22 characters)."
+    zipcode:
+        regex: "Zipcode must only contain uppercase letters, digits and spaces."
+    company_name:
+        regex: "Company name must only contain letters, digits and the following characters: space ' . | + - * = % ! ? ,"
+        required_professional: "Company name is required for a professional address."
+    duplicate: "An identical address already exists for this user."
+    keep_at_least_one: "At least one address must be kept."
+    default_cannot_delete: "The default address cannot be deleted. Please set another address as default before deleting this one."
+
+order:
+    public_id:
+        required: "PublicId is required."
+        uuid_format: "PublicId must be a valid UUID base62 format (22 characters)."
+    quantity:
+        required: "Quantity is required."
+        min: "Quantity must be at least {{ compared_value }}."
+    items:
+        not_empty: "Request body must contain at least one item."
