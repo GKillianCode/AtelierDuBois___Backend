@@ -36,6 +36,9 @@ class Address
     #[ORM\JoinColumn(nullable: false)]
     private ?User $userId = null;
 
+    #[ORM\Column(length: 80, nullable: true)]
+    private ?string $companyName = null;
+
     use TimestampableTrait;
 
     public function __construct()
@@ -129,6 +132,18 @@ class Address
     public function setUserId(?User $userId): static
     {
         $this->userId = $userId;
+
+        return $this;
+    }
+
+    public function getCompanyName(): ?string
+    {
+        return $this->companyName;
+    }
+
+    public function setCompanyName(?string $companyName): static
+    {
+        $this->companyName = $companyName;
 
         return $this;
     }

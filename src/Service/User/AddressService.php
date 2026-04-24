@@ -29,7 +29,7 @@ class AddressService
         $addressDto = $this->addressRequestMapper->mapAddAddressRequest($request);
 
         if ($this->addressManager->checkIfAddressExistsForUser($user, $addressDto)) {
-            throw new ConflictException('Address already exists for the user.');
+            throw new ConflictException('Une adresse identique existe déjà pour cet utilisateur.');
         }
 
         $address = $this->addressMapper->toEntityFromDto($addressDto, $user);
@@ -84,14 +84,15 @@ class AddressService
         $address = $this->addressManager->getAddressByPublicId($user, $publicId);
 
         if (!$address) {
-            throw new NotFoundException('Address', $publicId);
+            throw new NotFoundException('Adresse', $publicId);
         }
 
         $address->setStreet($addressDto->getStreet())
             ->setZipcode($addressDto->getZipcode())
             ->setCity($addressDto->getCity())
             ->setIsProfessional($addressDto->isProfessional())
-            ->setIsDefault($addressDto->isDefault());
+            ->setIsDefault($addressDto->isDefault())
+            ->setCompanyName($addressDto->getCompanyName());
 
         $address = $this->addressManager->setADefaultAddress($address, $user);
 
@@ -110,11 +111,15 @@ class AddressService
         $countRegisteredAddresses = $this->addressManager->countTheNumberOfAddressesForAUser($user);
 
         if (!$address) {
-            throw new NotFoundException('Address', $AddressPublicId);
+            throw new NotFoundException('Adresse', $AddressPublicId);
         }
 
         if (!$countRegisteredAddresses > 1) {
-            throw new ConflictException('At least one address must be kept.');
+            throw new ConflictException('Au moins une adresse doit être conservée.');
+        }
+
+        if ($address->isDefault()) {
+            throw new ConflictException('L\'adresse par défaut ne peut pas être supprimée. Veuillez définir une autre adresse par défaut avant de supprimer celle-ci.');
         }
 
         $this->addressManager->delete($address);

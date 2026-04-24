@@ -41,7 +41,8 @@ class AddressMapperTest extends TestCase
             city: 'Paris',
             zipcode: '75001',
             isProfessional: false,
-            isDefault: true
+            isDefault: true,
+            companyName: null
         );
 
         $address = $this->mapper->toEntityFromDto($addressDto, $user);
@@ -66,7 +67,8 @@ class AddressMapperTest extends TestCase
             city: 'Lyon',
             zipcode: '69001',
             isProfessional: true,
-            isDefault: false
+            isDefault: false,
+            companyName: null
         );
 
         $address = $this->mapper->toEntityFromDto($addressDto, $user);
@@ -91,7 +93,8 @@ class AddressMapperTest extends TestCase
             city: 'Lyon',
             zipcode: '69002',
             isProfessional: true,
-            isDefault: true
+            isDefault: true,
+            companyName: null
         );
 
         $address = $this->mapper->toEntityFromDto($addressDto, $user);
@@ -144,5 +147,61 @@ class AddressMapperTest extends TestCase
         $this->assertSame('75009', $dto->getZipcode());
         $this->assertTrue($dto->isProfessional());
         $this->assertFalse($dto->isDefault());
+    }
+
+    public function testToEntityFromDtoProfessionalAddressMapsCompanyName(): void
+    {
+        $user = new User();
+
+        $addressDto = new AddressDto(
+            publicId: null,
+            street: '10 boulevard Haussmann',
+            city: 'Paris',
+            zipcode: '75009',
+            isProfessional: true,
+            isDefault: false,
+            companyName: 'Atelier Du Bois SARL'
+        );
+
+        $address = $this->mapper->toEntityFromDto($addressDto, $user);
+
+        $this->assertSame('Atelier Du Bois SARL', $address->getCompanyName());
+        $this->assertTrue($address->isProfessional());
+    }
+
+    public function testToEntityFromDtoNonProfessionalAddressHasNullCompanyName(): void
+    {
+        $user = new User();
+
+        $addressDto = new AddressDto(
+            publicId: null,
+            street: '12 rue de la Paix',
+            city: 'Paris',
+            zipcode: '75001',
+            isProfessional: false,
+            isDefault: false,
+            companyName: null
+        );
+
+        $address = $this->mapper->toEntityFromDto($addressDto, $user);
+
+        $this->assertNull($address->getCompanyName());
+    }
+
+    public function testToDtoFromEntityWithCompanyName(): void
+    {
+        $address = new Address();
+        $address->setPublicId('aB3dEfGhIjKlMnOpQrStuV')
+            ->setStreet('10 boulevard Haussmann')
+            ->setCity('Paris')
+            ->setZipcode('75009')
+            ->setIsProfessional(true)
+            ->setIsDefault(false)
+            ->setCompanyName('Atelier Du Bois SARL');
+
+        $dto = $this->mapper->toDtoFromEntity($address);
+
+        $this->assertSame('Atelier Du Bois SARL', $dto->getCompanyName());
+        $this->assertTrue($dto->isProfessional());
     }
 }

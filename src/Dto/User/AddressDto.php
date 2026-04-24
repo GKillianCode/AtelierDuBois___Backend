@@ -12,7 +12,8 @@ class AddressDto
         private readonly string $city,
         private readonly string $zipcode,
         private readonly bool $isProfessional,
-        private readonly bool $isDefault
+        private readonly bool $isDefault,
+        private readonly ?string $companyName
     ) {}
 
     public function getPublicId(): ?PublicIdDto
@@ -43,5 +44,10 @@ class AddressDto
     public function isDefault(): bool
     {
         return $this->isDefault;
+    }
+
+    public function getCompanyName(): ?string
+    {
+        return $this->companyName;
     }
 }

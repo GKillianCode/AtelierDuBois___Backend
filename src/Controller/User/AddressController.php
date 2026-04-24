@@ -49,7 +49,11 @@ final class AddressController extends AbstractController
             $this->addressService->addAddress($request, $user);
             return ApiResponse::success();
         } else {
-            return ApiResponse::error(ApiErrorCode::ADDRESS_LIMIT_REACHED->getUserMessage(), 'Maximum number of addresses reached.');
+            return ApiResponse::error(
+                ApiErrorCode::ADDRESS_LIMIT_REACHED->getUserMessage(),
+                'Maximum number of addresses reached.',
+                ApiErrorCode::ADDRESS_LIMIT_REACHED->getHttpStatus()
+            );
         }
     }
 

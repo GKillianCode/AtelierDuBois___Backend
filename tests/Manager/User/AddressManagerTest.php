@@ -2,6 +2,7 @@
 
 namespace App\Tests\Manager\User;
 
+use App\Dto\User\AddressDto;
 use App\Entity\User\Address;
 use App\Entity\User\User;
 use App\Manager\User\AddressManager;
@@ -301,5 +302,54 @@ class AddressManagerTest extends TestCase
             ->with('Error deleting address', $this->arrayHasKey('exception'));
 
         $this->sut->delete($address);
+    }
+
+    // --- checkIfAddressExistsForUser ---
+
+    public function testCheckIfAddressExistsForUserReturnsTrueWhenFound(): void
+    {
+        $user    = $this->buildUser();
+        $address = $this->buildAddress();
+
+        $addressDto = new AddressDto(
+            publicId: null,
+            street: '1 rue de la Paix',
+            city: 'Paris',
+            zipcode: '75001',
+            isProfessional: false,
+            isDefault: false,
+            companyName: null
+        );
+
+        $this->addressRepository->method('findOneBy')
+            ->with([
+                'userId'         => $user,
+                'street'         => '1 rue de la Paix',
+                'zipcode'        => '75001',
+                'city'           => 'Paris',
+                'isProfessional' => false,
+            ])
+            ->willReturn($address);
+
+        $this->assertTrue($this->sut->checkIfAddressExistsForUser($user, $addressDto));
+    }
+
+    public function testCheckIfAddressExistsForUserReturnsFalseWhenNotFound(): void
+    {
+        $user = $this->buildUser();
+
+        $addressDto = new AddressDto(
+            publicId: null,
+            street: '1 rue de la Paix',
+            city: 'Paris',
+            zipcode: '75001',
+            isProfessional: false,
+            isDefault: false,
+            companyName: null
+        );
+
+        $this->addressRepository->method('findOneBy')->willReturn(null);
+
+        $this->assertFalse($this->sut->checkIfAddressExistsForUser($user, $addressDto));
     }
 }
