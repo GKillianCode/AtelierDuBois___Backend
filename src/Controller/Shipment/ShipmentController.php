@@ -22,8 +22,8 @@ final class ShipmentController extends AbstractController
         private readonly NormalizerInterface $serializer,
     ) {}
 
-    #[Route('/api/v1/shipment/history', name: 'shipment_history', methods: ['POST'])]
-    #[OA\Post(
+    #[Route('/api/v1/shipment/history', name: 'shipment_history', methods: ['GET'])]
+    #[OA\Get(
         summary: 'Get shipment history',
     )]
     #[OA\Response(
