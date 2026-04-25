@@ -46,7 +46,8 @@ class ShipmentHistoryRequestMapper
             ],
             'limit' => [
                 new Assert\Optional([
-                    new Assert\Choice(choices: [20, 50, 100], message: 'request.limit.choice')
+                    new Assert\Type('numeric'),
+                    new Assert\Choice(choices: ['20', '50', '100'], message: 'request.limit.choice')
                 ])
             ],
             'search' => [
