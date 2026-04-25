@@ -27,6 +27,7 @@ use App\Mapper\Product\ImageMapper;
 use App\Repository\Order\OrderRepository;
 use App\Repository\Shipment\ShipmentRepository;
 use App\Trait\ValidateAndSaveTrait;
+use App\Util\PaginationUtil;
 use App\Util\ShipmentUtil;
 use App\Util\ValidatorUtil;
 use Doctrine\ORM\EntityManagerInterface;
@@ -50,6 +51,7 @@ class ShipmentManager
         private readonly ShipmentRepository $shipmentRepository,
         private readonly OrderRepository $orderRepository,
         private readonly CarrierFactory $carrierFactory,
+        private readonly PaginationUtil $paginationUtil,
     ) {}
 
     /**
@@ -253,6 +255,9 @@ class ShipmentManager
                 ) * ($getShipmentHistoryRequestDto->getFilterName() === ShipmentHistorySortFilterCode::NAME_ASC ? 1 : -1));
             }
 
+            $paginationDataDto = $this->paginationUtil->getMetaPaginationData($orders, $getShipmentHistoryRequestDto->getLimit(), $getShipmentHistoryRequestDto->getPage());
+
+
             if (empty($shipmentItems)) {
                 continue;
             }
@@ -263,6 +268,9 @@ class ShipmentManager
             );
         }
 
-        return $shipmentHistory;
+        return [
+            'shipments' => $shipmentHistory,
+            'pagination' => $paginationDataDto
+        ];
     }
 }

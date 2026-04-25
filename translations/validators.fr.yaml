@@ -1,0 +1,106 @@
+price:
+    type: "La valeur {{ value }} n'est pas valide pour le prix."
+    greater_than: "Le prix doit être supérieur à {{ compared_value }}."
+    less_than: "Le prix doit être inférieur à {{ compared_value }}."
+
+image:
+    type: "La valeur {{ value }} n'est pas valide pour l'URL de l'image."
+    not_blank: "L'URL de l'image ne doit pas être vide."
+    url: "L'URL de l'image n'est pas une URL valide."
+    max_length: "L'URL de l'image ne doit pas dépasser {{ limit }} caractères."
+    regex: "L'URL de l'image doit se terminer par .webp"
+
+public_id:
+    type: "La valeur {{ value }} n'est pas valide pour le publicId."
+    not_blank: "Le publicId ne doit pas être vide."
+    min_length: "Le publicId doit contenir au minimum {{ limit }} caractères."
+    max_length: "Le publicId ne doit pas dépasser {{ limit }} caractères."
+    regex: "Le publicId doit être un UUID valide en Base62."
+
+user:
+    email:
+        already_used: "Cette adresse email est déjà utilisée."
+        not_blank: "L'email ne peut pas être vide."
+        invalid: "L'adresse email {{ value }} n'est pas valide."
+        max_length: "L'email ne peut pas dépasser {{ limit }} caractères."
+    uuid:
+        already_used: "Cet UUID est déjà utilisé."
+        not_blank: "L'UUID ne peut pas être vide."
+        invalid: "L'UUID doit être valide."
+    roles:
+        type: "Les rôles doivent être un tableau."
+        item_type: "Chaque rôle doit être une chaîne de caractères."
+        item_format: "Le format du rôle est invalide."
+    password:
+        not_blank: "Le mot de passe ne peut pas être vide."
+    firstname:
+        not_blank: "Le prénom ne peut pas être vide."
+        min_length: "Le prénom doit contenir au moins {{ limit }} caractères."
+        max_length: "Le prénom ne peut pas dépasser {{ limit }} caractères."
+        regex: "Le prénom ne peut contenir que des lettres, espaces et tirets."
+    lastname:
+        not_blank: "Le nom de famille ne peut pas être vide."
+        min_length: "Le nom de famille doit contenir au moins {{ limit }} caractères."
+        max_length: "Le nom de famille ne peut pas dépasser {{ limit }} caractères."
+        regex: "Le nom de famille ne peut contenir que des lettres, espaces et tirets."
+    created_at:
+        not_null: "La date de création ne peut pas être vide."
+        type: "La date de création doit être une date valide."
+    updated_at:
+        not_null: "La date de mise à jour ne peut pas être vide."
+        type: "La date de mise à jour doit être une date valide."
+
+register:
+    lastname:
+        min_length: "Le nom doit contenir au moins {{ limit }} caractères."
+        max_length: "Le nom ne peut pas dépasser {{ limit }} caractères."
+        regex: "Le nom ne peut contenir que des lettres, espaces et tirets."
+    email:
+        min_length: "L'email doit contenir au moins {{ limit }} caractères."
+    confirm_password:
+        not_blank: "La confirmation du mot de passe ne peut pas être vide."
+    passwords_not_match: "Les mots de passe ne correspondent pas."
+
+request:
+    limit:
+        choice: "La limite doit être 20, 50 ou 100."
+    category:
+        uuid_format: "La catégorie doit être un UUID en format Base62 valide (22 caractères)."
+    search:
+        regex: "La recherche ne peut contenir que des lettres, chiffres, espaces et tirets."
+    filter:
+        regex: "Le filtre ne peut contenir que des lettres majuscules et des underscores."
+        invalid: "Valeur de filtre invalide : %value%."
+    filter_name:
+        invalid: "Valeur de filterName invalide : %value%."
+    product_type:
+        invalid: "Type de produit invalide : %value%."
+    year:
+        regex: "L'année doit être comprise entre 2000 et 2100."
+
+error:
+    invalid_json: "Données JSON invalides : %detail%."
+    validation_failed: "Validation échouée : %details%."
+
+address:
+    public_id:
+        required: "Le publicId est requis pour les mises à jour."
+        uuid_format: "Le publicId doit être un UUID en format Base62 valide (22 caractères)."
+    zipcode:
+        regex: "Le code postal ne doit contenir que des lettres majuscules, des chiffres et des espaces."
+    company_name:
+        regex: "Le nom de société ne doit contenir que des lettres, chiffres et les caractères suivants : espace ' . | + - * = % ! ? ,"
+        required_professional: "Le nom de société est obligatoire pour une adresse professionnelle."
+    duplicate: "Une adresse identique existe déjà pour cet utilisateur."
+    keep_at_least_one: "Au moins une adresse doit être conservée."
+    default_cannot_delete: "L'adresse par défaut ne peut pas être supprimée. Veuillez définir une autre adresse par défaut avant de supprimer celle-ci."
+
+order:
+    public_id:
+        required: "Le publicId est requis."
+        uuid_format: "Le publicId doit être un UUID en format Base62 valide (22 caractères)."
+    quantity:
+        required: "La quantité est requise."
+        min: "La quantité doit être au minimum {{ compared_value }}."
+    items:
+        not_empty: "Le corps de la requête doit contenir au moins un article."

@@ -7,11 +7,13 @@ use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class OrderRequestMapper
 {
     public function __construct(
-        private ValidatorInterface $validator
+        private ValidatorInterface $validator,
+        private TranslatorInterface $translator,
     ) {}
 
     /**
@@ -34,7 +36,7 @@ class OrderRequestMapper
         $data = json_decode($request->getContent(), true);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new BadRequestException('Invalid JSON data: ' . json_last_error_msg());
+            throw new BadRequestException($this->translator->trans('error.invalid_json', ['%detail%' => json_last_error_msg()], 'validators'));
         }
 
         $orderData = [];
@@ -60,25 +62,25 @@ class OrderRequestMapper
     {
         $constraints = new Assert\Collection([
             'publicId' => [
-                new Assert\NotBlank(['message' => 'PublicId is required']),
+                new Assert\NotBlank(['message' => 'order.public_id.required']),
                 new Assert\Type('string'),
                 new Assert\Regex([
                     'pattern' => '/^[0-9A-Za-z]{22}$/',
-                    'message' => 'PublicId must be a valid UUID base62 format (22 characters)'
+                    'message' => 'order.public_id.uuid_format'
                 ])
             ],
             'quantity' => [
-                new Assert\NotBlank(['message' => 'Quantity is required']),
+                new Assert\NotBlank(['message' => 'order.quantity.required']),
                 new Assert\Type('integer'),
                 new Assert\GreaterThanOrEqual([
                     'value' => 1,
-                    'message' => 'Quantity must be at least {{ compared_value }}'
+                    'message' => 'order.quantity.min'
                 ])
             ]
         ]);
 
         if (\count($data) === 0) {
-            throw new BadRequestException('Request body must contain at least one item');
+            throw new BadRequestException($this->translator->trans('order.items.not_empty', [], 'validators'));
         }
 
         foreach ($data as $item) {
@@ -93,7 +95,7 @@ class OrderRequestMapper
                     $errors[] = $violation->getPropertyPath() . ': ' . $violation->getMessage();
                 }
 
-                throw new BadRequestException('Validation failed: ' . implode(', ', $errors));
+                throw new BadRequestException($this->translator->trans('error.validation_failed', ['%details%' => implode(', ', $errors)], 'validators'));
             }
         }
     }

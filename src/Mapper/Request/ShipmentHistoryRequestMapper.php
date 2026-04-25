@@ -8,11 +8,13 @@ use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class ShipmentHistoryRequestMapper
 {
     public function __construct(
-        private ValidatorInterface $validator
+        private ValidatorInterface $validator,
+        private TranslatorInterface $translator,
     ) {}
 
     public function mapGetAllShipmentsRequest(Request $request): GetShipmentHistoryRequestDto
@@ -44,7 +46,8 @@ class ShipmentHistoryRequestMapper
             ],
             'limit' => [
                 new Assert\Optional([
-                    new Assert\Choice(choices: [20, 50, 100], message: 'Limit must be 20, 50 or 100')
+                    new Assert\Type('numeric'),
+                    new Assert\Choice(choices: ['20', '50', '100'], message: 'request.limit.choice')
                 ])
             ],
             'search' => [
@@ -53,7 +56,7 @@ class ShipmentHistoryRequestMapper
                     new Assert\Length(max: 255),
                     new Assert\Regex(
                         pattern: '/^[\p{L}0-9 \-]*$/u',
-                        message: 'Search must only contain letters, numbers, spaces and hyphens'
+                        message: 'request.search.regex'
                     )
                 ])
             ],
@@ -63,7 +66,7 @@ class ShipmentHistoryRequestMapper
                     new Assert\Length(max: 50),
                     new Assert\Regex(
                         pattern: '/^[A-Z_]*$/',
-                        message: 'Filter must only contain uppercase letters and underscores'
+                        message: 'request.filter.regex'
                     )
                 ])
             ],
@@ -73,7 +76,7 @@ class ShipmentHistoryRequestMapper
                     new Assert\Length(max: 50),
                     new Assert\Regex(
                         pattern: '/^[A-Z_]*$/',
-                        message: 'Filter must only contain uppercase letters and underscores'
+                        message: 'request.filter.regex'
                     )
                 ])
             ],
@@ -82,7 +85,7 @@ class ShipmentHistoryRequestMapper
                     new Assert\Type('numeric'),
                     new Assert\Regex(
                         pattern: '/^(20\d{2}|2100)$/',
-                        message: 'Year must be between 2000 and 2100'
+                        message: 'request.year.regex'
                     )
                 ])
             ],
@@ -95,7 +98,7 @@ class ShipmentHistoryRequestMapper
             foreach ($violations as $violation) {
                 $errors[] = $violation->getPropertyPath() . ': ' . $violation->getMessage();
             }
-            throw new BadRequestException('Validation failed: ' . implode(', ', $errors));
+            throw new BadRequestException($this->translator->trans('error.validation_failed', ['%details%' => implode(', ', $errors)], 'validators'));
         }
 
         $this->validateEnumValues($request);
@@ -105,12 +108,12 @@ class ShipmentHistoryRequestMapper
     {
         $filterValue = $request->query->get('filter');
         if ($filterValue && !ShipmentHistorySortFilterCode::tryFrom($filterValue)) {
-            throw new BadRequestException("Invalid filter value: {$filterValue}");
+            throw new BadRequestException($this->translator->trans('request.filter.invalid', ['%value%' => $filterValue], 'validators'));
         }
 
         $filterNameValue = $request->query->get('filterName');
         if ($filterNameValue && $filterNameValue !== ShipmentHistorySortFilterCode::NAME_ASC->value && $filterNameValue !== ShipmentHistorySortFilterCode::NAME_DESC->value) {
-            throw new BadRequestException("Invalid filterName value: {$filterNameValue}");
+            throw new BadRequestException($this->translator->trans('request.filter_name.invalid', ['%value%' => $filterNameValue], 'validators'));
         }
     }
 }

@@ -14,7 +14,7 @@ class ResponseShipmentsHistoryDtoNormalizer implements NormalizerInterface
     public function normalize(mixed $object, ?string $format = null, array $context = []): array
     {
         return [
-            'shipments' => array_map(fn($item) => [
+            'shipment' => array_map(fn($item) => [
                 'publicId' => $item->getPublicId(),
                 'name' => $item->getName(),
                 'quantity' => $item->getQuantity(),

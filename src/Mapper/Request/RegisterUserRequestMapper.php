@@ -8,11 +8,13 @@ use Symfony\Component\HttpFoundation\Exception\BadRequestException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class RegisterUserRequestMapper
 {
     public function __construct(
-        private ValidatorInterface $validator
+        private ValidatorInterface $validator,
+        private TranslatorInterface $translator,
     ) {}
 
     public function registerUserRequest(Request $request): RegisterUserDto
@@ -29,7 +31,7 @@ class RegisterUserRequestMapper
         $data = json_decode($request->getContent(), true);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new BadRequestException('Invalid JSON data: ' . json_last_error_msg());
+            throw new BadRequestException($this->translator->trans('error.invalid_json', ['%detail%' => json_last_error_msg()], 'validators'));
         }
 
 
@@ -54,12 +56,12 @@ class RegisterUserRequestMapper
                 new Assert\Length(
                     min: 2,
                     max: 50,
-                    minMessage: 'Le prénom doit contenir au moins {{ limit }} caractères.',
-                    maxMessage: 'Le prénom ne peut pas dépasser {{ limit }} caractères.',
+                    minMessage: 'user.firstname.min_length',
+                    maxMessage: 'user.firstname.max_length',
                 ),
                 new Assert\Regex(
                     pattern: '/^[a-zA-ZÀ-ÿ\-\s]+$/',
-                    message: 'Le prénom ne peut contenir que des lettres, espaces et tirets.',
+                    message: 'user.firstname.regex',
                 ),
             ],
             'lastname' => [
@@ -68,25 +70,25 @@ class RegisterUserRequestMapper
                 new Assert\Length(
                     min: 2,
                     max: 50,
-                    minMessage: 'Le nom doit contenir au moins {{ limit }} caractères.',
-                    maxMessage: 'Le nom ne peut pas dépasser {{ limit }} caractères.',
+                    minMessage: 'register.lastname.min_length',
+                    maxMessage: 'register.lastname.max_length',
                 ),
                 new Assert\Regex(
                     pattern: '/^[a-zA-ZÀ-ÿ\-\s]+$/',
-                    message: 'Le nom ne peut contenir que des lettres, espaces et tirets.',
+                    message: 'register.lastname.regex',
                 ),
             ],
             'email' => [
                 new Assert\NotBlank(),
                 new Assert\Type('string'),
                 new Assert\Email(
-                    message: 'L\'adresse email {{ value }} n\'est pas valide.',
+                    message: 'user.email.invalid',
                 ),
                 new Assert\Length(
                     min: 8,
                     max: 150,
-                    minMessage: 'L\'email doit contenir au moins {{ limit }} caractères.',
-                    maxMessage: 'L\'email ne peut pas dépasser {{ limit }} caractères.',
+                    minMessage: 'register.email.min_length',
+                    maxMessage: 'user.email.max_length',
                 ),
             ],
             'password' => [
@@ -95,12 +97,12 @@ class RegisterUserRequestMapper
                 new StrongPassword(),
             ],
             'confirmPassword' => [
-                new Assert\NotBlank(message: 'La confirmation du mot de passe ne peut pas être vide.'),
+                new Assert\NotBlank(message: 'register.confirm_password.not_blank'),
                 new Assert\Type('string'),
                 new StrongPassword(),
                 new Assert\EqualTo(
                     value: $data['password'] ?? null,
-                    message: 'Les mots de passe ne correspondent pas.',
+                    message: 'register.passwords_not_match',
                 ),
             ],
         ]);
@@ -112,7 +114,7 @@ class RegisterUserRequestMapper
             foreach ($violations as $violation) {
                 $errors[] = $violation->getPropertyPath() . ': ' . $violation->getMessage();
             }
-            throw new BadRequestException('Validation failed: ' . implode(', ', $errors));
+            throw new BadRequestException($this->translator->trans('error.validation_failed', ['%details%' => implode(', ', $errors)], 'validators'));
         }
     }
 

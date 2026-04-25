@@ -17,8 +17,8 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
 #[ORM\UniqueConstraint(name: 'UNIQ_IDENTIFIER_UUID', fields: ['uuid'])]
-#[UniqueEntity(fields: ['email'], message: 'Cette adresse email est déjà utilisée.')]
-#[UniqueEntity(fields: ['uuid'], message: 'Cet UUID est déjà utilisé.')]
+#[UniqueEntity(fields: ['email'], message: 'user.email.already_used')]
+#[UniqueEntity(fields: ['uuid'], message: 'user.uuid.already_used')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
@@ -27,18 +27,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?int $id = null;
 
     #[ORM\Column(length: 180, unique: true)]
-    #[Assert\NotBlank(message: 'L\'UUID ne peut pas être vide.', groups: ['registration'])]
-    #[Assert\Uuid(message: 'L\'UUID doit être valide.', groups: ['registration'])]
+    #[Assert\NotBlank(message: 'user.uuid.not_blank', groups: ['registration'])]
+    #[Assert\Uuid(message: 'user.uuid.invalid', groups: ['registration'])]
     private ?string $uuid = null;
 
     /**
      * @var list<string> The user roles
      */
     #[ORM\Column]
-    #[Assert\Type(type: 'array', message: 'Les rôles doivent être un tableau.', groups: ['registration'])]
+    #[Assert\Type(type: 'array', message: 'user.roles.type', groups: ['registration'])]
     #[Assert\All([
-        new Assert\Type(type: 'string', message: 'Chaque rôle doit être une chaîne de caractères.', groups: ['registration']),
-        new Assert\Regex(pattern: '/^ROLE_[A-Z_]+$/', message: 'Le format du rôle est invalide.', groups: ['registration'])
+        new Assert\Type(type: 'string', message: 'user.roles.item_type', groups: ['registration']),
+        new Assert\Regex(pattern: '/^ROLE_[A-Z_]+$/', message: 'user.roles.item_format', groups: ['registration'])
     ])]
     private array $roles = [];
 
@@ -49,61 +49,61 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @var string The hashed password
      */
     #[ORM\Column]
-    #[Assert\NotBlank(message: 'Le mot de passe ne peut pas être vide.', groups: ['password_change'])]
+    #[Assert\NotBlank(message: 'user.password.not_blank', groups: ['password_change'])]
     private ?string $password = null;
 
     #[StrongPassword(groups: ['registration'])]
     private ?string $plainPassword = null;
 
     #[ORM\Column(length: 150, unique: true)]
-    #[Assert\NotBlank(message: 'L\'email ne peut pas être vide.', groups: ['registration'])]
-    #[Assert\Email(message: 'L\'adresse email {{ value }} n\'est pas valide.', groups: ['registration'])]
+    #[Assert\NotBlank(message: 'user.email.not_blank', groups: ['registration'])]
+    #[Assert\Email(message: 'user.email.invalid', groups: ['registration'])]
     #[Assert\Length(
         max: 150,
-        maxMessage: 'L\'email ne peut pas dépasser {{ limit }} caractères.'
+        maxMessage: 'user.email.max_length'
     )]
     private ?string $email = null;
 
     #[ORM\Column(length: 50)]
-    #[Assert\NotBlank(message: 'Le prénom ne peut pas être vide.', groups: ['registration'])]
+    #[Assert\NotBlank(message: 'user.firstname.not_blank', groups: ['registration'])]
     #[Assert\Length(
         min: 2,
         max: 50,
-        minMessage: 'Le prénom doit contenir au moins {{ limit }} caractères.',
-        maxMessage: 'Le prénom ne peut pas dépasser {{ limit }} caractères.',
+        minMessage: 'user.firstname.min_length',
+        maxMessage: 'user.firstname.max_length',
         groups: ['registration']
     )]
     #[Assert\Regex(
         pattern: '/^[a-zA-ZÀ-ÿ\-\s]+$/',
-        message: 'Le prénom ne peut contenir que des lettres, espaces et tirets.',
+        message: 'user.firstname.regex',
         groups: ['registration']
     )]
     private ?string $firstname = null;
 
     #[ORM\Column(length: 50)]
-    #[Assert\NotBlank(message: 'Le nom de famille ne peut pas être vide.', groups: ['registration'])]
+    #[Assert\NotBlank(message: 'user.lastname.not_blank', groups: ['registration'])]
     #[Assert\Length(
         min: 2,
         max: 50,
-        minMessage: 'Le nom de famille doit contenir au moins {{ limit }} caractères.',
-        maxMessage: 'Le nom de famille ne peut pas dépasser {{ limit }} caractères.',
+        minMessage: 'user.lastname.min_length',
+        maxMessage: 'user.lastname.max_length',
         groups: ['registration']
     )]
     #[Assert\Regex(
         pattern: '/^[a-zA-ZÀ-ÿ\-\s]+$/',
-        message: 'Le nom de famille ne peut contenir que des lettres, espaces et tirets.',
+        message: 'user.lastname.regex',
         groups: ['registration']
     )]
     private ?string $lastname = null;
 
     #[ORM\Column]
-    #[Assert\NotNull(message: 'La date de création ne peut pas être vide.', groups: ['registration'])]
-    #[Assert\Type(type: '\DateTimeImmutable', message: 'La date de création doit être une date valide.', groups: ['registration'])]
+    #[Assert\NotNull(message: 'user.created_at.not_null', groups: ['registration'])]
+    #[Assert\Type(type: '\DateTimeImmutable', message: 'user.created_at.type', groups: ['registration'])]
     private ?\DateTimeImmutable $createdAt = null;
 
     #[ORM\Column]
-    #[Assert\NotNull(message: 'La date de mise à jour ne peut pas être vide.', groups: ['registration'])]
-    #[Assert\Type(type: '\DateTimeImmutable', message: 'La date de mise à jour doit être une date valide.', groups: ['registration'])]
+    #[Assert\NotNull(message: 'user.updated_at.not_null', groups: ['registration'])]
+    #[Assert\Type(type: '\DateTimeImmutable', message: 'user.updated_at.type', groups: ['registration'])]
     private ?\DateTimeImmutable $updatedAt = null;
 
     /**

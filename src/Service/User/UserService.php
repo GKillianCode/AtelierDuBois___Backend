@@ -9,6 +9,7 @@ use App\Repository\User\UserRepository;
 use App\Util\ValidatorUtil;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class UserService
 {
@@ -18,6 +19,7 @@ class UserService
         private UserManager $userManager,
         public readonly ValidatorUtil $validatorUtil,
         public readonly UserRepository $userRepository,
+        private readonly TranslatorInterface $translator,
     ) {}
 
     public function registerUser(RegisterUserDto $registerUserDto): void
@@ -26,7 +28,7 @@ class UserService
 
         if ($this->checkEmailExists($registerUserDto->getEmail())) {
             $this->logger->debug("UserService::registerUser EXIT 1");
-            throw new ConflictException("Email already exists");
+            throw new ConflictException($this->translator->trans('user.email.already_used', [], 'validators'));
         }
 
         $this->userManager->create($registerUserDto);

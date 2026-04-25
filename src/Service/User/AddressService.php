@@ -11,6 +11,7 @@ use App\Mapper\User\AddressMapper;
 use App\Manager\User\AddressManager;
 use App\Mapper\Request\AddressRequestMapper;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 class AddressService
 {
@@ -19,7 +20,8 @@ class AddressService
         private readonly LoggerInterface $logger,
         private readonly AddressManager $addressManager,
         private readonly AddressMapper $addressMapper,
-        private readonly AddressRequestMapper $addressRequestMapper
+        private readonly AddressRequestMapper $addressRequestMapper,
+        private readonly TranslatorInterface $translator,
     ) {}
 
     public function addAddress(Request $request, User $user): void
@@ -29,7 +31,7 @@ class AddressService
         $addressDto = $this->addressRequestMapper->mapAddAddressRequest($request);
 
         if ($this->addressManager->checkIfAddressExistsForUser($user, $addressDto)) {
-            throw new ConflictException('Une adresse identique existe déjà pour cet utilisateur.');
+            throw new ConflictException($this->translator->trans('address.duplicate', [], 'validators'));
         }
 
         $address = $this->addressMapper->toEntityFromDto($addressDto, $user);
@@ -115,11 +117,11 @@ class AddressService
         }
 
         if (!$countRegisteredAddresses > 1) {
-            throw new ConflictException('Au moins une adresse doit être conservée.');
+            throw new ConflictException($this->translator->trans('address.keep_at_least_one', [], 'validators'));
         }
 
         if ($address->isDefault()) {
-            throw new ConflictException('L\'adresse par défaut ne peut pas être supprimée. Veuillez définir une autre adresse par défaut avant de supprimer celle-ci.');
+            throw new ConflictException($this->translator->trans('address.default_cannot_delete', [], 'validators'));
         }
 
         $this->addressManager->delete($address);
