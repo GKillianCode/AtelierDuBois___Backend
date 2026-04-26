@@ -62,20 +62,20 @@ class OrderRequestMapper
     {
         $constraints = new Assert\Collection([
             'publicId' => [
-                new Assert\NotBlank(['message' => 'order.public_id.required']),
+                new Assert\NotBlank(message: 'order.public_id.required'),
                 new Assert\Type('string'),
-                new Assert\Regex([
-                    'pattern' => '/^[0-9A-Za-z]{22}$/',
-                    'message' => 'order.public_id.uuid_format'
-                ])
+                new Assert\Regex(
+                    pattern: '/^[0-9A-Za-z]{22}$/',
+                    message: 'order.public_id.uuid_format'
+                )
             ],
             'quantity' => [
-                new Assert\NotBlank(['message' => 'order.quantity.required']),
+                new Assert\NotBlank(message: 'order.quantity.required'),
                 new Assert\Type('integer'),
-                new Assert\GreaterThanOrEqual([
-                    'value' => 1,
-                    'message' => 'order.quantity.min'
-                ])
+                new Assert\GreaterThanOrEqual(
+                    value: 1,
+                    message: 'order.quantity.min'
+                )
             ]
         ]);
 

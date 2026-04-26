@@ -62,20 +62,20 @@ class AddressRequestMapper
 
         $publicIdConstraints = $isPublicIdRequired
             ? [
-                new Assert\NotBlank(['message' => 'address.public_id.required']),
+                new Assert\NotBlank(message: 'address.public_id.required'),
                 new Assert\Type('string'),
-                new Assert\Regex([
-                    'pattern' => '/^[0-9A-Za-z]{22}$/',
-                    'message' => 'address.public_id.uuid_format'
-                ])
+                new Assert\Regex(
+                    pattern: '/^[0-9A-Za-z]{22}$/',
+                    message: 'address.public_id.uuid_format'
+                )
             ]
             : [
                 new Assert\Optional([
                     new Assert\Type('string'),
-                    new Assert\Regex([
-                        'pattern' => '/^[0-9A-Za-z]{22}$/',
-                        'message' => 'address.public_id.uuid_format'
-                    ])
+                    new Assert\Regex(
+                        pattern: '/^[0-9A-Za-z]{22}$/',
+                        message: 'address.public_id.uuid_format'
+                    )
                 ])
             ];
 
@@ -84,20 +84,20 @@ class AddressRequestMapper
             'street' => [
                 new Assert\NotBlank(),
                 new Assert\Type('string'),
-                new Assert\Length(['min' => 2, 'max' => 255])
+                new Assert\Length(min: 2, max: 255)
             ],
             'city' => [
                 new Assert\NotBlank(),
                 new Assert\Type('string'),
-                new Assert\Length(['min' => 2, 'max' => 100])
+                new Assert\Length(min: 2, max: 100)
             ],
             'zipcode' => [
                 new Assert\NotBlank(),
                 new Assert\Type('string'),
-                new Assert\Regex([
-                    'pattern' => '/^[A-Z0-9\s]+$/',
-                    'message' => 'address.zipcode.regex'
-                ])
+                new Assert\Regex(
+                    pattern: '/^[A-Z0-9\s]+$/',
+                    message: 'address.zipcode.regex'
+                )
             ],
             'isProfessional' => [
                 new Assert\Type('bool')
@@ -108,11 +108,11 @@ class AddressRequestMapper
             'companyName' => [
                 new Assert\Optional([
                     new Assert\Type('string'),
-                    new Assert\Length(['min' => 2, 'max' => 80]),
-                    new Assert\Regex([
-                        'pattern' => '/^[A-Za-z0-9 \'.|+\-*=%!?,]+$/',
-                        'message' => 'address.company_name.regex'
-                    ])
+                    new Assert\Length(min: 2, max: 80),
+                    new Assert\Regex(
+                        pattern: '/^[A-Za-z0-9 \'.|+\-*=%!?,]+$/',
+                        message: 'address.company_name.regex'
+                    )
                 ])
             ]
         ]);
