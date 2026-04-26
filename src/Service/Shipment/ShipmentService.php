@@ -46,4 +46,12 @@ class ShipmentService
     {
         return $this->shipmentManager->buildShipmentHistory($user, $getShipmentHistoryRequestDto);
     }
+
+    /**
+     * @return int[]
+     */
+    public function getShipmentHistoryYears(User $user): array
+    {
+        return $this->shipmentManager->getShipmentHistoryYears($user);
+    }
 }
