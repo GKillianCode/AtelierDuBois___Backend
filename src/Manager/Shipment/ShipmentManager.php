@@ -223,6 +223,7 @@ class ShipmentManager
         $shipmentHistory = [];
         $rawSearch = $getShipmentHistoryRequestDto->getSearch();
         $normalizedSearch = transliterator_transliterate('Any-Latin; Latin-ASCII; Lower()', $rawSearch);
+        $paginationDataDto = $this->paginationUtil->getMetaPaginationData($orders, $getShipmentHistoryRequestDto->getLimit(), $getShipmentHistoryRequestDto->getPage());
 
         foreach ($orders as $order) {
             $shipmentItems = [];
@@ -255,9 +256,6 @@ class ShipmentManager
                 ) * ($getShipmentHistoryRequestDto->getFilterName() === ShipmentHistorySortFilterCode::NAME_ASC ? 1 : -1));
             }
 
-            $paginationDataDto = $this->paginationUtil->getMetaPaginationData($orders, $getShipmentHistoryRequestDto->getLimit(), $getShipmentHistoryRequestDto->getPage());
-
-
             if (empty($shipmentItems)) {
                 continue;
             }
@@ -272,5 +270,10 @@ class ShipmentManager
             'shipments' => $shipmentHistory,
             'pagination' => $paginationDataDto
         ];
+    }
+
+    public function getShipmentHistoryYears(User $user): array
+    {
+        return $this->shipmentRepository->findDistinctYears($user);
     }
 }

@@ -43,4 +43,19 @@ final class ShipmentController extends AbstractController
         $shipmentHistory = $this->shipmentService->getShipmentHistory($user, $getShipmentHistoryRequestDto);
         return ApiResponse::success($this->serializer->normalize($shipmentHistory));
     }
+
+    #[Route('/api/v1/shipment/history/years', name: 'shipment_history_years', methods: ['GET'])]
+    #[OA\Get(summary: 'Get distinct years from shipment history')]
+    #[OA\Response(
+        response: Response::HTTP_OK,
+        description: 'Distinct years retrieved successfully',
+        content: new OA\JsonContent(type: 'array', items: new OA\Items(type: 'integer'))
+    )]
+    public function getHistoryYears(): Response
+    {
+        $user = $this->getUser();
+        assert($user instanceof User);
+        $years = $this->shipmentService->getShipmentHistoryYears($user);
+        return ApiResponse::success($years);
+    }
 }
