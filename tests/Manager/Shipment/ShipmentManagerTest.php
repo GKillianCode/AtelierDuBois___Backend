@@ -38,6 +38,7 @@ use App\Repository\User\AddressRepository;
 use App\Util\ShipmentUtil;
 use App\Util\UuidUtil;
 use App\Util\ValidatorUtil;
+use App\Util\PaginationUtil;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -117,6 +118,7 @@ class ShipmentManagerTest extends TestCase
             $this->createMock(ShipmentRepository::class),
             $this->orderRepository,
             $carrierFactory,
+            new PaginationUtil($mockLogger),
         );
     }
 
@@ -376,7 +378,7 @@ class ShipmentManagerTest extends TestCase
 
         $result = $this->sut->buildShipmentHistory(new User(), $this->makeHistoryRequestDto());
 
-        $this->assertSame([], $result);
+        $this->assertSame([], $result['shipments']);
     }
 
     public function testBuildShipmentHistoryReturnsMappedOrderData(): void
@@ -387,12 +389,12 @@ class ShipmentManagerTest extends TestCase
 
         $result = $this->sut->buildShipmentHistory(new User(), $this->makeHistoryRequestDto());
 
-        $this->assertCount(1, $result);
-        $this->assertSame(3000, $result[0]->getTotalPriceInCents()->getAmount());
-        $this->assertCount(1, $result[0]->getShipments());
-        $this->assertSame('Chaise', $result[0]->getShipments()[0]->getName());
-        $this->assertSame('PUB1', $result[0]->getShipments()[0]->getPublicId());
-        $this->assertSame(3, $result[0]->getShipments()[0]->getQuantity());
+        $this->assertCount(1, $result['shipments']);
+        $this->assertSame(3000, $result['shipments'][0]->getTotalPriceInCents()->getAmount());
+        $this->assertCount(1, $result['shipments'][0]->getShipments());
+        $this->assertSame('Chaise', $result['shipments'][0]->getShipments()[0]->getName());
+        $this->assertSame('PUB1', $result['shipments'][0]->getShipments()[0]->getPublicId());
+        $this->assertSame(3, $result['shipments'][0]->getShipments()[0]->getQuantity());
     }
 
     public function testBuildShipmentHistorySkipsOrdersWhereAllItemsFilteredBySearch(): void
@@ -404,7 +406,7 @@ class ShipmentManagerTest extends TestCase
 
         $result = $this->sut->buildShipmentHistory(new User(), $this->makeHistoryRequestDto(search: 'Table'));
 
-        $this->assertSame([], $result);
+        $this->assertSame([], $result['shipments']);
     }
 
     public function testBuildShipmentHistoryFiltersItemsByPartialSearchAndKeepsMatchingOnes(): void
@@ -435,8 +437,8 @@ class ShipmentManagerTest extends TestCase
 
         $result = $this->sut->buildShipmentHistory(new User(), $this->makeHistoryRequestDto(search: 'chai'));
 
-        $this->assertCount(1, $result);
-        $names = array_map(fn($s) => $s->getName(), $result[0]->getShipments());
+        $this->assertCount(1, $result['shipments']);
+        $names = array_map(fn($s) => $s->getName(), $result['shipments'][0]->getShipments());
         $this->assertSame(['Chaise'], $names);
     }
 
@@ -470,7 +472,7 @@ class ShipmentManagerTest extends TestCase
             $this->makeHistoryRequestDto(filterName: ShipmentHistorySortFilterCode::NAME_ASC),
         );
 
-        $names = array_map(fn($s) => $s->getName(), $result[0]->getShipments());
+        $names = array_map(fn($s) => $s->getName(), $result['shipments'][0]->getShipments());
         // After transliteration: 'zebre' > 'armoire' → NAME_ASC puts 'Armoire' first
         $this->assertSame(['Armoire', 'Zèbre'], $names);
     }
@@ -505,7 +507,7 @@ class ShipmentManagerTest extends TestCase
             $this->makeHistoryRequestDto(filterName: ShipmentHistorySortFilterCode::NAME_DESC),
         );
 
-        $names = array_map(fn($s) => $s->getName(), $result[0]->getShipments());
+        $names = array_map(fn($s) => $s->getName(), $result['shipments'][0]->getShipments());
         $this->assertSame(['Zèbre', 'Armoire'], $names);
     }
 }
