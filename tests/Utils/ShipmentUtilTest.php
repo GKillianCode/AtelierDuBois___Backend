@@ -74,4 +74,32 @@ class ShipmentUtilTest extends TestCase
             $this->sut->generateNewOrderNumber(),
         );
     }
+
+    // =========================================================================
+    // generateNewShipmentId
+    // =========================================================================
+
+    public function testGenerateNewShipmentIdMatchesFormat(): void
+    {
+        $result = $this->sut->generateNewShipmentId();
+
+        // SHP-{YY}{MM}-{8 uppercase alphanumeric chars}
+        $this->assertMatchesRegularExpression('/^SHP-\d{4}-[0-9A-Z]{8}$/', $result);
+    }
+
+    public function testGenerateNewShipmentIdContainsCurrentYearMonth(): void
+    {
+        $yearMonth = (new \DateTimeImmutable())->format('ym');
+        $result    = $this->sut->generateNewShipmentId();
+
+        $this->assertStringStartsWith("SHP-{$yearMonth}-", $result);
+    }
+
+    public function testGenerateNewShipmentIdIsUnique(): void
+    {
+        $this->assertNotSame(
+            $this->sut->generateNewShipmentId(),
+            $this->sut->generateNewShipmentId(),
+        );
+    }
 }

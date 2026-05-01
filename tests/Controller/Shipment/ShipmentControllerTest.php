@@ -89,6 +89,14 @@ class ShipmentControllerTest extends WebTestCase
         $mock = $this->createMock(ShipmentService::class);
         $mock->method('getShipmentHistory')->willReturn(['shipments' => [], 'pagination' => []]);
         $mock->method('getShipmentHistoryYears')->willReturn([2026, 2025]);
+        $mock->method('getShipmentDetail')->willReturn(
+            new \App\Dto\Response\ResponseShipmentDetailDto(
+                items: [],
+                shipmentId: 'SHP-2604-T6KLBS6G',
+                orderedAt: 0,
+                status: new \App\Dto\Types\ShipmentStatusDto(code: 'PENDING', name: 'En attente'),
+            )
+        );
         return $mock;
     }
 
@@ -233,5 +241,62 @@ class ShipmentControllerTest extends WebTestCase
         $body = json_decode($client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('success', $body);
         $this->assertArrayHasKey('message', $body);
+    }
+
+    // =========================================================================
+    // GET /api/v1/shipment/history/{publicId}
+    // =========================================================================
+
+    public function testDetailRequiresAuth(): void
+    {
+        $client = static::createClient();
+        $client->request('GET', '/api/v1/shipment/history/SHP-2604-T6KLBS6G');
+
+        $this->assertResponseStatusCodeSame(401);
+        $body = json_decode($client->getResponse()->getContent(), true);
+        $this->assertFalse($body['success']);
+    }
+
+    public function testDetailOnlyAcceptsGet(): void
+    {
+        $client = static::createClient();
+        $client->request('POST', '/api/v1/shipment/history/SHP-2604-T6KLBS6G');
+
+        $this->assertResponseStatusCodeSame(405);
+    }
+
+    public function testDetailWithInvalidPublicIdReturns400(): void
+    {
+        $client = $this->createAuthenticatedClient();
+        static::getContainer()->set(ShipmentService::class, $this->mockShipmentService());
+
+        $client->request('GET', '/api/v1/shipment/history/invalid-id', [], [], $this->authHeaders());
+
+        $this->assertResponseStatusCodeSame(400);
+    }
+
+    public function testDetailWithValidPublicIdReturns200(): void
+    {
+        $client = $this->createAuthenticatedClient();
+        static::getContainer()->set(ShipmentService::class, $this->mockShipmentService());
+
+        $client->request('GET', '/api/v1/shipment/history/SHP-2604-T6KLBS6G', [], [], $this->authHeaders());
+
+        $this->assertResponseStatusCodeSame(200);
+    }
+
+    public function testDetailResponseHasExpectedKeys(): void
+    {
+        $client = $this->createAuthenticatedClient();
+        static::getContainer()->set(ShipmentService::class, $this->mockShipmentService());
+
+        $client->request('GET', '/api/v1/shipment/history/SHP-2604-T6KLBS6G', [], [], $this->authHeaders());
+
+        $body = json_decode($client->getResponse()->getContent(), true);
+        $this->assertTrue($body['success']);
+        $this->assertArrayHasKey('data', $body);
+        $this->assertArrayHasKey('shipmentId', $body['data']);
+        $this->assertArrayHasKey('status', $body['data']);
+        $this->assertArrayHasKey('items', $body['data']);
     }
 }

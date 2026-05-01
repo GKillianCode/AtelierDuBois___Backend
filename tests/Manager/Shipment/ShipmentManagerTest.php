@@ -16,6 +16,7 @@ use App\Entity\Shipment\Shipment;
 use App\Entity\Shipment\ShipmentItem;
 use App\Entity\User\Address;
 use App\Entity\User\User;
+use App\Enum\ShipmentStatusCode;
 use App\Enum\SortFilter\ShipmentHistorySortFilterCode;
 use App\Exception\NotFoundException;
 use App\Factory\CarrierFactory;
@@ -55,6 +56,7 @@ class ShipmentManagerTest extends TestCase
     private OrderStatusRepository&MockObject $orderStatusRepository;
     private CarrierRepository&MockObject $carrierRepository;
     private OrderRepository&MockObject $orderRepository;
+    private ShipmentRepository&MockObject $shipmentRepository;
     private ShipmentManager $sut;
 
     protected function setUp(): void
@@ -66,7 +68,8 @@ class ShipmentManagerTest extends TestCase
         $this->addressRepository        = $this->createMock(AddressRepository::class);
         $this->orderStatusRepository    = $this->createMock(OrderStatusRepository::class);
         $this->carrierRepository        = $this->createMock(CarrierRepository::class);
-        $this->orderRepository          = $this->createMock(OrderRepository::class);
+        $this->orderRepository    = $this->createMock(OrderRepository::class);
+        $this->shipmentRepository = $this->createMock(ShipmentRepository::class);
 
         $mockLogger    = $this->createMock(LoggerInterface::class);
         $uuidUtil      = new UuidUtil($mockLogger);
@@ -115,7 +118,7 @@ class ShipmentManagerTest extends TestCase
             $shipmentStatusManager,
             $shipmentUtil,
             $validatorUtil,
-            $this->createMock(ShipmentRepository::class),
+            $this->shipmentRepository,
             $this->orderRepository,
             $carrierFactory,
             new PaginationUtil($mockLogger),
@@ -157,6 +160,7 @@ class ShipmentManagerTest extends TestCase
         int $variantId = 1,
         int $totalPrice = 5000,
         int $quantity = 2,
+        string $shipmentPublicId = 'SHP-2604-T6KLBS6G',
     ): Order {
         $product  = (new Product())->setName($productName)->setMaxStackSize(5);
         $variant  = (new ProductVariant())->setPublicId($publicId)->setPrice(1000)->setProductId($product);
@@ -171,7 +175,7 @@ class ShipmentManagerTest extends TestCase
             ->setQuantity($quantity)
             ->setOrderProductId($orderProduct);
 
-        $shipment = new Shipment();
+        $shipment = (new Shipment())->setPublicId($shipmentPublicId);
         $shipment->addShipmentItem($shipmentItem);
 
         $order = (new Order())->setTotalPrice($totalPrice);
@@ -381,7 +385,7 @@ class ShipmentManagerTest extends TestCase
         $this->assertSame([], $result['shipments']);
     }
 
-    public function testBuildShipmentHistoryReturnsMappedOrderData(): void
+    public function testBuildShipmentHistoryReturnsOneResultPerOrder(): void
     {
         $order = $this->makeHistoryOrder('Chaise', 'PUB1', 1, 3000, 3);
         $this->orderRepository->method('paginateHistoryOrders')->willReturn($this->makePaginator([$order]));
@@ -390,11 +394,42 @@ class ShipmentManagerTest extends TestCase
         $result = $this->sut->buildShipmentHistory(new User(), $this->makeHistoryRequestDto());
 
         $this->assertCount(1, $result['shipments']);
+    }
+
+    public function testBuildShipmentHistoryMapsTotalPrice(): void
+    {
+        $order = $this->makeHistoryOrder('Chaise', 'PUB1', 1, 3000, 3);
+        $this->orderRepository->method('paginateHistoryOrders')->willReturn($this->makePaginator([$order]));
+        $this->imageRepository->method('findOneBy')->willReturn($this->makeImage());
+
+        $result = $this->sut->buildShipmentHistory(new User(), $this->makeHistoryRequestDto());
+
         $this->assertSame(3000, $result['shipments'][0]->getTotalPriceInCents()->getAmount());
-        $this->assertCount(1, $result['shipments'][0]->getShipments());
-        $this->assertSame('Chaise', $result['shipments'][0]->getShipments()[0]->getName());
-        $this->assertSame('PUB1', $result['shipments'][0]->getShipments()[0]->getPublicId());
-        $this->assertSame(3, $result['shipments'][0]->getShipments()[0]->getQuantity());
+    }
+
+    public function testBuildShipmentHistoryMapsShipmentId(): void
+    {
+        $order = $this->makeHistoryOrder('Chaise', 'PUB1', 1, 3000, 3, 'SHP-2604-T6KLBS6G');
+        $this->orderRepository->method('paginateHistoryOrders')->willReturn($this->makePaginator([$order]));
+        $this->imageRepository->method('findOneBy')->willReturn($this->makeImage());
+
+        $result = $this->sut->buildShipmentHistory(new User(), $this->makeHistoryRequestDto());
+
+        $this->assertSame('SHP-2604-T6KLBS6G', $result['shipments'][0]->getShipmentId());
+    }
+
+    public function testBuildShipmentHistoryMapsItemData(): void
+    {
+        $order = $this->makeHistoryOrder('Chaise', 'PUB1', 1, 3000, 3);
+        $this->orderRepository->method('paginateHistoryOrders')->willReturn($this->makePaginator([$order]));
+        $this->imageRepository->method('findOneBy')->willReturn($this->makeImage());
+
+        $result = $this->sut->buildShipmentHistory(new User(), $this->makeHistoryRequestDto());
+
+        $item = $result['shipments'][0]->getShipments()[0];
+        $this->assertSame('Chaise', $item->getName());
+        $this->assertSame('PUB1', $item->getPublicId());
+        $this->assertSame(3, $item->getQuantity());
     }
 
     public function testBuildShipmentHistorySkipsOrdersWhereAllItemsFilteredBySearch(): void
@@ -509,5 +544,78 @@ class ShipmentManagerTest extends TestCase
 
         $names = array_map(fn($s) => $s->getName(), $result['shipments'][0]->getShipments());
         $this->assertSame(['Zèbre', 'Armoire'], $names);
+    }
+
+    // =========================================================================
+    // buildShipmentDetail
+    // =========================================================================
+
+    private function makeDetailShipment(
+        string $shipmentPublicId = 'SHP-2604-T6KLBS6G',
+        ShipmentStatusCode $statusCode = ShipmentStatusCode::PENDING,
+        string $statusName = 'En attente',
+    ): Shipment {
+        $status   = (new OrderStatus())->setCode($statusCode)->setName($statusName);
+        $order    = new Order();
+        $shipment = (new Shipment())->setPublicId($shipmentPublicId)->setStatusId($status)->setOrderId($order);
+        $order->addShipment($shipment);
+
+        return $shipment;
+    }
+
+    public function testBuildShipmentDetailThrowsNotFoundWhenShipmentNotFound(): void
+    {
+        $this->shipmentRepository->method('findByPublicIdForUser')->willReturn(null);
+
+        $this->expectException(NotFoundException::class);
+
+        $this->sut->buildShipmentDetail('SHP-2604-NOTFOUND', new User());
+    }
+
+    public function testBuildShipmentDetailReturnsDtoWithCorrectShipmentIdAndStatus(): void
+    {
+        $shipment = $this->makeDetailShipment('SHP-2604-T6KLBS6G', ShipmentStatusCode::IN_TRANSIT, 'En transit');
+        $this->shipmentRepository->method('findByPublicIdForUser')->willReturn($shipment);
+
+        $result = $this->sut->buildShipmentDetail('SHP-2604-T6KLBS6G', new User());
+
+        $this->assertSame('SHP-2604-T6KLBS6G', $result->getShipmentId());
+        $this->assertSame('IN_TRANSIT', $result->getStatus()->getCode());
+        $this->assertSame('En transit', $result->getStatus()->getName());
+        $this->assertSame([], $result->getItems());
+    }
+
+    public function testBuildShipmentDetailAggregatesItemsFromAllShipmentsOfOrder(): void
+    {
+        $product1 = (new Product())->setName('Chaise')->setMaxStackSize(5);
+        $variant1 = (new ProductVariant())->setPublicId('PUB1')->setPrice(1000)->setProductId($product1);
+        (new \ReflectionProperty(ProductVariant::class, 'id'))->setValue($variant1, 1);
+
+        $product2 = (new Product())->setName('Table')->setMaxStackSize(5);
+        $variant2 = (new ProductVariant())->setPublicId('PUB2')->setPrice(1000)->setProductId($product2);
+        (new \ReflectionProperty(ProductVariant::class, 'id'))->setValue($variant2, 2);
+
+        $item1 = (new ShipmentItem())->setQuantity(1)
+            ->setOrderProductId((new OrderProduct())->setProductVariantId($variant1)->setQuantity(1)->setPrice(1000));
+        $item2 = (new ShipmentItem())->setQuantity(1)
+            ->setOrderProductId((new OrderProduct())->setProductVariantId($variant2)->setQuantity(1)->setPrice(1000));
+
+        $status    = (new OrderStatus())->setCode(ShipmentStatusCode::PENDING)->setName('En attente');
+        $order     = new Order();
+        $shipment1 = (new Shipment())->setPublicId('SHP-2604-T6KLBS6G')->setStatusId($status)->setOrderId($order);
+        $shipment1->addShipmentItem($item1);
+        $shipment2 = (new Shipment())->setPublicId('SHP-2604-XXXXXXXX')->setStatusId($status)->setOrderId($order);
+        $shipment2->addShipmentItem($item2);
+        $order->addShipment($shipment1);
+        $order->addShipment($shipment2);
+
+        $this->shipmentRepository->method('findByPublicIdForUser')->willReturn($shipment1);
+        $this->imageRepository->method('findOneBy')->willReturn($this->makeImage());
+
+        $result = $this->sut->buildShipmentDetail('SHP-2604-T6KLBS6G', new User());
+
+        $this->assertCount(2, $result->getItems());
+        $names = array_map(fn($i) => $i->getName(), $result->getItems());
+        $this->assertSame(['Chaise', 'Table'], $names);
     }
 }
