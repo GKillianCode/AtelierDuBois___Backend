@@ -4,6 +4,7 @@ namespace App\Service\Shipment;
 
 use App\Dto\Order\OrderItemDto;
 use App\Dto\Request\Filter\GetShipmentHistoryRequestDto;
+use App\Dto\Response\ResponseShipmentDetailDto;
 use App\Dto\Response\ResponseOrderItemDto;
 use App\Dto\Response\ResponseShipmentsHistoryDto;
 use App\Dto\Response\ResponseShipmentsPreviewDto;
@@ -53,5 +54,10 @@ class ShipmentService
     public function getShipmentHistoryYears(User $user): array
     {
         return $this->shipmentManager->getShipmentHistoryYears($user);
+    }
+
+    public function getShipmentDetail(string $publicId, User $user): ResponseShipmentDetailDto
+    {
+        return $this->shipmentManager->buildShipmentDetail($publicId, $user);
     }
 }
