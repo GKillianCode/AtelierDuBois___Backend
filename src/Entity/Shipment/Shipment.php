@@ -29,6 +29,9 @@ class Shipment
     #[ORM\Column(length: 17)]
     private ?string $orderNumber = null;
 
+    #[ORM\Column(length: 17, unique: true)]
+    private ?string $publicId = null;
+
     #[ORM\Column(length: 100, nullable: true)]
     private ?string $trackingNumber = null;
 
@@ -95,6 +98,18 @@ class Shipment
     public function setOrderNumber(string $orderNumber): static
     {
         $this->orderNumber = $orderNumber;
+
+        return $this;
+    }
+
+    public function getPublicId(): ?string
+    {
+        return $this->publicId;
+    }
+
+    public function setPublicId(string $publicId): static
+    {
+        $this->publicId = $publicId;
 
         return $this;
     }

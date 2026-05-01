@@ -21,4 +21,13 @@ class ShipmentUtil
 
         return "ORD-{$yearMonth}-{$last8Digits}";
     }
+
+    public function generateNewShipmentId(): string
+    {
+        $yearMonth = (new \DateTimeImmutable())->format('ym');
+        $uuid = $this->uuidUtil->generateUuid62();
+        $last8Digits = strtoupper(substr($uuid, 0, 8));
+
+        return "SHP-{$yearMonth}-{$last8Digits}";
+    }
 }

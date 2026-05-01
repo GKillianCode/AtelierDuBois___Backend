@@ -34,4 +34,16 @@ class ShipmentRepository extends ServiceEntityRepository
 
         return array_map(static fn(array $row) => (int) $row['year'], $rows);
     }
+
+    public function findByPublicIdForUser(string $publicId, User $user): ?Shipment
+    {
+        return $this->createQueryBuilder('s')
+            ->join('s.orderId', 'o')
+            ->where('s.publicId = :publicId')
+            ->andWhere('o.userId = :user')
+            ->setParameter('publicId', $publicId)
+            ->setParameter('user', $user)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 }
