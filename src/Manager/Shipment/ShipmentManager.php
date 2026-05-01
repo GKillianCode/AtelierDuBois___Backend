@@ -5,11 +5,13 @@ namespace App\Manager\Shipment;
 use App\Dto\Order\OrderItemDto;
 use App\Dto\Request\Filter\GetShipmentHistoryRequestDto;
 use App\Dto\Response\ResponseOrderItemDto;
+use App\Dto\Response\ResponseShipmentDetailDto;
 use App\Dto\Response\ResponseShipmentItemDto;
 use App\Dto\Response\ResponseShipmentsHistoryDto;
 use App\Dto\Response\ResponseShipmentsPreviewDto;
 use App\Dto\Types\ImageDto;
 use App\Dto\Types\PriceDto;
+use App\Dto\Types\ShipmentStatusDto;
 use App\Entity\Order\Order;
 use App\Entity\Order\OrderProduct;
 use App\Entity\Shipment\Shipment;
@@ -47,7 +49,6 @@ class ShipmentManager
         private readonly ShipmentStatusManager $shipmentStatusManager,
         private readonly ShipmentUtil $shipmentUtil,
         private readonly ValidatorUtil $validatorUtil,
-        /** @phpstan-ignore property.onlyWritten */
         private readonly ShipmentRepository $shipmentRepository,
         private readonly OrderRepository $orderRepository,
         private readonly CarrierFactory $carrierFactory,
@@ -189,6 +190,7 @@ class ShipmentManager
                     $shipment = new Shipment();
                     $shipment->setDeliveryAddressId($defaultUserAddress)
                         ->setBillingAddressId($defaultUserAddress)
+                        ->setPublicId($this->shipmentUtil->generateNewShipmentId())
                         ->setOrderNumber($order->getOrderNumber())
                         ->setTrackingNumber($carrier->getTrackingNumber())
                         ->setOrderId($order)
@@ -227,7 +229,11 @@ class ShipmentManager
 
         foreach ($orders as $order) {
             $shipmentItems = [];
+            $shipmentPublicId = '';
             foreach ($order->getShipments() as $shipment) {
+                if ($shipmentPublicId === '') {
+                    $shipmentPublicId = $shipment->getPublicId() ?? '';
+                }
                 foreach ($shipment->getShipmentItems() as $shipmentItem) {
                     $name = $shipmentItem->getOrderProductId()->getProductVariantId()->getProductId()->getName();
 
@@ -263,6 +269,7 @@ class ShipmentManager
                 shipments: $shipmentItems,
                 totalPriceInCents: new PriceDto($order->getTotalPrice()),
                 orderedAt: $order->getCreatedAt()->getTimestamp(),
+                shipmentId: $shipmentPublicId,
             );
         }
 
@@ -275,5 +282,41 @@ class ShipmentManager
     public function getShipmentHistoryYears(User $user): array
     {
         return $this->shipmentRepository->findDistinctYears($user);
+    }
+
+    public function buildShipmentDetail(string $publicId, User $user): ResponseShipmentDetailDto
+    {
+        $shipment = $this->shipmentRepository->findByPublicIdForUser($publicId, $user);
+
+        if ($shipment === null) {
+            throw new NotFoundException('Shipment', $publicId);
+        }
+
+        $items = [];
+        $order = $shipment->getOrderId();
+        foreach ($order->getShipments() as $orderShipment) {
+            foreach ($orderShipment->getShipmentItems() as $shipmentItem) {
+                $items[] = new ResponseShipmentItemDto(
+                    publicId: $shipmentItem->getOrderProductId()->getProductVariantId()->getPublicId(),
+                    name: $shipmentItem->getOrderProductId()->getProductVariantId()->getProductId()->getName(),
+                    quantity: $shipmentItem->getQuantity(),
+                    mainImage: new ImageDto($this->imageMapper->toDtoFromEntity(
+                        $this->imageManager->getDefaultImageForVariant($shipmentItem->getOrderProductId()->getProductVariantId()->getId())
+                    )->getImageUrl()),
+                );
+            }
+        }
+
+        $status = $shipment->getStatusId();
+
+        return new ResponseShipmentDetailDto(
+            items: $items,
+            shipmentId: $shipment->getPublicId(),
+            orderedAt: $shipment->getCreatedAt()->getTimestamp(),
+            status: new ShipmentStatusDto(
+                code: $status->getCode()->value,
+                name: $status->getName(),
+            ),
+        );
     }
 }
