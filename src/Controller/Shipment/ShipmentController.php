@@ -2,7 +2,9 @@
 
 namespace App\Controller\Shipment;
 
+use App\Dto\Response\ResponseShipmentDetailDto;
 use App\Entity\User\User;
+use App\Mapper\Request\ShipmentDetailRequestMapper;
 use App\Mapper\Request\ShipmentHistoryRequestMapper;
 use App\Response\ApiResponse;
 use App\Service\Shipment\ShipmentService;
@@ -18,6 +20,7 @@ final class ShipmentController extends AbstractController
 {
     public function __construct(
         private readonly ShipmentHistoryRequestMapper $shipmentHistoryRequestMapper,
+        private readonly ShipmentDetailRequestMapper $shipmentDetailRequestMapper,
         private readonly ShipmentService $shipmentService,
         private readonly NormalizerInterface $serializer,
     ) {}
@@ -57,5 +60,23 @@ final class ShipmentController extends AbstractController
         assert($user instanceof User);
         $years = $this->shipmentService->getShipmentHistoryYears($user);
         return ApiResponse::success($years);
+    }
+
+    #[Route('/api/v1/shipment/history/{publicId}', name: 'shipment_detail', methods: ['GET'])]
+    #[OA\Get(summary: 'Get shipment detail by public ID')]
+    #[OA\Parameter(name: 'publicId', in: 'path', required: true, schema: new OA\Schema(type: 'string'))]
+    #[OA\Response(
+        response: Response::HTTP_OK,
+        description: 'Shipment detail retrieved successfully',
+    )]
+    public function getDetail(string $publicId): Response
+    {
+        $user = $this->getUser();
+        assert($user instanceof User);
+
+        $validatedPublicId = $this->shipmentDetailRequestMapper->mapPublicId($publicId);
+        $dto = $this->shipmentService->getShipmentDetail($validatedPublicId, $user);
+
+        return ApiResponse::success($this->serializer->normalize($dto));
     }
 }
