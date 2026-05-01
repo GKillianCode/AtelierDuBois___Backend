@@ -15,7 +15,7 @@ public_id:
     not_blank: "PublicId must not be blank."
     min_length: "PublicId must contain at least {{ limit }} characters."
     max_length: "PublicId must not exceed {{ limit }} characters."
-    regex: "PublicId must be a valid Base62 UUID."
+    regex: "PublicId must follow the format SHP-YYMM-XXXXXXXX."
 
 user:
     email:
@@ -104,3 +104,9 @@ order:
         min: "Quantity must be at least {{ compared_value }}."
     items:
         not_empty: "Request body must contain at least one item."
+    number:
+        required: "Order number is required."
+        format: "Order number must match the format ORD-YYMM-XXXXXXXX."
+
+shipment:
+    not_found: "Order not found."

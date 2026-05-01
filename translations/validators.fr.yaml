@@ -15,7 +15,7 @@ public_id:
     not_blank: "Le publicId ne doit pas être vide."
     min_length: "Le publicId doit contenir au minimum {{ limit }} caractères."
     max_length: "Le publicId ne doit pas dépasser {{ limit }} caractères."
-    regex: "Le publicId doit être un UUID valide en Base62."
+    regex: "Le publicId doit être au format SHP-YYMM-XXXXXXXX."
 
 user:
     email:
@@ -104,3 +104,9 @@ order:
         min: "La quantité doit être au minimum {{ compared_value }}."
     items:
         not_empty: "Le corps de la requête doit contenir au moins un article."
+    number:
+        required: "Le numéro de commande est requis."
+        format: "Le numéro de commande doit respecter le format ORD-AAMM-XXXXXXXX."
+
+shipment:
+    not_found: "Commande introuvable."
