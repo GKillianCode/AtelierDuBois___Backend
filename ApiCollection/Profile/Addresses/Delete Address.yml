@@ -1,0 +1,17 @@
+info:
+  name: Delete Address
+  type: http
+  seq: 6
+
+http:
+  method: DELETE
+  url: "{{ADB_baseURL}}/api/v1/user/address/6D39zpKj5AtKsrffOaRA6f/remove"
+  auth:
+    type: bearer
+    token: "{{ADB_token}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

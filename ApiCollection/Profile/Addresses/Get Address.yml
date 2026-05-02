@@ -1,0 +1,17 @@
+info:
+  name: Get Address
+  type: http
+  seq: 4
+
+http:
+  method: GET
+  url: "{{ADB_baseURL}}/api/v1/user/address/5brTCa1bAQLjVvIJOwppXO"
+  auth:
+    type: bearer
+    token: "{{ADB_token}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

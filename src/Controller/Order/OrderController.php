@@ -25,7 +25,7 @@ final class OrderController extends AbstractController
         private readonly NormalizerInterface $serializer,
     ) {}
 
-    #[Route('/api/v1/order/basket', name: 'app_order_basket', methods: ['POST'])]
+    #[Route('/api/public/v1/order/basket', name: 'app_order_basket', methods: ['POST'])]
     #[OA\Post(
         summary: 'Get order basket',
     )]
@@ -45,7 +45,7 @@ final class OrderController extends AbstractController
         return ApiResponse::success($this->serializer->normalize($basketPreview));
     }
 
-    #[Route('/api/v1/order/preview', name: 'app_order_preview', methods: ['POST'])]
+    #[Route('/api/public/v1/order/preview', name: 'app_order_preview', methods: ['POST'])]
     #[OA\Post(
         summary: 'Get order preview',
     )]

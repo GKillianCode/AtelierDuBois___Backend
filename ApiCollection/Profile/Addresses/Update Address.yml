@@ -1,0 +1,17 @@
+info:
+  name: Update Address
+  type: http
+  seq: 5
+
+http:
+  method: PUT
+  url: "{{ADB_baseURL}}/api/v1/user/address/6YNjqe9bfpKHcZWTNceD1Y/update"
+  auth:
+    type: bearer
+    token: "{{ADB_token}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

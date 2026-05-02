@@ -1,0 +1,22 @@
+info:
+  name: login
+  type: http
+  seq: 5
+
+http:
+  method: POST
+  url: "{{ADB_baseURL}}/api/login_check"
+  body:
+    type: json
+    data: |-
+      {
+          "username": "customer@email.com",
+          "password": "Abricot2024!"
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
