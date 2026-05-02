@@ -79,4 +79,22 @@ final class ShipmentController extends AbstractController
 
         return ApiResponse::success($this->serializer->normalize($dto));
     }
+
+    #[Route('/api/v1/shipment/{publicId}/review-rights', name: 'shipment_review_rights', methods: ['GET'])]
+    #[OA\Get(summary: 'Get review rights for each item of a shipment')]
+    #[OA\Parameter(name: 'publicId', in: 'path', required: true, schema: new OA\Schema(type: 'string'))]
+    #[OA\Response(
+        response: Response::HTTP_OK,
+        description: 'Review rights retrieved successfully',
+    )]
+    public function getReviewRights(string $publicId): Response
+    {
+        $user = $this->getUser();
+        assert($user instanceof User);
+
+        $validatedPublicId = $this->shipmentDetailRequestMapper->mapPublicId($publicId);
+        $rights = $this->shipmentService->getReviewRights($validatedPublicId, $user);
+
+        return ApiResponse::success($this->serializer->normalize($rights));
+    }
 }
