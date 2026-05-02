@@ -1,0 +1,32 @@
+info:
+  name: Get Cart Preview
+  type: http
+  seq: 2
+
+http:
+  method: POST
+  url: "{{ADB_baseURL}}/api/pubic/v1/order/basket"
+  body:
+    type: json
+    data: |-
+      [
+
+          {
+              "publicId" : "2FJd9NWY1WSinDw6pIa1xR",
+              "quantity" : 50
+          },
+          {
+              "publicId" : "1MPNEnPLwSAyOKPcZTKaPG",
+              "quantity" : 2
+          }
+
+      ]
+  auth:
+    type: bearer
+    token: "{{ADB_token}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

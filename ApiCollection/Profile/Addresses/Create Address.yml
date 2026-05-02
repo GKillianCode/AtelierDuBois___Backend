@@ -1,0 +1,27 @@
+info:
+  name: Create Address
+  type: http
+  seq: 1
+
+http:
+  method: POST
+  url: "{{ADB_baseURL}}/api/v1/user/address/add"
+  body:
+    type: json
+    data: |-
+      {
+          "street": "33 rue des papillonsddabc",
+          "city": "Tours",
+          "zipcode": "37000",
+          "isProfessional": false,
+          "isDefault": true,
+      }
+  auth:
+    type: bearer
+    token: "{{ADB_token}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

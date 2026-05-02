@@ -1,0 +1,6 @@
+name: local
+variables:
+  - name: ADB_baseURL
+    value: https://localhost:8000
+  - secret: true
+    name: ADB_token

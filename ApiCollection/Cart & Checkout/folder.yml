@@ -1,0 +1,7 @@
+info:
+  name: Cart & Checkout
+  type: folder
+  seq: 2
+
+request:
+  auth: inherit
