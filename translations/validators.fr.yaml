@@ -78,6 +78,22 @@ request:
     year:
         regex: "L'année doit être comprise entre 2000 et 2100."
 
+review:
+    product_variant_public_id:
+        not_blank: "L'identifiant du variant produit ne peut pas être vide."
+        max_length: "L'identifiant du variant produit ne peut pas dépasser {{ limit }} caractères."
+    rating:
+        not_null: "La note est obligatoire."
+        range: "La note doit être comprise entre 1 et 5."
+    comment:
+        max_length: "Le commentaire ne peut pas dépasser {{ limit }} caractères."
+    add:
+        forbidden: "Vous ne pouvez pas ajouter de commentaire pour ce produit. Le délai est dépassé ou vous avez déjà posté un avis."
+    edit:
+        forbidden: "Vous ne pouvez pas modifier ce commentaire. Le délai est dépassé ou il a déjà été modifié."
+    delete:
+        forbidden: "Vous ne pouvez pas supprimer ce commentaire. Le délai de 6 mois est dépassé."
+
 error:
     invalid_json: "Données JSON invalides : %detail%."
     validation_failed: "Validation échouée : %details%."

@@ -78,6 +78,22 @@ request:
     year:
         regex: "Year must be between 2000 and 2100."
 
+review:
+    product_variant_public_id:
+        not_blank: "Product variant identifier cannot be blank."
+        max_length: "Product variant identifier cannot exceed {{ limit }} characters."
+    rating:
+        not_null: "Rating is required."
+        range: "Rating must be between 1 and 5."
+    comment:
+        max_length: "Comment cannot exceed {{ limit }} characters."
+    add:
+        forbidden: "You cannot add a review for this product. The time limit has passed or you have already posted a review."
+    edit:
+        forbidden: "You cannot edit this review. The time limit has passed or it has already been edited."
+    delete:
+        forbidden: "You cannot delete this review. The 6-month limit has passed."
+
 error:
     invalid_json: "Invalid JSON data: %detail%."
     validation_failed: "Validation failed: %details%."
