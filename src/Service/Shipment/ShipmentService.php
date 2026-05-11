@@ -3,6 +3,7 @@
 namespace App\Service\Shipment;
 
 use App\Dto\Order\OrderItemDto;
+use App\Dto\Request\ReviewRequestDto;
 use App\Dto\Request\Filter\GetShipmentHistoryRequestDto;
 use App\Dto\Response\ResponseShipmentDetailDto;
 use App\Dto\Response\ResponseOrderItemDto;
@@ -68,5 +69,20 @@ class ShipmentService
     public function getReviewRights(string $publicId, User $user): array
     {
         return $this->shipmentManager->buildReviewRights($publicId, $user);
+    }
+
+    public function addReview(string $shipmentPublicId, User $user, ReviewRequestDto $dto): void
+    {
+        $this->shipmentManager->addReview($shipmentPublicId, $user, $dto);
+    }
+
+    public function editReview(string $shipmentPublicId, string $variantPublicId, User $user, ReviewRequestDto $dto): void
+    {
+        $this->shipmentManager->editReview($shipmentPublicId, $variantPublicId, $user, $dto);
+    }
+
+    public function deleteReview(string $shipmentPublicId, string $variantPublicId, User $user): void
+    {
+        $this->shipmentManager->deleteReview($shipmentPublicId, $variantPublicId, $user);
     }
 }
