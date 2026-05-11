@@ -81,6 +81,10 @@ class ReviewRequestMapper
                     max: 255,
                     maxMessage: 'review.comment.max_length',
                 ),
+                new Assert\Regex(
+                    pattern: '/^[\p{L}\p{N} ,.!?:()\[\]\-]*$/u',
+                    message: 'review.comment.invalid_characters',
+                ),
             ]),
         ]));
 
@@ -111,7 +115,7 @@ class ReviewRequestMapper
                     maxMessage: 'review.comment.max_length',
                 ),
                 new Assert\Regex(
-                    pattern: '/^[A-Za-z0-9,.!?:()[]]*$/',
+                    pattern: '/^[\p{L}\p{N} ,.!?:()\[\]\-]*$/u',
                     message: 'review.comment.invalid_characters',
                 ),
             ]),
