@@ -2,6 +2,7 @@
 
 namespace App\Entity\Product;
 
+use App\Entity\Order\Order;
 use App\Entity\User\User;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -29,6 +30,13 @@ class ProductReview
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
     private ?ProductVariant $productVariantId = null;
+
+    #[ORM\Column(options: ['default' => false])]
+    private bool $isEdited = false;
+
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?Order $orderId = null;
 
     use TimestampableTrait;
 
@@ -87,6 +95,30 @@ class ProductReview
     public function setProductVariantId(?ProductVariant $productVariantId): static
     {
         $this->productVariantId = $productVariantId;
+
+        return $this;
+    }
+
+    public function isEdited(): bool
+    {
+        return $this->isEdited;
+    }
+
+    public function setIsEdited(bool $isEdited): static
+    {
+        $this->isEdited = $isEdited;
+
+        return $this;
+    }
+
+    public function getOrderId(): ?Order
+    {
+        return $this->orderId;
+    }
+
+    public function setOrderId(?Order $orderId): static
+    {
+        $this->orderId = $orderId;
 
         return $this;
     }

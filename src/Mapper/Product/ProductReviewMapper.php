@@ -12,9 +12,11 @@ class ProductReviewMapper
 
     public function toDtoFromEntity(ProductReview $review, string $author): ResponseProductReviewDto
     {
+        $rawComment = $review->getComment();
+
         $dto = new ResponseProductReviewDto(
             rating: $review->getRating(),
-            comment: $review->getComment(),
+            comment: $rawComment !== null ? htmlspecialchars($rawComment, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') : null,
             authorName: $author,
             postedAt: $review->getCreatedAt(),
         );

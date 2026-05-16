@@ -30,9 +30,11 @@ use App\Mapper\Product\ImageMapper;
 use App\Mapper\Product\ProductVariantMapper;
 use App\Repository\Order\OrderRepository;
 use App\Repository\Product\ImageRepository;
+use App\Repository\Product\ProductReviewRepository;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use App\Repository\Product\ProductVariantRepository;
 use App\Repository\Shipment\CarrierRepository;
+use App\Service\Product\ReviewRightsService;
 use App\Repository\Shipment\OrderStatusRepository;
 use App\Repository\Shipment\ShipmentRepository;
 use App\Repository\User\AddressRepository;
@@ -122,6 +124,10 @@ class ShipmentManagerTest extends TestCase
             $this->orderRepository,
             $carrierFactory,
             new PaginationUtil($mockLogger),
+            $this->createMock(ReviewRightsService::class),
+            $this->createMock(ProductReviewRepository::class),
+            $this->productVariantRepository,
+            $productReviewManager,
         );
     }
 

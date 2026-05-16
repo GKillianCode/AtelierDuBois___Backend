@@ -4,6 +4,7 @@ namespace App\Controller\Shipment;
 
 use App\Dto\Response\ResponseShipmentDetailDto;
 use App\Entity\User\User;
+use App\Mapper\Request\ReviewRequestMapper;
 use App\Mapper\Request\ShipmentDetailRequestMapper;
 use App\Mapper\Request\ShipmentHistoryRequestMapper;
 use App\Response\ApiResponse;
@@ -21,6 +22,7 @@ final class ShipmentController extends AbstractController
     public function __construct(
         private readonly ShipmentHistoryRequestMapper $shipmentHistoryRequestMapper,
         private readonly ShipmentDetailRequestMapper $shipmentDetailRequestMapper,
+        private readonly ReviewRequestMapper $reviewRequestMapper,
         private readonly ShipmentService $shipmentService,
         private readonly NormalizerInterface $serializer,
     ) {}
@@ -78,5 +80,72 @@ final class ShipmentController extends AbstractController
         $dto = $this->shipmentService->getShipmentDetail($validatedPublicId, $user);
 
         return ApiResponse::success($this->serializer->normalize($dto));
+    }
+
+    #[Route('/api/v1/shipment/{publicId}/review-rights', name: 'shipment_review_rights', methods: ['GET'])]
+    #[OA\Get(summary: 'Get review rights for each item of a shipment')]
+    #[OA\Parameter(name: 'publicId', in: 'path', required: true, schema: new OA\Schema(type: 'string'))]
+    #[OA\Response(
+        response: Response::HTTP_OK,
+        description: 'Review rights retrieved successfully',
+    )]
+    public function getReviewRights(string $publicId): Response
+    {
+        $user = $this->getUser();
+        assert($user instanceof User);
+
+        $validatedPublicId = $this->shipmentDetailRequestMapper->mapPublicId($publicId);
+        $rights = $this->shipmentService->getReviewRights($validatedPublicId, $user);
+
+        return ApiResponse::success($this->serializer->normalize($rights));
+    }
+
+    #[Route('/api/v1/shipment/{publicId}/review', name: 'shipment_review_add', methods: ['POST'])]
+    #[OA\Post(summary: 'Add a review for a product variant in a shipment')]
+    #[OA\Parameter(name: 'publicId', in: 'path', required: true, schema: new OA\Schema(type: 'string'))]
+    #[OA\Response(response: Response::HTTP_CREATED, description: 'Review created successfully')]
+    public function addReview(Request $request, string $publicId): Response
+    {
+        $user = $this->getUser();
+        assert($user instanceof User);
+
+        $validatedPublicId = $this->shipmentDetailRequestMapper->mapPublicId($publicId);
+        $dto = $this->reviewRequestMapper->mapAddReviewRequest($request);
+        $this->shipmentService->addReview($validatedPublicId, $user, $dto);
+
+        return ApiResponse::created();
+    }
+
+    #[Route('/api/v1/shipment/{publicId}/review/{variantPublicId}', name: 'shipment_review_edit', methods: ['PUT'])]
+    #[OA\Put(summary: 'Edit a review for a product variant in a shipment')]
+    #[OA\Parameter(name: 'publicId', in: 'path', required: true, schema: new OA\Schema(type: 'string'))]
+    #[OA\Parameter(name: 'variantPublicId', in: 'path', required: true, schema: new OA\Schema(type: 'string'))]
+    #[OA\Response(response: Response::HTTP_OK, description: 'Review updated successfully')]
+    public function editReview(Request $request, string $publicId, string $variantPublicId): Response
+    {
+        $user = $this->getUser();
+        assert($user instanceof User);
+
+        $validatedPublicId = $this->shipmentDetailRequestMapper->mapPublicId($publicId);
+        $dto = $this->reviewRequestMapper->mapEditReviewRequest($request);
+        $this->shipmentService->editReview($validatedPublicId, $variantPublicId, $user, $dto);
+
+        return ApiResponse::success();
+    }
+
+    #[Route('/api/v1/shipment/{publicId}/review/{variantPublicId}', name: 'shipment_review_delete', methods: ['DELETE'])]
+    #[OA\Delete(summary: 'Delete a review for a product variant in a shipment')]
+    #[OA\Parameter(name: 'publicId', in: 'path', required: true, schema: new OA\Schema(type: 'string'))]
+    #[OA\Parameter(name: 'variantPublicId', in: 'path', required: true, schema: new OA\Schema(type: 'string'))]
+    #[OA\Response(response: Response::HTTP_OK, description: 'Review deleted successfully')]
+    public function deleteReview(string $publicId, string $variantPublicId): Response
+    {
+        $user = $this->getUser();
+        assert($user instanceof User);
+
+        $validatedPublicId = $this->shipmentDetailRequestMapper->mapPublicId($publicId);
+        $this->shipmentService->deleteReview($validatedPublicId, $variantPublicId, $user);
+
+        return ApiResponse::success();
     }
 }

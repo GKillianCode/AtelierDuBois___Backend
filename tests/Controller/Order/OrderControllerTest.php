@@ -121,33 +121,34 @@ class OrderControllerTest extends WebTestCase
     }
 
     // =========================================================================
-    // POST /api/v1/order/basket
+    // POST /api/public/v1/order/basket  (route publique — pas d'auth requise)
     // =========================================================================
 
-    public function testBasketRequiresAuth(): void
+    public function testBasketIsPublicNoAuthRequired(): void
     {
         $client = static::createClient();
-        $this->postJson($client, '/api/v1/order/basket', self::VALID_ITEMS);
+        static::getContainer()->set(ShipmentService::class, $this->mockShipmentService());
 
-        $this->assertResponseStatusCodeSame(401);
-        $body = json_decode($client->getResponse()->getContent(), true);
-        $this->assertFalse($body['success']);
+        $this->postJson($client, '/api/public/v1/order/basket', self::VALID_ITEMS);
+
+        // Route publique : 200 sans token
+        $this->assertResponseStatusCodeSame(200);
     }
 
     public function testBasketOnlyAcceptsPost(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/api/v1/order/basket');
+        $client->request('GET', '/api/public/v1/order/basket');
 
         $this->assertResponseStatusCodeSame(405);
     }
 
     public function testBasketWithValidPayloadReturns200(): void
     {
-        $client = $this->createAuthenticatedClient();
+        $client = static::createClient();
         static::getContainer()->set(ShipmentService::class, $this->mockShipmentService());
 
-        $this->postJson($client, '/api/v1/order/basket', self::VALID_ITEMS, true);
+        $this->postJson($client, '/api/public/v1/order/basket', self::VALID_ITEMS);
 
         $this->assertResponseStatusCodeSame(200);
         $this->assertResponseHeaderSame('content-type', 'application/json');
@@ -155,10 +156,10 @@ class OrderControllerTest extends WebTestCase
 
     public function testBasketResponseHasSuccessTrue(): void
     {
-        $client = $this->createAuthenticatedClient();
+        $client = static::createClient();
         static::getContainer()->set(ShipmentService::class, $this->mockShipmentService());
 
-        $this->postJson($client, '/api/v1/order/basket', self::VALID_ITEMS, true);
+        $this->postJson($client, '/api/public/v1/order/basket', self::VALID_ITEMS);
 
         $body = json_decode($client->getResponse()->getContent(), true);
         $this->assertTrue($body['success']);
@@ -166,9 +167,9 @@ class OrderControllerTest extends WebTestCase
 
     public function testBasketWithEmptyBodyReturns400(): void
     {
-        $client = $this->createAuthenticatedClient();
+        $client = static::createClient();
 
-        $client->request('POST', '/api/v1/order/basket', [], [], array_merge($this->authHeaders(), $this->jsonHeaders()), '[]');
+        $client->request('POST', '/api/public/v1/order/basket', [], [], $this->jsonHeaders(), '[]');
 
         $this->assertResponseStatusCodeSame(400);
         $body = json_decode($client->getResponse()->getContent(), true);
@@ -177,41 +178,41 @@ class OrderControllerTest extends WebTestCase
 
     public function testBasketWithInvalidJsonReturns400(): void
     {
-        $client = $this->createAuthenticatedClient();
+        $client = static::createClient();
 
-        $client->request('POST', '/api/v1/order/basket', [], [], array_merge($this->authHeaders(), $this->jsonHeaders()), 'not-json');
+        $client->request('POST', '/api/public/v1/order/basket', [], [], $this->jsonHeaders(), 'not-json');
 
         $this->assertResponseStatusCodeSame(400);
     }
 
     // =========================================================================
-    // POST /api/v1/order/preview
+    // POST /api/public/v1/order/preview  (route publique — pas d'auth requise)
     // =========================================================================
 
-    public function testPreviewRequiresAuth(): void
+    public function testPreviewIsPublicNoAuthRequired(): void
     {
         $client = static::createClient();
-        $this->postJson($client, '/api/v1/order/preview', self::VALID_ITEMS);
+        static::getContainer()->set(ShipmentService::class, $this->mockShipmentService());
 
-        $this->assertResponseStatusCodeSame(401);
-        $body = json_decode($client->getResponse()->getContent(), true);
-        $this->assertFalse($body['success']);
+        $this->postJson($client, '/api/public/v1/order/preview', self::VALID_ITEMS);
+
+        $this->assertResponseStatusCodeSame(200);
     }
 
     public function testPreviewOnlyAcceptsPost(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/api/v1/order/preview');
+        $client->request('GET', '/api/public/v1/order/preview');
 
         $this->assertResponseStatusCodeSame(405);
     }
 
     public function testPreviewWithValidPayloadReturns200(): void
     {
-        $client = $this->createAuthenticatedClient();
+        $client = static::createClient();
         static::getContainer()->set(ShipmentService::class, $this->mockShipmentService());
 
-        $this->postJson($client, '/api/v1/order/preview', self::VALID_ITEMS, true);
+        $this->postJson($client, '/api/public/v1/order/preview', self::VALID_ITEMS);
 
         $this->assertResponseStatusCodeSame(200);
         $this->assertResponseHeaderSame('content-type', 'application/json');
@@ -219,10 +220,10 @@ class OrderControllerTest extends WebTestCase
 
     public function testPreviewResponseHasSuccessTrue(): void
     {
-        $client = $this->createAuthenticatedClient();
+        $client = static::createClient();
         static::getContainer()->set(ShipmentService::class, $this->mockShipmentService());
 
-        $this->postJson($client, '/api/v1/order/preview', self::VALID_ITEMS, true);
+        $this->postJson($client, '/api/public/v1/order/preview', self::VALID_ITEMS);
 
         $body = json_decode($client->getResponse()->getContent(), true);
         $this->assertTrue($body['success']);
@@ -230,9 +231,9 @@ class OrderControllerTest extends WebTestCase
 
     public function testPreviewWithEmptyBodyReturns400(): void
     {
-        $client = $this->createAuthenticatedClient();
+        $client = static::createClient();
 
-        $client->request('POST', '/api/v1/order/preview', [], [], array_merge($this->authHeaders(), $this->jsonHeaders()), '[]');
+        $client->request('POST', '/api/public/v1/order/preview', [], [], $this->jsonHeaders(), '[]');
 
         $this->assertResponseStatusCodeSame(400);
         $body = json_decode($client->getResponse()->getContent(), true);
@@ -301,7 +302,7 @@ class OrderControllerTest extends WebTestCase
     public function test401ResponseHasExpectedStructure(): void
     {
         $client = static::createClient();
-        $client->request('POST', '/api/v1/order/basket', [], [], $this->jsonHeaders(), '[]');
+        $client->request('POST', '/api/v1/order/purchase', [], [], $this->jsonHeaders(), '[]');
 
         $this->assertResponseHeaderSame('content-type', 'application/json');
         $body = json_decode($client->getResponse()->getContent(), true);

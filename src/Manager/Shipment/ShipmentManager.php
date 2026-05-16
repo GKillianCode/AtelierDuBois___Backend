@@ -3,10 +3,12 @@
 namespace App\Manager\Shipment;
 
 use App\Dto\Order\OrderItemDto;
+use App\Dto\Request\ReviewRequestDto;
 use App\Dto\Request\Filter\GetShipmentHistoryRequestDto;
 use App\Dto\Response\ResponseOrderItemDto;
 use App\Dto\Response\ResponseShipmentDetailDto;
 use App\Dto\Response\ResponseShipmentItemDto;
+use App\Dto\Response\ResponseProductReviewRightsDto;
 use App\Dto\Response\ResponseShipmentsHistoryDto;
 use App\Dto\Response\ResponseShipmentsPreviewDto;
 use App\Dto\Types\ImageDto;
@@ -24,10 +26,14 @@ use App\Exception\NotFoundException;
 use App\Factory\CarrierFactory;
 use App\Manager\Product\ImageManager;
 use App\Manager\Product\ProductManager;
+use App\Manager\Product\ProductReviewManager;
 use App\Manager\User\AddressManager;
 use App\Mapper\Product\ImageMapper;
 use App\Repository\Order\OrderRepository;
+use App\Repository\Product\ProductReviewRepository;
+use App\Repository\Product\ProductVariantRepository;
 use App\Repository\Shipment\ShipmentRepository;
+use App\Service\Product\ReviewRightsService;
 use App\Trait\ValidateAndSaveTrait;
 use App\Util\PaginationUtil;
 use App\Util\ShipmentUtil;
@@ -53,6 +59,10 @@ class ShipmentManager
         private readonly OrderRepository $orderRepository,
         private readonly CarrierFactory $carrierFactory,
         private readonly PaginationUtil $paginationUtil,
+        private readonly ReviewRightsService $reviewRightsService,
+        private readonly ProductReviewRepository $productReviewRepository,
+        private readonly ProductVariantRepository $productVariantRepository,
+        private readonly ProductReviewManager $productReviewManager,
     ) {}
 
     /**
@@ -318,5 +328,86 @@ class ShipmentManager
                 name: $status->getName(),
             ),
         );
+    }
+
+    /**
+     * @return ResponseProductReviewRightsDto[]
+     */
+    public function buildReviewRights(string $publicId, User $user): array
+    {
+        $shipment = $this->shipmentRepository->findByPublicIdForUser($publicId, $user);
+
+        if ($shipment === null) {
+            throw new NotFoundException('Shipment', $publicId);
+        }
+
+        $order = $shipment->getOrderId();
+        $purchaseDate = $order->getCreatedAt();
+        $rights = [];
+        $seenVariants = [];
+
+        $reviewsByVariantId = $this->productReviewRepository->findAllByUserAndOrder($user, $order);
+
+        foreach ($order->getShipments() as $orderShipment) {
+            foreach ($orderShipment->getShipmentItems() as $shipmentItem) {
+                $variant = $shipmentItem->getOrderProductId()->getProductVariantId();
+                $variantPublicId = $variant->getPublicId();
+
+                if (isset($seenVariants[$variantPublicId])) {
+                    continue;
+                }
+                $seenVariants[$variantPublicId] = true;
+
+                $existingReview = $reviewsByVariantId[$variant->getId()] ?? null;
+
+                $rights[] = new ResponseProductReviewRightsDto(
+                    productVariantPublicId: $variantPublicId,
+                    canAdd: $this->reviewRightsService->canAddReview($existingReview, $purchaseDate),
+                    canEdit: $this->reviewRightsService->canEditReview($existingReview),
+                );
+            }
+        }
+
+        return $rights;
+    }
+
+    public function addReview(string $shipmentPublicId, User $user, ReviewRequestDto $dto): void
+    {
+        $shipment = $this->shipmentRepository->findByPublicIdForUser($shipmentPublicId, $user);
+        if ($shipment === null) {
+            throw new NotFoundException('Shipment', $shipmentPublicId);
+        }
+
+        $this->productReviewManager->addReview($dto, $user, $shipment->getOrderId());
+    }
+
+    public function editReview(string $shipmentPublicId, string $variantPublicId, User $user, ReviewRequestDto $dto): void
+    {
+        $shipment = $this->shipmentRepository->findByPublicIdForUser($shipmentPublicId, $user);
+        if ($shipment === null) {
+            throw new NotFoundException('Shipment', $shipmentPublicId);
+        }
+
+        $variant = $this->productVariantRepository->getProductVariantByPublicId($variantPublicId);
+        if ($variant === null) {
+            throw new NotFoundException('ProductVariant', $variantPublicId);
+        }
+
+        $this->productReviewManager->editReview($dto, $user, $variant, $shipment->getOrderId());
+    }
+
+    public function deleteReview(string $shipmentPublicId, string $variantPublicId, User $user): void
+    {
+        $shipment = $this->shipmentRepository->findByPublicIdForUser($shipmentPublicId, $user);
+        if ($shipment === null) {
+            throw new NotFoundException('Shipment', $shipmentPublicId);
+        }
+
+        $variant = $this->productVariantRepository->getProductVariantByPublicId($variantPublicId);
+        if ($variant === null) {
+            throw new NotFoundException('ProductVariant', $variantPublicId);
+        }
+
+        $this->productReviewManager->deleteReview($user, $variant, $shipment->getOrderId());
     }
 }

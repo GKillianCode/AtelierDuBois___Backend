@@ -3,7 +3,10 @@
 namespace App\Repository\Product;
 
 use Psr\Log\LoggerInterface;
+use App\Entity\Order\Order;
 use App\Entity\Product\ProductReview;
+use App\Entity\Product\ProductVariant;
+use App\Entity\User\User;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use App\Enum\SortFilter\CommentSortFilterCode;
@@ -70,5 +73,53 @@ class ProductReviewRepository extends ServiceEntityRepository
         $this->logger->debug("ProductReviewRepository::paginateProductReviews EXIT");
 
         return new Paginator($query, true);
+    }
+
+    public function findByUserAndVariant(User $user, ProductVariant $productVariant): ?ProductReview
+    {
+        return $this->createQueryBuilder('pr')
+            ->where('pr.userId = :user')
+            ->andWhere('pr.productVariantId = :variant')
+            ->setParameter('user', $user)
+            ->setParameter('variant', $productVariant)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
+    public function findByUserVariantAndOrder(User $user, ProductVariant $productVariant, Order $order): ?ProductReview
+    {
+        return $this->createQueryBuilder('pr')
+            ->where('pr.userId = :user')
+            ->andWhere('pr.productVariantId = :variant')
+            ->andWhere('pr.orderId = :order')
+            ->setParameter('user', $user)
+            ->setParameter('variant', $productVariant)
+            ->setParameter('order', $order)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
+    /**
+     * Returns reviews indexed by productVariantId for a given user + order.
+     * Allows bulk rights computation with a single query.
+     *
+     * @return array<int, ProductReview>
+     */
+    public function findAllByUserAndOrder(User $user, Order $order): array
+    {
+        $reviews = $this->createQueryBuilder('pr')
+            ->where('pr.userId = :user')
+            ->andWhere('pr.orderId = :order')
+            ->setParameter('user', $user)
+            ->setParameter('order', $order)
+            ->getQuery()
+            ->getResult();
+
+        $indexed = [];
+        foreach ($reviews as $review) {
+            $indexed[$review->getProductVariantId()->getId()] = $review;
+        }
+
+        return $indexed;
     }
 }

@@ -11,11 +11,16 @@ use App\Entity\User\User;
 use App\Manager\Product\ProductReviewManager;
 use App\Mapper\Product\ProductReviewMapper;
 use App\Repository\Product\ProductReviewRepository;
+use App\Repository\Product\ProductVariantRepository;
+use App\Service\Product\ReviewRightsService;
 use App\Util\PaginationUtil;
+use App\Util\ValidatorUtil;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Validator\Validation;
 
 class ProductReviewManagerTest extends TestCase
 {
@@ -35,11 +40,20 @@ class ProductReviewManagerTest extends TestCase
         // Real ProductReviewMapper — no constructor dependencies
         $mapper = new ProductReviewMapper();
 
+        $validatorUtil = new ValidatorUtil(
+            Validation::createValidatorBuilder()->enableAttributeMapping()->getValidator(),
+            $this->createMock(LoggerInterface::class),
+        );
+
         $this->sut = new ProductReviewManager(
             $this->logger,
+            $this->createMock(EntityManagerInterface::class),
+            $validatorUtil,
             $this->paginationUtil,
             $this->productReviewRepository,
-            $mapper
+            $this->createMock(ProductVariantRepository::class),
+            $mapper,
+            $this->createMock(ReviewRightsService::class),
         );
     }
 
