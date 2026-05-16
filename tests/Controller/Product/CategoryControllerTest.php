@@ -7,13 +7,13 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 class CategoryControllerTest extends WebTestCase
 {
     // -------------------------------------------------------------------------
-    // GET /api/public/v1/category/all
+    // GET /api/public/v1/categories
     // -------------------------------------------------------------------------
 
     public function testGetAllCategoriesReturns200(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/api/public/v1/category/all');
+        $client->request('GET', '/api/public/v1/categories');
 
         $this->assertResponseStatusCodeSame(200);
         $this->assertResponseHeaderSame('content-type', 'application/json');
@@ -22,7 +22,7 @@ class CategoryControllerTest extends WebTestCase
     public function testGetAllCategoriesResponseHasSuccessTrue(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/api/public/v1/category/all');
+        $client->request('GET', '/api/public/v1/categories');
 
         $body = json_decode($client->getResponse()->getContent(), true);
         $this->assertTrue($body['success']);
@@ -31,7 +31,7 @@ class CategoryControllerTest extends WebTestCase
     public function testGetAllCategoriesResponseHasDataKey(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/api/public/v1/category/all');
+        $client->request('GET', '/api/public/v1/categories');
 
         $body = json_decode($client->getResponse()->getContent(), true);
         $this->assertArrayHasKey('data', $body);
@@ -40,7 +40,7 @@ class CategoryControllerTest extends WebTestCase
     public function testGetAllCategoriesIsPublicNoAuthRequired(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/api/public/v1/category/all');
+        $client->request('GET', '/api/public/v1/categories');
 
         $this->assertResponseStatusCodeSame(200);
     }
@@ -48,7 +48,7 @@ class CategoryControllerTest extends WebTestCase
     public function testGetAllCategoriesOnlyAcceptsGet(): void
     {
         $client = static::createClient();
-        $client->request('POST', '/api/public/v1/category/all');
+        $client->request('POST', '/api/public/v1/categories');
 
         $this->assertResponseStatusCodeSame(405);
     }
