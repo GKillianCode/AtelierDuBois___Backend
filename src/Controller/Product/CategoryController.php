@@ -20,7 +20,7 @@ final class CategoryController extends AbstractController
         private readonly NormalizerInterface $serializer,
     ) {}
 
-    #[Route('/api/public/v1/category/all', name: 'app_product_category', methods: ['GET'])]
+    #[Route('/api/public/v1/categories', name: 'app_product_category', methods: ['GET'])]
     #[OA\Get(
         summary: 'Get all product categories',
     )]
