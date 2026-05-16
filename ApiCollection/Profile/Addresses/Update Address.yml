@@ -5,7 +5,7 @@ info:
 
 http:
   method: PUT
-  url: "{{ADB_baseURL}}/api/v1/user/address/6YNjqe9bfpKHcZWTNceD1Y/update"
+  url: "{{ADB_baseURL}}/api/v1/user/addresses/6YNjqe9bfpKHcZWTNceD1Y"
   auth:
     type: bearer
     token: "{{ADB_token}}"

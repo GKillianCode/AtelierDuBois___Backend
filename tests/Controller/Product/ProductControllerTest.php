@@ -12,13 +12,13 @@ class ProductControllerTest extends WebTestCase
     private const REVIEW_PUBLIC_ID = 'aB3dEfGhIjKlMnOpQrStuV';
 
     // -------------------------------------------------------------------------
-    // GET /api/public/v1/product/all
+    // GET /api/public/v1/products
     // -------------------------------------------------------------------------
 
     public function testGetAllProductsReturns200(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/api/public/v1/product/all');
+        $client->request('GET', '/api/public/v1/products');
 
         $this->assertResponseStatusCodeSame(200);
         $this->assertResponseHeaderSame('content-type', 'application/json');
@@ -27,7 +27,7 @@ class ProductControllerTest extends WebTestCase
     public function testGetAllProductsResponseHasSuccessTrue(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/api/public/v1/product/all');
+        $client->request('GET', '/api/public/v1/products');
 
         $body = json_decode($client->getResponse()->getContent(), true);
         $this->assertTrue($body['success']);
@@ -36,7 +36,7 @@ class ProductControllerTest extends WebTestCase
     public function testGetAllProductsIsPublicNoAuthRequired(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/api/public/v1/product/all');
+        $client->request('GET', '/api/public/v1/products');
 
         $this->assertResponseStatusCodeSame(200);
     }
@@ -44,20 +44,20 @@ class ProductControllerTest extends WebTestCase
     public function testGetAllProductsOnlyAcceptsGet(): void
     {
         $client = static::createClient();
-        $client->request('POST', '/api/public/v1/product/all');
+        $client->request('POST', '/api/public/v1/products');
 
         $this->assertResponseStatusCodeSame(405);
     }
 
     // -------------------------------------------------------------------------
-    // GET /api/public/v1/product/{publicId}
+    // GET /api/public/v1/products/{publicId}
     // Route publique — variante inexistante → 404 (comportement réel)
     // -------------------------------------------------------------------------
 
     public function testGetProductByPublicIdNotFoundReturns404(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/api/public/v1/product/' . self::FAKE_PUBLIC_ID);
+        $client->request('GET', '/api/public/v1/products/' . self::FAKE_PUBLIC_ID);
 
         $this->assertResponseStatusCodeSame(404);
         $this->assertResponseHeaderSame('content-type', 'application/json');
@@ -66,7 +66,7 @@ class ProductControllerTest extends WebTestCase
     public function testGetProductByPublicIdNotFoundResponseHasSuccessFalse(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/api/public/v1/product/' . self::FAKE_PUBLIC_ID);
+        $client->request('GET', '/api/public/v1/products/' . self::FAKE_PUBLIC_ID);
 
         $body = json_decode($client->getResponse()->getContent(), true);
         $this->assertFalse($body['success']);
@@ -75,7 +75,7 @@ class ProductControllerTest extends WebTestCase
     public function testGetProductByPublicIdIsPublicNoAuthRequired(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/api/public/v1/product/' . self::FAKE_PUBLIC_ID);
+        $client->request('GET', '/api/public/v1/products/' . self::FAKE_PUBLIC_ID);
 
         // Variante inexistante → 404, mais pas 401 : la route est bien publique
         $this->assertResponseStatusCodeSame(404);
@@ -84,20 +84,20 @@ class ProductControllerTest extends WebTestCase
     public function testGetProductByPublicIdOnlyAcceptsGet(): void
     {
         $client = static::createClient();
-        $client->request('POST', '/api/public/v1/product/' . self::FAKE_PUBLIC_ID);
+        $client->request('POST', '/api/public/v1/products/' . self::FAKE_PUBLIC_ID);
 
         $this->assertResponseStatusCodeSame(405);
     }
 
     // -------------------------------------------------------------------------
-    // GET /api/public/v1/product/{publicId}/reviews
+    // GET /api/public/v1/products/{publicId}/reviews
     // Route publique — variante inexistante → 404 (comportement réel)
     // -------------------------------------------------------------------------
 
     public function testGetReviewsByVariantNotFoundReturns404(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/api/public/v1/product/' . self::REVIEW_PUBLIC_ID . '/reviews');
+        $client->request('GET', '/api/public/v1/products/' . self::REVIEW_PUBLIC_ID . '/reviews');
 
         $this->assertResponseStatusCodeSame(404);
         $this->assertResponseHeaderSame('content-type', 'application/json');
@@ -106,7 +106,7 @@ class ProductControllerTest extends WebTestCase
     public function testGetReviewsByVariantNotFoundResponseHasSuccessFalse(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/api/public/v1/product/' . self::REVIEW_PUBLIC_ID . '/reviews');
+        $client->request('GET', '/api/public/v1/products/' . self::REVIEW_PUBLIC_ID . '/reviews');
 
         $body = json_decode($client->getResponse()->getContent(), true);
         $this->assertFalse($body['success']);
@@ -115,7 +115,7 @@ class ProductControllerTest extends WebTestCase
     public function testGetReviewsByVariantIsPublicNoAuthRequired(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/api/public/v1/product/' . self::REVIEW_PUBLIC_ID . '/reviews');
+        $client->request('GET', '/api/public/v1/products/' . self::REVIEW_PUBLIC_ID . '/reviews');
 
         // Variante inexistante → 404, mais pas 401 : la route est bien publique
         $this->assertResponseStatusCodeSame(404);

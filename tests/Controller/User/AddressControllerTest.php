@@ -121,7 +121,7 @@ class AddressControllerTest extends WebTestCase
     public function testAddAddressRequiresAuth(): void
     {
         $client = static::createClient();
-        $client->request('POST', '/api/v1/user/address/add', [], [], $this->jsonHeaders(), '{}');
+        $client->request('POST', '/api/v1/user/addresses', [], [], $this->jsonHeaders(), '{}');
 
         $this->assertResponseStatusCodeSame(401);
         $body = json_decode($client->getResponse()->getContent(), true);
@@ -131,7 +131,7 @@ class AddressControllerTest extends WebTestCase
     public function testCanAddAddressRequiresAuth(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/api/v1/user/address/can-add');
+        $client->request('GET', '/api/v1/user/addresses/eligibility');
 
         $this->assertResponseStatusCodeSame(401);
         $body = json_decode($client->getResponse()->getContent(), true);
@@ -141,7 +141,7 @@ class AddressControllerTest extends WebTestCase
     public function testGetAllAddressesRequiresAuth(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/api/v1/user/address/all');
+        $client->request('GET', '/api/v1/user/addresses');
 
         $this->assertResponseStatusCodeSame(401);
         $body = json_decode($client->getResponse()->getContent(), true);
@@ -151,7 +151,7 @@ class AddressControllerTest extends WebTestCase
     public function testGetAddressRequiresAuth(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/api/v1/user/address/' . self::FAKE_PUBLIC_ID);
+        $client->request('GET', '/api/v1/user/addresses/' . self::FAKE_PUBLIC_ID);
 
         $this->assertResponseStatusCodeSame(401);
         $body = json_decode($client->getResponse()->getContent(), true);
@@ -161,7 +161,7 @@ class AddressControllerTest extends WebTestCase
     public function testUpdateAddressRequiresAuth(): void
     {
         $client = static::createClient();
-        $client->request('PUT', '/api/v1/user/address/' . self::FAKE_PUBLIC_ID . '/update', [], [], $this->jsonHeaders(), '{}');
+        $client->request('PUT', '/api/v1/user/addresses/' . self::FAKE_PUBLIC_ID, [], [], $this->jsonHeaders(), '{}');
 
         $this->assertResponseStatusCodeSame(401);
         $body = json_decode($client->getResponse()->getContent(), true);
@@ -171,7 +171,7 @@ class AddressControllerTest extends WebTestCase
     public function testRemoveAddressRequiresAuth(): void
     {
         $client = static::createClient();
-        $client->request('DELETE', '/api/v1/user/address/' . self::FAKE_PUBLIC_ID . '/remove');
+        $client->request('DELETE', '/api/v1/user/addresses/' . self::FAKE_PUBLIC_ID);
 
         $this->assertResponseStatusCodeSame(401);
         $body = json_decode($client->getResponse()->getContent(), true);
@@ -185,7 +185,7 @@ class AddressControllerTest extends WebTestCase
     public function test401ResponseIsJsonWithExpectedStructure(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/api/v1/user/address/all');
+        $client->request('GET', '/api/v1/user/addresses');
 
         $this->assertResponseHeaderSame('content-type', 'application/json');
         $body = json_decode($client->getResponse()->getContent(), true);
@@ -201,7 +201,7 @@ class AddressControllerTest extends WebTestCase
     {
         $client = $this->createAuthenticatedClient();
 
-        $client->request('GET', '/api/v1/user/address/can-add', [], [], $this->authHeaders());
+        $client->request('GET', '/api/v1/user/addresses/eligibility', [], [], $this->authHeaders());
 
         $this->assertResponseStatusCodeSame(200);
         $body = json_decode($client->getResponse()->getContent(), true);
@@ -216,7 +216,7 @@ class AddressControllerTest extends WebTestCase
 
         static::getContainer()->set(AddressManager::class, $this->mockAddressManager(canAdd: false));
 
-        $client->request('GET', '/api/v1/user/address/can-add', [], [], $this->authHeaders());
+        $client->request('GET', '/api/v1/user/addresses/eligibility', [], [], $this->authHeaders());
 
         $this->assertResponseStatusCodeSame(200);
         $body = json_decode($client->getResponse()->getContent(), true);
@@ -228,7 +228,7 @@ class AddressControllerTest extends WebTestCase
     {
         $client = $this->createAuthenticatedClient();
 
-        $client->request('GET', '/api/v1/user/address/all', [], [], $this->authHeaders());
+        $client->request('GET', '/api/v1/user/addresses', [], [], $this->authHeaders());
 
         $this->assertResponseStatusCodeSame(200);
         $body = json_decode($client->getResponse()->getContent(), true);
@@ -240,7 +240,7 @@ class AddressControllerTest extends WebTestCase
     {
         $client = $this->createAuthenticatedClient();
 
-        $client->request('GET', '/api/v1/user/address/' . self::FAKE_PUBLIC_ID, [], [], $this->authHeaders());
+        $client->request('GET', '/api/v1/user/addresses/' . self::FAKE_PUBLIC_ID, [], [], $this->authHeaders());
 
         $this->assertResponseStatusCodeSame(404);
         $body = json_decode($client->getResponse()->getContent(), true);
@@ -253,7 +253,7 @@ class AddressControllerTest extends WebTestCase
 
         $client->request(
             'PUT',
-            '/api/v1/user/address/' . self::FAKE_PUBLIC_ID . '/update',
+            '/api/v1/user/addresses/' . self::FAKE_PUBLIC_ID,
             [],
             [],
             array_merge($this->authHeaders(), $this->jsonHeaders()),
@@ -269,7 +269,7 @@ class AddressControllerTest extends WebTestCase
     {
         $client = $this->createAuthenticatedClient();
 
-        $client->request('DELETE', '/api/v1/user/address/' . self::FAKE_PUBLIC_ID . '/remove', [], [], $this->authHeaders());
+        $client->request('DELETE', '/api/v1/user/addresses/' . self::FAKE_PUBLIC_ID, [], [], $this->authHeaders());
 
         // L'adresse n'existe pas → deleteAddress lève NotFoundException → 404
         $this->assertResponseStatusCodeSame(404);
@@ -284,7 +284,7 @@ class AddressControllerTest extends WebTestCase
     public function testAddAddressOnlyAcceptsPost(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/api/v1/user/address/add');
+        $client->request('GET', '/api/v1/user/addresses');
 
         // Le firewall s'exécute avant la vérification de méthode pour cette route → 401
         $this->assertResponseStatusCodeSame(401);
@@ -293,26 +293,28 @@ class AddressControllerTest extends WebTestCase
     public function testGetAllAddressesOnlyAcceptsGet(): void
     {
         $client = static::createClient();
-        $client->request('POST', '/api/v1/user/address/all');
+        $client->request('POST', '/api/v1/user/addresses');
 
-        // La vérification de méthode s'exécute avant le firewall pour cette route → 405
-        $this->assertResponseStatusCodeSame(405);
+        // Le POST matche la route de création, donc le firewall répond avant tout contrôle métier → 401
+        $this->assertResponseStatusCodeSame(401);
     }
 
     public function testUpdateAddressOnlyAcceptsPut(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/api/v1/user/address/' . self::FAKE_PUBLIC_ID . '/update');
+        $client->request('GET', '/api/v1/user/addresses/' . self::FAKE_PUBLIC_ID);
 
-        $this->assertResponseStatusCodeSame(405);
+        // Le GET matche la route de lecture de la ressource, donc le firewall répond d'abord → 401
+        $this->assertResponseStatusCodeSame(401);
     }
 
     public function testRemoveAddressOnlyAcceptsDelete(): void
     {
         $client = static::createClient();
-        $client->request('GET', '/api/v1/user/address/' . self::FAKE_PUBLIC_ID . '/remove');
+        $client->request('GET', '/api/v1/user/addresses/' . self::FAKE_PUBLIC_ID);
 
-        $this->assertResponseStatusCodeSame(405);
+        // Même URL que la lecture : la requête est interceptée par le firewall avant un 405 → 401
+        $this->assertResponseStatusCodeSame(401);
     }
 
     // =========================================================================
@@ -333,7 +335,7 @@ class AddressControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/v1/user/address/add',
+            '/api/v1/user/addresses',
             [],
             [],
             array_merge($this->authHeaders(), $this->jsonHeaders()),
@@ -353,7 +355,7 @@ class AddressControllerTest extends WebTestCase
 
         $client->request(
             'POST',
-            '/api/v1/user/address/add',
+            '/api/v1/user/addresses',
             [],
             [],
             array_merge($this->authHeaders(), $this->jsonHeaders()),

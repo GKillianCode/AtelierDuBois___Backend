@@ -5,7 +5,7 @@ info:
 
 http:
   method: GET
-  url: "{{ADB_baseURL}}/api/v1/user/address/5brTCa1bAQLjVvIJOwppXO"
+  url: "{{ADB_baseURL}}/api/v1/user/addresses/5brTCa1bAQLjVvIJOwppXO"
   auth:
     type: bearer
     token: "{{ADB_token}}"

@@ -28,7 +28,7 @@ final class ProductController extends AbstractController
         private readonly CommentRequestMapper $commentRequestMapper,
     ) {}
 
-    #[Route('/api/public/v1/product/all', name: 'product_get_all', methods: ['GET'])]
+    #[Route('/api/public/v1/products', name: 'product_get_all', methods: ['GET'])]
     #[OA\Get(
         summary: 'Get all products with pagination and optional filters',
     )]
@@ -58,7 +58,7 @@ final class ProductController extends AbstractController
         return ApiResponse::success($this->serializer->normalize($result));
     }
 
-    #[Route('/api/public/v1/product/{publicId}', name: 'product_get_by_publicid', methods: ['GET'])]
+    #[Route('/api/public/v1/products/{publicId}', name: 'product_get_by_publicid', methods: ['GET'])]
     #[OA\Get(
         summary: 'Get a product by its public ID',
     )]
@@ -76,7 +76,7 @@ final class ProductController extends AbstractController
         return ApiResponse::success($this->serializer->normalize($product));
     }
 
-    #[Route('/api/public/v1/product/{publicId}/reviews', name: 'product_get_reviews_by_publicid', methods: ['GET'])]
+    #[Route('/api/public/v1/products/{publicId}/reviews', name: 'product_get_reviews_by_publicid', methods: ['GET'])]
     #[OA\Get(
         summary: 'Get reviews for a product variant by its public ID',
     )]

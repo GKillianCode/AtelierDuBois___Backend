@@ -25,7 +25,7 @@ final class AddressController extends AbstractController
         private readonly AddressManager $addressManager,
     ) {}
 
-    #[Route('/api/v1/user/address/add', name: 'address_add', methods: ['POST'])]
+    #[Route('/api/v1/user/addresses', name: 'address_add', methods: ['POST'])]
     #[OA\Post(
         summary: 'Add an address for the authenticated user',
         requestBody: new OA\RequestBody(
@@ -57,7 +57,7 @@ final class AddressController extends AbstractController
         }
     }
 
-    #[Route('/api/v1/user/address/can-add', name: 'address_can_add', methods: ['GET'])]
+    #[Route('/api/v1/user/addresses/eligibility', name: 'address_can_add', methods: ['GET'])]
     #[OA\Get(
         summary: 'Check if the authenticated user can add an address',
         security: [['bearerAuth' => []]]
@@ -78,7 +78,7 @@ final class AddressController extends AbstractController
     }
 
 
-    #[Route('/api/v1/user/address/all', name: 'address_get_all', methods: ['GET'])]
+    #[Route('/api/v1/user/addresses', name: 'address_get_all', methods: ['GET'])]
     #[OA\Get(
         summary: 'Get all addresses for the authenticated user',
         security: [['bearerAuth' => []]]
@@ -99,7 +99,7 @@ final class AddressController extends AbstractController
         return ApiResponse::success($this->serializer->normalize($addresses));
     }
 
-    #[Route('/api/v1/user/address/{publicId}', name: 'address_get', methods: ['GET'])]
+    #[Route('/api/v1/user/addresses/{publicId}', name: 'address_get', methods: ['GET'])]
     #[OA\Get(
         summary: 'Get a specific address by public ID for the authenticated user',
         security: [['bearerAuth' => []]],
@@ -122,7 +122,7 @@ final class AddressController extends AbstractController
         return ApiResponse::notFound('Address not found.');
     }
 
-    #[Route('/api/v1/user/address/{publicId}/update', name: 'address_update', methods: ['PUT'])]
+    #[Route('/api/v1/user/addresses/{publicId}', name: 'address_update', methods: ['PUT'])]
     #[OA\Put(
         summary: 'Update a specific address by public ID for the authenticated user',
         security: [['bearerAuth' => []]]
@@ -145,7 +145,7 @@ final class AddressController extends AbstractController
         }
     }
 
-    #[Route('/api/v1/user/address/{publicId}/remove', name: 'address_remove', methods: ['DELETE'])]
+    #[Route('/api/v1/user/addresses/{publicId}', name: 'address_remove', methods: ['DELETE'])]
     #[OA\Delete(
         summary: 'Remove a specific address by public ID for the authenticated user',
         security: [['bearerAuth' => []]]

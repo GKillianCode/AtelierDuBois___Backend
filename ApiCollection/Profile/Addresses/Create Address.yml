@@ -5,7 +5,7 @@ info:
 
 http:
   method: POST
-  url: "{{ADB_baseURL}}/api/v1/user/address/add"
+  url: "{{ADB_baseURL}}/api/v1/user/addresses"
   body:
     type: json
     data: |-
