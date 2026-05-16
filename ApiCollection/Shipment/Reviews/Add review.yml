@@ -5,7 +5,7 @@ info:
 
 http:
   method: POST
-  url: "{{ADB_baseURL}}/api/v1/shipment/SHP-2605-3GDPQVMM/review/2VjG06kPtBEvMuFNX7EY3T"
+  url: "{{ADB_baseURL}}/api/v1/shipment/SHP-2605-3GDPQVMM/review"
   body:
     type: json
     data: |-

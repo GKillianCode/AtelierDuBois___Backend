@@ -5,7 +5,7 @@ info:
 
 http:
   method: POST
-  url: "{{ADB_baseURL}}/api/pubic/v1/order/basket"
+  url: "{{ADB_baseURL}}/api/public/v1/order/basket"
   body:
     type: json
     data: |-

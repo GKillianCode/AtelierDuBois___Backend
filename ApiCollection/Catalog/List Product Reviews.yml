@@ -5,7 +5,7 @@ info:
 
 http:
   method: GET
-  url: "{{ADB_baseURL}}/api/public/v1/product/Qe9P1sMb4Lk7Tw2DaVxH/reviewd"
+  url: "{{ADB_baseURL}}/api/public/v1/products/4oB6XHlaSo6VVdTMhr6gTD/reviews"
   auth: inherit
 
 settings:

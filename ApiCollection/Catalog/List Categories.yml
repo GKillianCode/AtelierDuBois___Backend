@@ -5,7 +5,7 @@ info:
 
 http:
   method: GET
-  url: "{{ADB_baseURL}}/api/public/v1/category/all"
+  url: "{{ADB_baseURL}}/api/public/v1/categories"
   auth: inherit
 
 settings:

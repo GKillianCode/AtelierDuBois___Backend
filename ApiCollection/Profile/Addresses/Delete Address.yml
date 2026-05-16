@@ -5,7 +5,7 @@ info:
 
 http:
   method: DELETE
-  url: "{{ADB_baseURL}}/api/v1/user/address/6D39zpKj5AtKsrffOaRA6f/remove"
+  url: "{{ADB_baseURL}}/api/v1/user/addresses/6D39zpKj5AtKsrffOaRA6f"
   auth:
     type: bearer
     token: "{{ADB_token}}"
