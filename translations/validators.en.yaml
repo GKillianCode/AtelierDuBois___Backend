@@ -123,6 +123,9 @@ order:
     number:
         required: "Order number is required."
         format: "Order number must match the format ORD-YYMM-XXXXXXXX."
+    cancel:
+        status_already_processed: "Cannot cancel the order: one or more shipments have already been processed."
 
 shipment:
     not_found: "Order not found."
+

@@ -121,8 +121,11 @@ order:
     items:
         not_empty: "Le corps de la requête doit contenir au moins un article."
     number:
-        required: "Le numéro de commande est requis."
-        format: "Le numéro de commande doit respecter le format ORD-AAMM-XXXXXXXX."
+        required: "Le numro de commande est requis."
+        format: "Le numro de commande doit respecter le format ORD-AAMM-XXXXXXXX."
+    cancel:
+        status_already_processed: "Impossible d'annuler la commande : un ou plusieurs envois ont déjà été traités."
 
 shipment:
     not_found: "Commande introuvable."
+

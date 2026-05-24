@@ -22,6 +22,7 @@ use App\Entity\User\User;
 use App\Enum\CarrierCode;
 use App\Enum\ShipmentStatusCode;
 use App\Enum\SortFilter\ShipmentHistorySortFilterCode;
+use App\Exception\ForbiddenException;
 use App\Exception\NotFoundException;
 use App\Factory\CarrierFactory;
 use App\Manager\Product\ImageManager;
@@ -29,6 +30,7 @@ use App\Manager\Product\ProductManager;
 use App\Manager\Product\ProductReviewManager;
 use App\Manager\User\AddressManager;
 use App\Mapper\Product\ImageMapper;
+use App\Repository\Order\OrderProductRepository;
 use App\Repository\Order\OrderRepository;
 use App\Repository\Product\ProductReviewRepository;
 use App\Repository\Product\ProductVariantRepository;
@@ -63,6 +65,7 @@ class ShipmentManager
         private readonly ProductReviewRepository $productReviewRepository,
         private readonly ProductVariantRepository $productVariantRepository,
         private readonly ProductReviewManager $productReviewManager,
+        private readonly OrderProductRepository $orderProductRepository,
     ) {}
 
     /**
@@ -394,6 +397,65 @@ class ShipmentManager
         }
 
         $this->productReviewManager->editReview($dto, $user, $variant, $shipment->getOrderId());
+    }
+
+    public function getOrderByShipmentPublicId(string $publicId, User $user): Order
+    {
+        $shipment = $this->shipmentRepository->findByPublicIdForUser($publicId, $user);
+
+        if ($shipment === null) {
+            throw new NotFoundException('Shipment', $publicId);
+        }
+
+        return $shipment->getOrderId();
+    }
+
+    public function cancelShipment(string $publicId, User $user): void
+    {
+        $shipment = $this->shipmentRepository->findForOrderCancellation($publicId, $user);
+
+        if ($shipment === null) {
+            throw new NotFoundException('Shipment', $publicId);
+        }
+
+        $order = $shipment->getOrderId();
+        $this->assertOrderIsCancellable($order);
+        $this->entityManager->wrapInTransaction(function () use ($order): void {
+            $this->deleteOrderData($order);
+        });
+    }
+
+    private function assertOrderIsCancellable(Order $order): void
+    {
+        $defaultStatusCode = ShipmentStatusCode::getFirstStatus()->value;
+
+        foreach ($order->getShipments() as $shipment) {
+            $statusCode = $shipment->getStatusId()?->getCode();
+            if ($statusCode === null || $statusCode->value !== $defaultStatusCode) {
+                throw new ForbiddenException('order.cancel.status_already_processed');
+            }
+        }
+    }
+
+    private function deleteOrderData(Order $order): void
+    {
+        foreach ($this->productReviewRepository->findAllByOrder($order) as $review) {
+            $this->entityManager->remove($review);
+        }
+
+        foreach ($order->getShipments() as $shipment) {
+            foreach ($shipment->getShipmentItems() as $shipmentItem) {
+                $this->entityManager->remove($shipmentItem);
+            }
+            $this->entityManager->remove($shipment);
+        }
+
+        foreach ($this->orderProductRepository->findByOrder($order) as $orderProduct) {
+            $this->entityManager->remove($orderProduct);
+        }
+
+        $this->entityManager->remove($order);
+        $this->entityManager->flush();
     }
 
     public function deleteReview(string $shipmentPublicId, string $variantPublicId, User $user): void

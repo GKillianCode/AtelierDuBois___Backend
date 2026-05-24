@@ -10,6 +10,7 @@ use App\Dto\Response\ResponseOrderItemDto;
 use App\Dto\Response\ResponseProductReviewRightsDto;
 use App\Dto\Response\ResponseShipmentsHistoryDto;
 use App\Dto\Response\ResponseShipmentsPreviewDto;
+use App\Entity\Order\Order;
 use App\Entity\User\User;
 use App\Manager\Shipment\ShipmentManager;
 
@@ -79,6 +80,16 @@ class ShipmentService
     public function editReview(string $shipmentPublicId, string $variantPublicId, User $user, ReviewRequestDto $dto): void
     {
         $this->shipmentManager->editReview($shipmentPublicId, $variantPublicId, $user, $dto);
+    }
+
+    public function getOrderByShipmentPublicId(string $publicId, User $user): Order
+    {
+        return $this->shipmentManager->getOrderByShipmentPublicId($publicId, $user);
+    }
+
+    public function cancelShipment(string $publicId, User $user): void
+    {
+        $this->shipmentManager->cancelShipment($publicId, $user);
     }
 
     public function deleteReview(string $shipmentPublicId, string $variantPublicId, User $user): void

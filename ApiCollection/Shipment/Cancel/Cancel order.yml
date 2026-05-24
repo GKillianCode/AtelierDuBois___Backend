@@ -1,0 +1,18 @@
+info:
+  name: Cancel order
+  type: http
+  seq: 1
+
+http:
+  method: DELETE
+  url: "{{ADB_baseURL}}/api/v1/shipment/SHP-2605-3GDPQVMM/cancel"
+  auth:
+    type: bearer
+    token: "{{ADB_token}}"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+

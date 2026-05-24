@@ -2,6 +2,7 @@
 
 namespace App\Controller\Shipment;
 
+use App\Voter\CancelShipmentVoter;
 use App\Dto\Response\ResponseShipmentDetailDto;
 use App\Entity\User\User;
 use App\Mapper\Request\ReviewRequestMapper;
@@ -148,4 +149,25 @@ final class ShipmentController extends AbstractController
 
         return ApiResponse::success();
     }
+
+    #[Route('/api/v1/shipment/{publicId}/cancel', name: 'shipment_cancel', methods: ['DELETE'])]
+    #[OA\Delete(summary: 'Cancel a shipment')]
+    #[OA\Parameter(name: 'publicId', in: 'path', required: true, schema: new OA\Schema(type: 'string'))]
+    #[OA\Response(response: Response::HTTP_OK, description: 'Shipment cancelled successfully')]
+    #[OA\Response(response: Response::HTTP_FORBIDDEN, description: 'Cancellation window has expired')]
+    public function cancel(string $publicId): Response
+    {
+        $user = $this->getUser();
+        assert($user instanceof User);
+
+        $validatedPublicId = $this->shipmentDetailRequestMapper->mapPublicId($publicId);
+        $order = $this->shipmentService->getOrderByShipmentPublicId($validatedPublicId, $user);
+
+        $this->denyAccessUnlessGranted(CancelShipmentVoter::CAN_CANCEL_SHIPMENT, $order);
+
+        $this->shipmentService->cancelShipment($validatedPublicId, $user);
+
+        return ApiResponse::success();
+    }
 }
+

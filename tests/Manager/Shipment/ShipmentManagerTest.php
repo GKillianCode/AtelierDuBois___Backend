@@ -37,6 +37,7 @@ use App\Repository\Shipment\CarrierRepository;
 use App\Service\Product\ReviewRightsService;
 use App\Repository\Shipment\OrderStatusRepository;
 use App\Repository\Shipment\ShipmentRepository;
+use App\Repository\Order\OrderProductRepository;
 use App\Repository\User\AddressRepository;
 use App\Util\ShipmentUtil;
 use App\Util\UuidUtil;
@@ -128,6 +129,7 @@ class ShipmentManagerTest extends TestCase
             $this->createMock(ProductReviewRepository::class),
             $this->productVariantRepository,
             $productReviewManager,
+            $this->createMock(OrderProductRepository::class),
         );
     }
 

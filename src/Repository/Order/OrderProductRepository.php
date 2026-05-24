@@ -24,6 +24,20 @@ class OrderProductRepository extends ServiceEntityRepository
         $this->logger = $logger;
     }
 
+    /**
+     * Returns all OrderProducts for a given order.
+     *
+     * @return OrderProduct[]
+     */
+    public function findByOrder(Order $order): array
+    {
+        return $this->createQueryBuilder('op')
+            ->where('op.orderId = :order')
+            ->setParameter('order', $order)
+            ->getQuery()
+            ->getResult();
+    }
+
     public function getOrderProductsByOrder(Order $order): QueryBuilder
     {
         $this->logger->debug("OrderProductRepository::getOrderProductsByOrder ENTER");
