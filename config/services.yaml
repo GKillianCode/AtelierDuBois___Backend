@@ -12,6 +12,7 @@ services:
         autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
         bind:
             bool $debug: "%kernel.debug%"
+            int $shipmentCancellationDelayHours: "%env(int:SHIPMENT_CANCELLATION_DELAY_HOURS)%"
 
     _instanceof:
         App\Interface\CarrierInterface:
