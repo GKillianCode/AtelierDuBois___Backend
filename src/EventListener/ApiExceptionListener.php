@@ -38,12 +38,23 @@ final class ApiExceptionListener
             $exception instanceof AppException                      => $this->handleApp($exception, $request),
             $exception instanceof ValidationFailedException          => $this->handleValidation($exception, $request),
             $exception instanceof AuthenticationException            => ApiResponse::unauthorized('Unauthorized'),
-            $exception instanceof SecurityAccessDeniedException      => ApiResponse::unauthorized('Unauthorized'),
+            $exception instanceof SecurityAccessDeniedException      => $this->handleAccessDenied($exception),
             $exception instanceof HttpExceptionInterface             => $this->handleHttp($exception, $request),
             default                                                  => $this->handleUnknown($exception, $request),
         };
 
         $event->setResponse($response);
+    }
+
+    private function handleAccessDenied(SecurityAccessDeniedException $e): ApiResponse
+    {
+        // If user is not authenticated, treat as 401 (missing/invalid credentials)
+        // If user is authenticated but lacks permissions, return 403 (forbidden)
+        if ($this->security->getUser() === null) {
+            return ApiResponse::unauthorized('Unauthorized');
+        }
+
+        return ApiResponse::forbidden('Forbidden');
     }
 
     /** @return array<string, mixed> */
@@ -100,7 +111,6 @@ final class ApiExceptionListener
             $violations[] = [
                 'field'   => $violation->getPropertyPath(),
                 'message' => $violation->getMessage(),
-                'value'   => (string) $violation->getInvalidValue(),
             ];
         }
 
@@ -155,15 +165,6 @@ final class ApiExceptionListener
 
         $response = ApiResponse::serverError('Une erreur interne s\'est produite.');
 
-        if ($this->debug) {
-            $data = json_decode($response->getContent(), true);
-            $data['debug'] = [
-                'exception' => $e::class,
-                'message'   => $e->getMessage(),
-                'trace'     => explode("\n", $e->getTraceAsString()),
-            ];
-            $response->setData($data);
-        }
 
         return $response;
     }

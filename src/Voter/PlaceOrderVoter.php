@@ -28,8 +28,7 @@ class PlaceOrderVoter extends Voter
 
         if (!$user instanceof User) {
             $this->logger->warning('Unauthenticated access attempt', [
-                'attribute'   => $attribute,
-                'subject_id' => $subject->getId(),
+                'attribute' => $attribute,
             ]);
 
             return false;

@@ -118,8 +118,10 @@ order:
     quantity:
         required: "Quantity is required."
         min: "Quantity must be at least {{ compared_value }}."
+        max: "Quantity cannot exceed {{ compared_value }}."
     items:
         not_empty: "Request body must contain at least one item."
+        too_many: "Order cannot contain more than 50 different items."
     number:
         required: "Order number is required."
         format: "Order number must match the format ORD-YYMM-XXXXXXXX."

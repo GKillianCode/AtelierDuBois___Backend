@@ -41,7 +41,6 @@ class OrderRequestMapper
 
         $orderData = [];
 
-        $data = json_decode($request->getContent(), true);
 
         for ($i = 0; $i < \count($data); $i++) {
             $currentItem = $data[$i];
@@ -75,12 +74,20 @@ class OrderRequestMapper
                 new Assert\GreaterThanOrEqual(
                     value: 1,
                     message: 'order.quantity.min'
-                )
+                ),
+                new Assert\LessThanOrEqual(
+                    value: 100,
+                    message: 'order.quantity.max'
+                ),
             ]
         ]);
 
         if (\count($data) === 0) {
             throw new BadRequestException($this->translator->trans('order.items.not_empty', [], 'validators'));
+        }
+
+        if (\count($data) > 50) {
+            throw new BadRequestException($this->translator->trans('order.items.too_many', [], 'validators'));
         }
 
         foreach ($data as $item) {

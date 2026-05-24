@@ -118,8 +118,10 @@ order:
     quantity:
         required: "La quantité est requise."
         min: "La quantité doit être au minimum {{ compared_value }}."
+        max: "La quantité ne peut pas dépasser {{ compared_value }}."
     items:
         not_empty: "Le corps de la requête doit contenir au moins un article."
+        too_many: "La commande ne peut pas contenir plus de 50 articles différents."
     number:
         required: "Le numro de commande est requis."
         format: "Le numro de commande doit respecter le format ORD-AAMM-XXXXXXXX."
