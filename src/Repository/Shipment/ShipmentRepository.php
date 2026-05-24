@@ -46,4 +46,24 @@ class ShipmentRepository extends ServiceEntityRepository
             ->getQuery()
             ->getOneOrNullResult();
     }
+
+    /**
+     * Eager-loads the full order graph needed for cancellation in a single query:
+     * Shipment → Order → Shipments (with StatusId + ShipmentItems).
+     */
+    public function findForOrderCancellation(string $publicId, User $user): ?Shipment
+    {
+        return $this->createQueryBuilder('s')
+            ->join('s.orderId', 'o')
+            ->leftJoin('o.shipments', 'os')
+            ->leftJoin('os.statusId', 'st')
+            ->leftJoin('os.shipmentItems', 'si')
+            ->addSelect('o', 'os', 'st', 'si')
+            ->where('s.publicId = :publicId')
+            ->andWhere('o.userId = :user')
+            ->setParameter('publicId', $publicId)
+            ->setParameter('user', $user)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 }

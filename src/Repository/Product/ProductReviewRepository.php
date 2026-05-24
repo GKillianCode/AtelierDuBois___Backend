@@ -100,6 +100,20 @@ class ProductReviewRepository extends ServiceEntityRepository
     }
 
     /**
+     * Returns all reviews for a given order (any user).
+     *
+     * @return ProductReview[]
+     */
+    public function findAllByOrder(Order $order): array
+    {
+        return $this->createQueryBuilder('pr')
+            ->where('pr.orderId = :order')
+            ->setParameter('order', $order)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /**
      * Returns reviews indexed by productVariantId for a given user + order.
      * Allows bulk rights computation with a single query.
      *
